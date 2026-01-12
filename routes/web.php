@@ -15,3 +15,4 @@ Route::get('/search', fn () => view('search'))->name('search');
 Route::get('/notifications', fn () => view('notifications'))->name('notifications');
 Route::get('/profile', fn () => view('profile'))->name('profile');
 Route::get('/friends', fn () => view('friends'))->name('friends');
+Route::get('/settings', fn () => view('settings'))->name('settings');
