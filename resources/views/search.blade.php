@@ -3,65 +3,65 @@
 
 @section('content')
 @php
-  $q = request('q', '');
+$q = request('q', '');
 
-  // demo data (replace with DB later)
-  $trending = [
-    ['tag' => '#PUPEnrollment2025', 'count' => 1234],
-    ['tag' => '#IskolarNgBayan',    'count' => 892],
-    ['tag' => '#PUPFoundersDay',    'count' => 654],
-    ['tag' => '#CCISWeek',          'count' => 432],
-    ['tag' => '#PUPBasketball',     'count' => 321],
-    ['tag' => '#BSIT',              'count' => 298],
-    ['tag' => '#StudentLife',       'count' => 267],
-    ['tag' => '#LostAndFound',      'count' => 189],
-  ];
+// demo data (replace with DB later)
+$trending = [
+['tag' => '#PUPEnrollment2025', 'count' => 1234],
+['tag' => '#IskolarNgBayan', 'count' => 892],
+['tag' => '#PUPFoundersDay', 'count' => 654],
+['tag' => '#CCISWeek', 'count' => 432],
+['tag' => '#PUPBasketball', 'count' => 321],
+['tag' => '#BSIT', 'count' => 298],
+['tag' => '#StudentLife', 'count' => 267],
+['tag' => '#LostAndFound', 'count' => 189],
+];
 
-  $people = [
-    [
-      'name' => 'Juan Dela Cruz',
-      'handle' => '@juandc',
-      'meta' => 'BSIT Student | Web Developer | Coffee Enthusiast',
-      'avatar' => 'https://i.pravatar.cc/120?img=12',
-      'badge' => null,
-    ],
-    [
-      'name' => 'PUP Central Student Organization',
-      'handle' => '@pupcso',
-      'meta' => 'Official student organization of PUP',
-      'avatar' => 'https://i.pravatar.cc/120?img=32',
-      'badge' => 'Organization',
-    ],
-    [
-      'name' => 'Prof. Maria Santos',
-      'handle' => '@mariasantos',
-      'meta' => 'Associate Professor | CCIS',
-      'avatar' => 'https://i.pravatar.cc/120?img=49',
-      'badge' => 'Faculty',
-    ],
-    [
-      'name' => 'PUP Tech Club',
-      'handle' => '@puptechclub',
-      'meta' => 'Technology and Innovation Club',
-      'avatar' => 'https://i.pravatar.cc/120?img=15',
-      'badge' => 'Organization',
-    ],
-    [
-      'name' => 'PUP Alumni Association',
-      'handle' => '@pupalumni',
-      'meta' => 'Connecting PUP graduates',
-      'avatar' => 'https://i.pravatar.cc/120?img=8',
-      'badge' => 'Alumni',
-    ],
-  ];
+$people = [
+[
+'name' => 'Juan Dela Cruz',
+'handle' => '@juandc',
+'meta' => 'BSIT Student | Web Developer | Coffee Enthusiast',
+'avatar' => 'https://i.pravatar.cc/120?img=12',
+'badge' => null,
+],
+[
+'name' => 'PUP Central Student Organization',
+'handle' => '@pupcso',
+'meta' => 'Official student organization of PUP',
+'avatar' => 'https://i.pravatar.cc/120?img=32',
+'badge' => 'Organization',
+],
+[
+'name' => 'Prof. Maria Santos',
+'handle' => '@mariasantos',
+'meta' => 'Associate Professor | CCIS',
+'avatar' => 'https://i.pravatar.cc/120?img=49',
+'badge' => 'Faculty',
+],
+[
+'name' => 'PUP Tech Club',
+'handle' => '@puptechclub',
+'meta' => 'Technology and Innovation Club',
+'avatar' => 'https://i.pravatar.cc/120?img=15',
+'badge' => 'Organization',
+],
+[
+'name' => 'PUP Alumni Association',
+'handle' => '@pupalumni',
+'meta' => 'Connecting PUP graduates',
+'avatar' => 'https://i.pravatar.cc/120?img=8',
+'badge' => 'Alumni',
+],
+];
 
-  $whoToFollow = [
-    ['name' => 'PUP Scout', 'handle' => '@pupscout', 'avatar' => 'https://i.pravatar.cc/120?img=3'],
-  ];
+$whoToFollow = [
+['name' => 'PUP Scout', 'handle' => '@pupscout', 'avatar' => 'https://i.pravatar.cc/120?img=3'],
+];
 
-  // sidebar active styles (copied from Notifications)
-  $active = 'bg-[#6C1517] text-white';
-  $inactive = 'hover:bg-gray-100 text-gray-800';
+// sidebar active styles (copied from Notifications)
+$active = 'bg-[#6C1517] text-white';
+$inactive = 'hover:bg-gray-100 text-gray-800';
 @endphp
 
 <div class="min-h-screen bg-[#F2EADA]">
@@ -106,13 +106,6 @@
             Notifications
           </a>
 
-          <a href="{{ route('friends') }}"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl font-normal
-            {{ request()->routeIs('friends') ? $active : $inactive }}">
-            <span class="text-lg">👥</span>
-            Friends
-          </a>
-
           <a href="{{ route('profile') }}"
             class="flex items-center gap-3 px-4 py-3 rounded-xl font-normal
             {{ request()->routeIs('profile') ? $active : $inactive }}">
@@ -152,7 +145,7 @@
 
             {{-- TOP SEARCH BOX ONLY --}}
             <form action="{{ route('search') }}" method="GET"
-                  class="bg-white rounded-2xl shadow-sm ring-1 ring-neutral-200 p-4">
+              class="bg-white rounded-2xl shadow-sm ring-1 ring-neutral-200 p-4">
               <div class="flex items-center gap-3">
                 <span class="text-neutral-400">🔍</span>
                 <input
@@ -160,8 +153,7 @@
                   name="q"
                   value="{{ $q }}"
                   placeholder="Search PUPCOM..."
-                  class="w-full bg-transparent outline-none text-sm placeholder:text-neutral-400"
-                />
+                  class="w-full bg-transparent outline-none text-sm placeholder:text-neutral-400" />
               </div>
             </form>
 
@@ -174,27 +166,27 @@
 
               <div class="mt-4 space-y-4">
                 @foreach($people as $p)
-                  <div class="flex items-center justify-between rounded-2xl border border-neutral-200 bg-white p-4">
-                    <div class="flex items-center gap-4">
-                      <img class="h-12 w-12 rounded-full object-cover" src="{{ $p['avatar'] }}" alt="avatar">
-                      <div class="leading-tight">
-                        <div class="flex items-center gap-2">
-                          <div class="font-extrabold">{{ $p['name'] }}</div>
-                          @if(!empty($p['badge']))
-                            <span class="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-semibold text-neutral-700">
-                              {{ $p['badge'] }}
-                            </span>
-                          @endif
-                        </div>
-                        <div class="text-sm text-neutral-500">{{ $p['handle'] }}</div>
-                        <div class="text-sm text-neutral-600 mt-1">{{ $p['meta'] }}</div>
+                <div class="flex items-center justify-between rounded-2xl border border-neutral-200 bg-white p-4">
+                  <div class="flex items-center gap-4">
+                    <img class="h-12 w-12 rounded-full object-cover" src="{{ $p['avatar'] }}" alt="avatar">
+                    <div class="leading-tight">
+                      <div class="flex items-center gap-2">
+                        <div class="font-extrabold">{{ $p['name'] }}</div>
+                        @if(!empty($p['badge']))
+                        <span class="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-semibold text-neutral-700">
+                          {{ $p['badge'] }}
+                        </span>
+                        @endif
                       </div>
+                      <div class="text-sm text-neutral-500">{{ $p['handle'] }}</div>
+                      <div class="text-sm text-neutral-600 mt-1">{{ $p['meta'] }}</div>
                     </div>
-
-                    <button class="rounded-xl border border-neutral-200 px-4 py-2 font-semibold hover:bg-neutral-50">
-                      Follow
-                    </button>
                   </div>
+
+                  <button class="rounded-xl border border-neutral-200 px-4 py-2 font-semibold hover:bg-neutral-50">
+                    Follow
+                  </button>
+                </div>
                 @endforeach
               </div>
             </div>
@@ -213,11 +205,11 @@
 
               <div class="mt-4 space-y-4">
                 @foreach(array_slice($trending, 0, 5) as $i => $t)
-                  <div>
-                    <div class="text-xs text-neutral-500">{{ $i + 1 }} · Trending</div>
-                    <div class="font-semibold">{{ $t['tag'] }}</div>
-                    <div class="text-sm text-neutral-500">{{ number_format($t['count']) }} posts</div>
-                  </div>
+                <div>
+                  <div class="text-xs text-neutral-500">{{ $i + 1 }} · Trending</div>
+                  <div class="font-semibold">{{ $t['tag'] }}</div>
+                  <div class="text-sm text-neutral-500">{{ number_format($t['count']) }} posts</div>
+                </div>
                 @endforeach
               </div>
             </div>
@@ -228,19 +220,19 @@
 
               <div class="mt-4 space-y-4">
                 @foreach($whoToFollow as $p)
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                      <img class="h-10 w-10 rounded-full object-cover" src="{{ $p['avatar'] }}" alt="avatar">
-                      <div class="leading-tight">
-                        <div class="font-semibold">{{ $p['name'] }}</div>
-                        <div class="text-sm text-neutral-500">{{ $p['handle'] }}</div>
-                      </div>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <img class="h-10 w-10 rounded-full object-cover" src="{{ $p['avatar'] }}" alt="avatar">
+                    <div class="leading-tight">
+                      <div class="font-semibold">{{ $p['name'] }}</div>
+                      <div class="text-sm text-neutral-500">{{ $p['handle'] }}</div>
                     </div>
-
-                    <button class="rounded-xl border border-neutral-200 px-4 py-2 font-semibold hover:bg-neutral-50">
-                      Follow
-                    </button>
                   </div>
+
+                  <button class="rounded-xl border border-neutral-200 px-4 py-2 font-semibold hover:bg-neutral-50">
+                    Follow
+                  </button>
+                </div>
                 @endforeach
               </div>
             </div>

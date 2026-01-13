@@ -49,13 +49,6 @@
             Notifications
           </a>
 
-          <a href="{{ route('friends') }}"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl font-normal
-            {{ request()->routeIs('friends') ? $active : $inactive }}">
-            <span class="text-lg">👥</span>
-            Friends
-          </a>
-
           <a href="{{ route('profile') }}"
             class="flex items-center gap-3 px-4 py-3 rounded-xl font-normal
             {{ request()->routeIs('profile') ? $active : $inactive }}">
@@ -70,7 +63,6 @@
             Settings
           </a>
         </nav>
-
 
         {{-- user preview pinned at bottom (CLICKABLE -> profile) --}}
         <a

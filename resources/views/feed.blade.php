@@ -42,12 +42,6 @@
             Notifications
           </a>
 
-          <a href="{{ route('friends') }}"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 text-gray-800 font-normal">
-            <span class="text-lg">👥</span>
-            Friends
-          </a>
-
           <a href="{{ route('profile') }}"
             class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 text-gray-800 font-normal">
             <span class="text-lg">👤</span>
@@ -59,20 +53,38 @@
             <span class="text-lg">⚙</span>
             Settings
           </a>
-
-          {{-- removed Create Post button --}}
         </nav>
 
-        {{-- user preview pinned at bottom (CLICKABLE -> profile) --}}
-        <a
-          href="{{ route('profile') }}"
-          class="px-6 py-5 border-t border-gray-200 flex items-center gap-3 hover:bg-gray-50 transition">
-          <div class="h-11 w-11 rounded-full bg-gray-200"></div>
-          <div class="leading-tight">
-            <div class="text-sm font-semibold text-gray-900">Juan Dela Cruz</div>
-            <div class="text-xs text-gray-500">@juanisko</div>
+        {{-- bottom user preview pinned at bottom (profile + logout icon) --}}
+        <div class="border-t border-gray-200">
+          <div class="px-6 py-5 flex items-center gap-3">
+            {{-- left clickable profile --}}
+            <a href="{{ route('profile') }}" class="flex items-center gap-3 flex-1 hover:opacity-90 transition">
+              <div class="h-11 w-11 rounded-full bg-gray-200"></div>
+              <div class="leading-tight">
+                <div class="text-sm font-semibold text-gray-900">Juan Dela Cruz</div>
+                <div class="text-xs text-gray-500">@juanisko</div>
+              </div>
+            </a>
+
+            {{-- logout icon (clean, not childish) --}}
+            <form method="POST" action="{{ route('logout') }}">
+              @csrf
+              <button
+                type="submit"
+                title="Logout"
+                class="h-10 w-10 rounded-xl flex items-center justify-center
+                       hover:bg-[#6C1517]/10 text-gray-500 hover:text-[#6C1517] transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <path d="M16 17l5-5-5-5" />
+                  <path d="M21 12H9" />
+                </svg>
+              </button>
+            </form>
           </div>
-        </a>
+        </div>
 
       </div>
     </aside>
@@ -114,13 +126,6 @@
               Announcement
             </button>
           </div>
-        </div>
-
-        {{-- Filter pills --}}
-        <div class="rounded-full bg-gray-200 p-1 flex gap-1 shadow-inner">
-          <button class="flex-1 rounded-full bg-white py-2 text-sm font-semibold shadow">All</button>
-          <button class="flex-1 rounded-full py-2 text-sm font-semibold text-gray-700 hover:bg-white/60">Announcements</button>
-          <button class="flex-1 rounded-full py-2 text-sm font-semibold text-gray-700 hover:bg-white/60">Events</button>
         </div>
 
         {{-- MULTIPLE SAMPLE POSTS --}}
@@ -178,8 +183,6 @@
 
   </div>
   </main>
-
-
 
   <!-- RIGHT SIDE (FULL HEIGHT PANEL) -->
   <aside class="bg-white border-l border-gray-200 lg:sticky lg:top-0 lg:h-screen">
