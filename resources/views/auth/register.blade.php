@@ -6,12 +6,8 @@
 
   <!-- LEFT (PUP background image panel) -->
   <div
-    class="hidden md:flex relative items-center justify-center overflow-hidden"
-    style="
-      background-image: url('{{ asset('images/pupbg.png') }}');
-      background-size: cover;
-      background-position: center;
-    ">
+    class="hidden md:flex items-center justify-center relative overflow-hidden"
+    style="background-image: url('/images/pupbg.png'); background-size: cover; background-position: center;">
     {{-- warm overlay like login --}}
     <div class="absolute inset-0 bg-gradient-to-tr from-[#F59E0B]/50 via-[#EF4444]/35 to-[#6C1517]/55"></div>
     <div class="absolute inset-0 bg-black/10"></div>
@@ -34,7 +30,7 @@
         <a
           href="{{ route('login') }}"
           class="flex-1 text-center block rounded-full py-2 text-sm font-semibold text-gray-700 hover:text-gray-900">
-          Sign in
+          Login
         </a>
 
         <div class="flex-1 text-center">
