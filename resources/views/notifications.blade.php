@@ -1,97 +1,27 @@
 @extends('layouts.app')
 @section('title','Notifications')
 
+{{-- match feed background --}}
+@section('main_class', 'bg-[#F3F3F3]')
+
 @section('content')
-<div class="min-h-screen bg-[#F2EADA]">
-  {{-- 2-COLUMN LAYOUT: LEFT SIDEBAR + NOTIFICATIONS (CENTER+RIGHT MERGED) --}}
-  <div class="grid grid-cols-1 lg:grid-cols-[320px_1fr] min-h-screen">
+<div class="h-screen overflow-hidden">
+  <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] h-full">
 
-    <!-- LEFT SIDEBAR (FULL HEIGHT like reference) -->
-    <aside class="bg-white border-r border-gray-200 lg:sticky lg:top-0 lg:h-screen">
-      <div class="h-full flex flex-col">
+    {{-- CENTER (scroll) --}}
+    <main class="h-full overflow-y-auto bg-[#F6F0EE]">
 
-        {{-- header (bigger logo + bigger PUPCOM) --}}
-        <div class="px-6 py-6 border-b border-gray-200 flex items-center gap-4">
-          <img
-            src="{{ asset('images/logo.png') }}"
-            alt="PUPCOM Logo"
-            class="h-14 w-14 rounded-2xl object-contain select-none" />
-
-          <div class="leading-tight">
-            <div class="text-xl font-extrabold text-gray-900 tracking-wide">PUPCOM</div>
-          </div>
-        </div>
-
-        @php
-        $active = 'bg-[#6C1517] text-white';
-        $inactive = 'hover:bg-gray-100 text-gray-800';
-        @endphp
-
-        <nav class="px-4 py-4 space-y-1 flex-1">
-          <a href="{{ route('feed') }}"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl font-normal
-            {{ request()->routeIs('feed') ? $active : $inactive }}">
-            <span class="text-lg">⌂</span>
-            Home
-          </a>
-
-          <a href="{{ route('search') }}"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl font-normal
-            {{ request()->routeIs('search') ? $active : $inactive }}">
-            <span class="text-lg">⌕</span>
-            Search
-          </a>
-
-          <a href="{{ route('notifications') }}"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl font-normal
-            {{ request()->routeIs('notifications') ? $active : $inactive }}">
-            <span class="text-lg">🔔</span>
-            Notifications
-          </a>
-
-          <a href="{{ route('profile') }}"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl font-normal
-            {{ request()->routeIs('profile') ? $active : $inactive }}">
-            <span class="text-lg">👤</span>
-            Profile
-          </a>
-
-          <a href="{{ route('settings') }}"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl font-normal
-            {{ request()->routeIs('settings') ? $active : $inactive }}">
-            <span class="text-lg">⚙</span>
-            Settings
-          </a>
-        </nav>
-
-        {{-- user preview pinned at bottom (CLICKABLE -> profile) --}}
-        <a
-          href="{{ route('profile') }}"
-          class="px-6 py-5 border-t border-gray-200 flex items-center gap-3 hover:bg-gray-50 transition">
-          <div class="h-11 w-11 rounded-full bg-gray-200"></div>
-          <div class="leading-tight">
-            <div class="text-sm font-semibold text-gray-900">Juan Dela Cruz</div>
-            <div class="text-xs text-gray-500">@juanisko</div>
-          </div>
-        </a>
-
-      </div>
-    </aside>
-
-
-    <!-- NOTIFICATIONS (CENTER + RIGHT MERGED) -->
-    <main class="min-h-screen bg-[#F6F0EE]">
       {{-- top header bar --}}
-      <div class="h-16 border-b border-gray-200 bg-[#F6F0EE] flex items-center px-8">
+      <div class="h-16 border-b border-gray-200 bg-[#F6F0EE] flex items-center px-6 lg:px-8">
         <div class="flex items-center gap-3">
           <span class="text-lg">▮▮</span>
           <h1 class="text-xl font-extrabold text-[#6C1517]">Notifications</h1>
         </div>
       </div>
 
-      {{-- content spans the whole main area now --}}
       <div class="px-6 lg:px-14 py-10">
         <div class="max-w-5xl mx-auto">
+
           <div class="flex items-center justify-between mb-6">
             <h2 class="text-3xl font-extrabold text-gray-900">Recent Activity</h2>
             <button class="text-sm font-semibold text-[#6C1517] hover:underline">
@@ -166,7 +96,11 @@
           </div>
         </div>
       </div>
+
     </main>
+
+    {{-- RIGHT SIDEBAR (UNIFIED PARTIAL) --}}
+    @include('partials.right-sidebar')
 
   </div>
 </div>

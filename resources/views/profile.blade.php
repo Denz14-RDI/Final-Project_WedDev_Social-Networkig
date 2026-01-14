@@ -1,96 +1,27 @@
 @extends('layouts.app')
 @section('title','Profile')
 
+@section('main_class', 'bg-[#F7F4EF]')
+
 @section('content')
-<div class="min-h-screen bg-[#F7F4EF]">
-  {{-- FULL WIDTH LAYOUT --}}
-  <div class="grid grid-cols-1 lg:grid-cols-[320px_1fr] min-h-screen">
+<div class="h-screen overflow-hidden bg-[#F7F4EF]">
+  <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] h-full">
 
-    <!-- LEFT SIDEBAR (same one we’ve been using) -->
-    <aside class="bg-white border-r border-gray-200 lg:sticky lg:top-0 lg:h-screen">
-      <div class="h-full flex flex-col">
-
-        {{-- header --}}
-        <div class="px-6 py-6 border-b border-gray-200 flex items-center gap-4">
-          <img
-            src="{{ asset('images/logo.png') }}"
-            alt="PUPCOM Logo"
-            class="h-14 w-14 rounded-2xl object-contain select-none" />
-
-          <div class="leading-tight">
-            <div class="text-xl font-extrabold text-gray-900 tracking-wide">PUPCOM</div>
-          </div>
-        </div>
-
-        {{-- nav --}}
-        <nav class="px-4 py-4 space-y-1 flex-1">
-          @php
-          $navItem = function ($routeName) {
-          return request()->routeIs($routeName)
-          ? 'bg-[#6C1517] text-white font-semibold'
-          : 'hover:bg-gray-100 text-gray-800';
-          };
-          @endphp
-
-          <a href="{{ route('feed') }}"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl {{ $navItem('feed') }}">
-            <span class="text-lg">⌂</span>
-            Home
-          </a>
-
-          <a href="{{ route('search') }}"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl {{ $navItem('search') }}">
-            <span class="text-lg">⌕</span>
-            Search
-          </a>
-
-          <a href="{{ route('notifications') }}"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl {{ $navItem('notifications') }}">
-            <span class="text-lg">🔔</span>
-            Notifications
-          </a>
-
-          <a href="{{ route('profile') }}"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl {{ $navItem('profile') }}">
-            <span class="text-lg">👤</span>
-            Profile
-          </a>
-
-          <a href="{{ route('settings') }}"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl {{ $navItem('settings') }}">
-            <span class="text-lg">⚙</span>
-            Settings
-          </a>
-        </nav>
-
-        {{-- bottom user preview (clickable -> profile) --}}
-        <a href="{{ route('profile') }}"
-          class="px-6 py-5 border-t border-gray-200 flex items-center gap-3 hover:bg-gray-50 transition">
-          <div class="h-11 w-11 rounded-full bg-gray-200"></div>
-          <div class="leading-tight">
-            <div class="text-sm font-semibold text-gray-900">Juan Dela Cruz</div>
-            <div class="text-xs text-gray-500">@juanisko</div>
-          </div>
-        </a>
-
-      </div>
-    </aside>
-
-    <!-- PROFILE MAIN (center+right together like notifications) -->
-    <main class="bg-[#F7F4EF]">
+    {{-- CENTER (scroll) --}}
+    <main class="h-full overflow-y-auto">
       <div class="px-6 py-10">
         <div class="max-w-[980px] mx-auto">
 
           {{-- profile header card --}}
           <div class="bg-white rounded-2xl shadow-[0_18px_40px_rgba(0,0,0,.12)] border border-black/10 overflow-hidden">
 
-            {{-- COVER (gradient like reference) --}}
+            {{-- COVER --}}
             <div class="h-44 sm:h-52 bg-gradient-to-r from-[#6C1517] via-[#7B2A2D] to-[#9B5658]"></div>
 
             {{-- CONTENT --}}
             <div class="px-8 pb-8">
-              {{-- Header block uses padding-top to push content BELOW the cover like the reference --}}
               <div class="relative pt-8 sm:pt-10">
+
                 {{-- avatar --}}
                 <div class="absolute -top-10 sm:-top-12 left-0">
                   <div class="h-24 w-24 sm:h-28 sm:w-28 rounded-full bg-gray-200 ring-4 ring-white"></div>
@@ -104,7 +35,7 @@
                   </a>
                 </div>
 
-                {{-- text (closer to avatar) --}}
+                {{-- text --}}
                 <div class="mt-10 sm:mt-12">
                   <div class="text-2xl sm:text-3xl font-extrabold text-gray-900 leading-tight">
                     Juan Dela Cruz
@@ -126,8 +57,6 @@
                   </div>
                 </div>
               </div>
-
-
 
               <div class="mt-8 border-t border-black/10"></div>
 
@@ -197,6 +126,9 @@
         </div>
       </div>
     </main>
+
+    {{-- RIGHT SIDEBAR (UNIFIED PARTIAL) --}}
+    @include('partials.right-sidebar')
 
   </div>
 </div>
