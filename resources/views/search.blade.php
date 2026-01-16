@@ -1,14 +1,12 @@
 @extends('layouts.app')
 @section('title','Search')
 
-{{-- admin palette bg --}}
 @section('main_class', 'bg-app-page')
 
 @section('content')
 @php
 $q = request('q', '');
 
-// demo data (replace with DB later)
 $people = [
 [
 'name' => 'Juan Dela Cruz',
@@ -63,8 +61,8 @@ $people = [
 
         {{-- Search box --}}
         <form action="{{ route('search') }}" method="GET"
-          class="bg-app-card rounded-2xl border border-app shadow-[0_10px_18px_rgba(0,0,0,.08)] p-4">
-          <div class="flex items-center gap-3 h-11 rounded-full bg-white border border-app px-5">
+          class="bg-app-card rounded-2xl border border-app shadow-app p-4">
+          <div class="flex items-center gap-3 h-11 rounded-full bg-app-input border border-app px-5">
             <span class="text-app-muted">🔍</span>
             <input
               type="text"
@@ -76,15 +74,14 @@ $people = [
         </form>
 
         {{-- Results --}}
-        <div class="bg-app-card rounded-2xl border border-app shadow-[0_10px_18px_rgba(0,0,0,.08)] overflow-hidden">
+        <div class="bg-app-card rounded-2xl border border-app shadow-app overflow-hidden">
 
           <div class="p-6 pb-4 flex items-center justify-between">
             <div class="text-lg font-extrabold flex items-center gap-2 text-app">
-              <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-[#6C1517] text-white text-sm">👥</span>
+              <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-app-brand text-white text-sm">👥</span>
               <span>People to Follow</span>
             </div>
 
-            {{-- optional: small count --}}
             <div class="text-xs text-app-muted">
               {{ count($people) }} results
             </div>
@@ -92,7 +89,7 @@ $people = [
 
           <div class="px-6 pb-6 space-y-4">
             @foreach($people as $p)
-            <div class="flex items-center justify-between gap-4 rounded-2xl border border-app bg-white p-4">
+            <div class="flex items-center justify-between gap-4 rounded-2xl border border-app bg-app-input p-4">
 
               <div class="flex items-center gap-4 min-w-0">
                 <img
@@ -105,7 +102,7 @@ $people = [
                     <div class="font-extrabold text-app truncate">{{ $p['name'] }}</div>
 
                     @if(!empty($p['badge']))
-                    <span class="rounded-full bg-amber-50 border border-app px-2.5 py-1 text-xs font-semibold text-[#D97706]">
+                    <span class="rounded-full bg-[var(--amber-bg)] border border-app px-2.5 py-1 text-xs font-semibold text-[var(--amber)]">
                       {{ $p['badge'] }}
                     </span>
                     @endif
@@ -116,9 +113,7 @@ $people = [
                 </div>
               </div>
 
-              <button
-                type="button"
-                class="shrink-0 px-4 py-2 rounded-full border border-app bg-white text-sm font-semibold text-app hover:bg-black/5">
+              <button type="button" class="shrink-0 px-4 py-2 rounded-full btn-ghost text-sm font-semibold">
                 Follow
               </button>
 

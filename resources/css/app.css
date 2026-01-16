@@ -11,111 +11,150 @@
     'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* =========================
-   ADMIN-PALETTE TOKENS
-   (use these in user UI too)
-   ========================= */
+/* =========================================================
+   DESIGN TOKENS
+   ========================================================= */
 :root {
+  color-scheme: light;
+
   --brand: #6C1517;
 
+  /* surfaces */
   --app-bg: #F6F6F6;
-  --surface: #FFFFFF;
-  /* cards/panels */
   --sidebar: #FFFFFF;
-  /* sidebar bg */
+  --surface: #FFFFFF;
+  --input: #F3F4F6;
 
+  /* borders & dividers */
   --border: #E5E7EB;
+  --divider: rgba(17, 24, 39, 0.10);
 
+  /* text */
   --text: #111827;
-  /* gray-900 */
   --muted: #6B7280;
-  /* gray-500 */
   --muted-light: #9CA3AF;
-  /* gray-400 */
 
+  /* hovers */
+  --hover: rgba(17, 24, 39, 0.04);
+  --hover-strong: rgba(17, 24, 39, 0.07);
+
+  /* shadow */
+  --shadow: 0 18px 50px rgba(0, 0, 0, 0.10);
+
+  /* accents */
   --amber: #D97706;
-  /* amber-600 */
   --amber-bg: #FFFBEB;
-  /* amber-50 */
 
+  /* danger */
   --danger: #DC2626;
-  /* red-600 */
   --danger-bg: #FEF2F2;
-  /* red-50 */
   --danger-border: #FECACA;
-  /* red-200 */
+}
+
+/* =========================================================
+   DARK MODE (ChatGPT-ish neutral blacks/grays)
+   Toggle by adding class="dark" on <html>
+   ========================================================= */
+html.dark {
+  color-scheme: dark;
+
+  --brand: #6C1517;
+
+  /* neutral darks (no blue tint) */
+  --app-bg: #0B0B0D;
+  --sidebar: #0F0F12;
+  --surface: #17181B;
+  --input: #121317;
+
+  --border: rgba(255, 255, 255, 0.10);
+  --divider: rgba(255, 255, 255, 0.08);
+
+  --text: #F3F4F6;
+  --muted: #A1A1AA;
+  --muted-light: #71717A;
+
+  --hover: rgba(255, 255, 255, 0.05);
+  --hover-strong: rgba(255, 255, 255, 0.08);
+
+  --shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+
+  --amber: #F59E0B;
+  --amber-bg: rgba(245, 158, 11, 0.12);
+
+  --danger: #F87171;
+  --danger-bg: rgba(248, 113, 113, 0.12);
+  --danger-border: rgba(248, 113, 113, 0.25);
 }
 
 @layer base {
   .retro-ui {
-    font-family: "Space Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-family: "Space Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      "Liberation Mono", "Courier New", monospace;
   }
 }
 
-/* Hide scrollbar but keep scroll */
+/* =========================================================
+   UTILITIES
+   ========================================================= */
 @layer utilities {
-  .no-scrollbar::-webkit-scrollbar {
-    width: 0px;
-    height: 0px;
-  }
+  /* Hide scrollbar but keep scroll */
+  .no-scrollbar::-webkit-scrollbar { width: 0px; height: 0px; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-}
+  /* Semantic helpers */
+  .bg-app-page { background-color: var(--app-bg); }
+  .bg-app-sidebar { background-color: var(--sidebar); }
+  .bg-app-card { background-color: var(--surface); }
+  .bg-app-input { background-color: var(--input); }
 
-/* =========================
-   SEMANTIC UI HELPERS
-   ========================= */
-@layer utilities {
-  .bg-app-page {
-    background-color: var(--app-bg);
-  }
+  .text-app { color: var(--text); }
+  .text-app-muted { color: var(--muted); }
+  .text-app-mutedlight { color: var(--muted-light); }
 
-  .bg-app-sidebar {
-    background-color: var(--sidebar);
-  }
+  .border-app { border-color: var(--border); }
+  .bg-app-divider { background-color: var(--divider); }
 
-  .bg-app-card {
-    background-color: var(--surface);
-  }
+  .bg-app-brand { background-color: var(--brand); }
+  .bg-app-accent { background-color: var(--amber); }
+  .bg-app-surface { background-color: var(--surface); }
 
-  .text-app {
+  .shadow-app { box-shadow: var(--shadow); }
+
+  /* hover helpers (work in both modes, no Tailwind dark: needed) */
+  .hover-app:hover { background-color: var(--hover); }
+  .hover-app-strong:hover { background-color: var(--hover-strong); }
+
+  /* Buttons */
+  .btn-brand { background-color: var(--brand); color: #fff; }
+  .btn-ghost {
+    background-color: var(--input);
     color: var(--text);
+    border: 1px solid var(--border);
   }
+  .btn-ghost:hover { background-color: var(--hover-strong); }
 
-  .text-app-muted {
-    color: var(--muted);
+  /* Switch (used on Settings) */
+  .theme-track {
+    width: 48px;
+    height: 28px;
+    border-radius: 9999px;
+    background: var(--border);
+    transition: background-color 200ms ease;
   }
+  html.dark .theme-track { background: rgba(255,255,255,0.14); }
+  .theme-track.on { background: var(--brand); }
 
-  .text-app-mutedlight {
-    color: var(--muted-light);
+  .theme-knob {
+    position: absolute;
+    left: 4px;
+    top: 4px;
+    width: 20px;
+    height: 20px;
+    border-radius: 9999px;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(0,0,0,.25);
+    transform: translateX(0);
+    transition: transform 200ms ease;
   }
-
-  .border-app {
-    border-color: var(--border);
-  }
-
-  .btn-brand {
-    background-color: var(--brand);
-    color: white;
-  }
-
-  /* extra helpers used by the notifications popover */
-  .bg-app-surface {
-    background-color: var(--surface);
-  }
-
-  .bg-app-brand {
-    background-color: var(--brand);
-  }
-
-  .bg-app-accent {
-    background-color: var(--amber);
-  }
+  .theme-knob.on { transform: translateX(20px); }
 }

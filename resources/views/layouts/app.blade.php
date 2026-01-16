@@ -6,16 +6,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>@yield('title', 'PUPCOM')</title>
 
-  {{-- Vite --}}
-  @vite(['resources/css/app.css', 'resources/js/app.js'])
+  {{-- set theme before paint (prevents flash) --}}
+  <script>
+    (() => {
+      const saved = localStorage.getItem('theme'); // "dark" | "light" | null
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const useDark = saved ? saved === 'dark' : prefersDark;
+      document.documentElement.classList.toggle('dark', useDark);
+    })();
+  </script>
 
-  {{-- Alpine (for popouts/modals) --}}
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="bg-app-page text-app-text">
+<body class="bg-app-page text-app">
   <div class="min-h-screen">
-    <div class="grid grid-cols-1 lg:grid-cols-[320px_1fr] h-screen overflow-hidden">
+    {{-- IMPORTANT: no overflow-hidden here (popover needs to overflow) --}}
+    <div class="grid grid-cols-1 lg:grid-cols-[320px_1fr] h-screen">
 
       {{-- LEFT SIDEBAR --}}
       @include('partials.sidebar')

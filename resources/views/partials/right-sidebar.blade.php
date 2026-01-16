@@ -4,7 +4,7 @@
         <div class="space-y-5">
 
             {{-- Trending --}}
-            <div class="bg-app-card rounded-2xl shadow-[0_18px_40px_rgba(0,0,0,.08)] border border-app p-6">
+            <div class="bg-app-card rounded-2xl shadow-app border border-app p-6">
                 <div class="font-extrabold text-app mb-4 flex items-center gap-2">
                     <span>📌</span>
                     <span>Trending in PUP</span>
@@ -47,27 +47,24 @@
             ];
             @endphp
 
-            <div class="bg-app-card rounded-2xl shadow-[0_18px_40px_rgba(0,0,0,.08)] border border-app p-6">
+            <div class="bg-app-card rounded-2xl shadow-app border border-app p-6">
                 <div class="font-extrabold text-app mb-4">Who to follow</div>
 
                 <div class="space-y-4">
                     @foreach($whoToFollow as $u)
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3">
+                    <div class="flex items-center justify-between gap-4">
+                        <div class="flex items-center gap-3 min-w-0">
                             <img
                                 src="{{ $u['avatar'] }}"
                                 class="h-10 w-10 rounded-full object-cover border border-app"
                                 alt="avatar">
-
-                            <div class="leading-tight">
-                                <div class="text-sm font-semibold text-app">{{ $u['name'] }}</div>
-                                <div class="text-xs text-app-muted">{{ $u['handle'] }}</div>
+                            <div class="leading-tight min-w-0">
+                                <div class="text-sm font-semibold text-app truncate">{{ $u['name'] }}</div>
+                                <div class="text-xs text-app-muted truncate">{{ $u['handle'] }}</div>
                             </div>
                         </div>
 
-                        <button
-                            type="button"
-                            class="px-4 py-2 rounded-full bg-white border border-app text-sm font-semibold text-app hover:bg-gray-50">
+                        <button type="button" class="shrink-0 px-4 py-2 rounded-full btn-ghost text-sm font-semibold">
                             Follow
                         </button>
                     </div>
