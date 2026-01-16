@@ -16,7 +16,8 @@
     <img
       src="{{ asset('images/logo.png') }}"
       alt="PUPCOM Logo"
-      class="relative z-10 w-[1000px] h-auto opacity-95 select-none drop-shadow-[0_20px_40px_rgba(0,0,0,.25)]">
+      class="relative z-10 w-60 sm:w-72 lg:w-80 xl:w-96 max-w-[380px] h-auto opacity-95 select-none
+    drop-shadow-[0_18px_35px_rgba(0,0,0,.35)]">
   </div>
 
   <!-- RIGHT (beige background + register card) -->
@@ -127,22 +128,6 @@
             placeholder="••••••••"
             class="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:ring-2 focus:ring-[#6C1517]/25 focus:border-[#6C1517]"
             required>
-        </div>
-
-        {{-- Role --}}
-        <div>
-          <label class="block text-sm font-semibold text-gray-800 mb-1">Role</label>
-          <select
-            name="role"
-            class="w-full rounded-xl border border-gray-200 px-4 py-3 bg-white outline-none focus:ring-2 focus:ring-[#6C1517]/25 focus:border-[#6C1517]"
-            required>
-            <option value="" disabled {{ old('role') ? '' : 'selected' }}>Select role...</option>
-            <option value="User" {{ old('role') === 'User' ? 'selected' : '' }}>User</option>
-            <option value="Admin" {{ old('role') === 'Admin' ? 'selected' : '' }}>Admin</option>
-          </select>
-          @error('role')
-          <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-          @enderror
         </div>
 
         {{-- Button --}}

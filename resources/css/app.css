@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -6,18 +7,115 @@
 @source '../**/*.js';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root{
+/* =========================
+   ADMIN-PALETTE TOKENS
+   (use these in user UI too)
+   ========================= */
+:root {
   --brand: #6C1517;
-  --accent: #F2C75C;
-  --bg: #F2EADA;
-  --muted: #5C5C5C;
+
+  --app-bg: #F6F6F6;
+  --surface: #FFFFFF;
+  /* cards/panels */
+  --sidebar: #FFFFFF;
+  /* sidebar bg */
+
+  --border: #E5E7EB;
+
+  --text: #111827;
+  /* gray-900 */
+  --muted: #6B7280;
+  /* gray-500 */
+  --muted-light: #9CA3AF;
+  /* gray-400 */
+
+  --amber: #D97706;
+  /* amber-600 */
+  --amber-bg: #FFFBEB;
+  /* amber-50 */
+
+  --danger: #DC2626;
+  /* red-600 */
+  --danger-bg: #FEF2F2;
+  /* red-50 */
+  --danger-border: #FECACA;
+  /* red-200 */
 }
 
+@layer base {
+  .retro-ui {
+    font-family: "Space Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  }
+}
+
+/* Hide scrollbar but keep scroll */
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* =========================
+   SEMANTIC UI HELPERS
+   ========================= */
+@layer utilities {
+  .bg-app-page {
+    background-color: var(--app-bg);
+  }
+
+  .bg-app-sidebar {
+    background-color: var(--sidebar);
+  }
+
+  .bg-app-card {
+    background-color: var(--surface);
+  }
+
+  .text-app {
+    color: var(--text);
+  }
+
+  .text-app-muted {
+    color: var(--muted);
+  }
+
+  .text-app-mutedlight {
+    color: var(--muted-light);
+  }
+
+  .border-app {
+    border-color: var(--border);
+  }
+
+  .btn-brand {
+    background-color: var(--brand);
+    color: white;
+  }
+
+  /* extra helpers used by the notifications popover */
+  .bg-app-surface {
+    background-color: var(--surface);
+  }
+
+  .bg-app-brand {
+    background-color: var(--brand);
+  }
+
+  .bg-app-accent {
+    background-color: var(--amber);
+  }
+}

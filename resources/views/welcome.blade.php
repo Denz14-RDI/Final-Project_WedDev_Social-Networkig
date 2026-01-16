@@ -5,44 +5,49 @@
 <div
   class="min-h-screen relative flex items-center justify-center px-6 py-10 bg-cover bg-center bg-no-repeat"
   style="background-image: url('{{ asset('images/welcome-bg.png') }}');">
-  {{-- overlay (adjust if too dark) --}}
-  <div class="absolute inset-0 bg-black/15"></div>
+
+  {{-- warm overlay (matches login/register) --}}
+  <div class="absolute inset-0 bg-gradient-to-tr from-[#F59E0B]/45 via-[#EF4444]/30 to-[#6C1517]/55"></div>
+  <div class="absolute inset-0 bg-black/10"></div>
 
   <div class="relative z-10 w-full max-w-6xl text-center">
 
-    {{-- top pill --}}
-    <div class="inline-flex items-center gap-2 rounded-full
-            bg-white/75 backdrop-blur
-            px-7 py-3 text-lg font-bold text-[#6C1517]
-            ring-1 ring-[#6C1517]/10
-            shadow-[0_10px_25px_rgba(0,0,0,.18)]">
-      <span class="text-xl">🎓</span>
-      <span>Welcome to the PUP Community</span>
-    </div>
+    {{-- HERO GLASS WRAPPER (improves readability) --}}
+    <div class="mx-auto max-w-4xl rounded-3xl bg-[#6C1517]/15 backdrop-blur-md ring-1 ring-white/15 px-6 sm:px-10 py-8">
 
-    {{-- main heading --}}
-    <h1 class="mt-7 text-7xl md:text-8xl font-bold tracking-tight leading-[1.02] text-[#0F172A]">
-      Welcome to
-      <span class="block text-[#6C1517] drop-shadow-[0_10px_25px_rgba(0,0,0,.25)]">PUPCOM</span>
-    </h1>
+      {{-- top pill --}}
+      <div class="inline-flex items-center gap-2 rounded-full
+              bg-[#F2EADA]/90 backdrop-blur
+              px-7 py-3 text-lg font-bold text-[#6C1517]
+              ring-1 ring-[#F5D27A]/50
+              shadow-[0_10px_25px_rgba(0,0,0,.22)]">
+        <span class="text-xl">🎓</span>
+        <span>Welcome to the PUP Community</span>
+      </div>
 
-    {{-- subtitle --}}
-    <p class="mt-6 text-xl md:text-2xl text-white/90 max-w-3xl mx-auto leading-relaxed drop-shadow-[0_10px_25px_rgba(0,0,0,.25)]">
-      The premier digital home for the
-      <span class="font-semibold underline decoration-yellow-300 decoration-4 underline-offset-4">Iskolar ng Bayan</span>.
-      Connect with peers, share updates, and discover what's happening across the campus.
-    </p>
+      {{-- main heading --}}
+      <h1 class="mt-7 text-6xl sm:text-7xl md:text-8xl font-black tracking-tight leading-[1.02] text-[#F2EADA]
+        drop-shadow-[0_10px_25px_rgba(0,0,0,.55)]">
+        Welcome to
+        <span class="block text-[#F5D27A] drop-shadow-[0_12px_28px_rgba(108,21,23,.75)]">
+          PUPCOM
+        </span>
+      </h1>
+
+      {{-- subtitle --}}
+      <p class="mt-6 text-lg sm:text-xl md:text-2xl text-[#F2EADA]/95 max-w-3xl mx-auto leading-relaxed
+        drop-shadow-[0_
 
     {{-- button --}}
-    <div class="mt-10 flex items-center justify-center">
-      <a href="{{ route('login') }}"
-        class="inline-flex items-center justify-center gap-2
+    <div class=" mt-10 flex items-center justify-center">
+        <a href="{{ route('signin.choice') }}"
+          class="inline-flex items-center justify-center gap-2
           px-10 py-4 rounded-2xl
           bg-[#6C1517] text-white font-semibold text-lg
           shadow-[0_18px_35px_rgba(108,21,23,.35)]
           hover:opacity-95">
-        Get Started <span class="text-xl">→</span>
-      </a>
+          Get Started <span class="text-xl">→</span>
+        </a>
     </div>
 
     {{-- feature cards --}}
