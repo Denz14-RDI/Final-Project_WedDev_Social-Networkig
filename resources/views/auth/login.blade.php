@@ -16,9 +16,8 @@
     <img
       src="{{ asset('images/logo.png') }}"
       alt="PUPCOM Logo"
-      class="relative z-10 w-[1000px] h-auto opacity-95 select-none
-         drop-shadow-[0_35px_60px_rgba(0,0,0,.45)]
-         drop-shadow-[0_10px_25px_rgba(0,0,0,.35)]">
+      class="relative z-10 w-60 sm:w-72 lg:w-80 xl:w-96 max-w-[380px] h-auto opacity-95 select-none
+    drop-shadow-[0_18px_35px_rgba(0,0,0,.35)]">
   </div>
 
   <!-- RIGHT (beige background + login card) -->
@@ -41,7 +40,7 @@
         </a>
       </div>
 
-      <form method="POST" action="{{ route('login') }}" class="mt-6 space-y-5">
+      <form method="POST" action="{{ route('login.store') }}" class="mt-6 space-y-5">
         @csrf
 
         <!-- Email or Username -->
