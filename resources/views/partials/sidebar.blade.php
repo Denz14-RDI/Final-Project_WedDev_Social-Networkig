@@ -80,7 +80,7 @@
                 </template>
             </a>
 
-            {{-- Profile (✅ updated to use shortcut route) --}}
+            {{-- Profile --}}
             <a href="{{ route('profile') }}"
                 class="flex items-center gap-3 px-4 py-3 rounded-xl {{ $navItem('profile') }}">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
