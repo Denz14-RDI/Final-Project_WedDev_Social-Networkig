@@ -1,5 +1,5 @@
 @extends('layouts.guest')
-@section('title', 'Sign in')
+@section('title', 'Log in')
 
 @section('content')
 <div class="min-h-screen grid grid-cols-1 md:grid-cols-2">
@@ -8,11 +8,9 @@
   <div
     class="hidden md:flex items-center justify-center relative overflow-hidden"
     style="background-image: url('/images/pupbg.png'); background-size: cover; background-position: center;">
-    {{-- Optional warm overlay to match the look (remove if you want the raw photo only) --}}
     <div class="absolute inset-0 bg-gradient-to-tr from-[#F59E0B]/50 via-[#EF4444]/35 to-[#6C1517]/55"></div>
     <div class="absolute inset-0 bg-black/10"></div>
 
-    {{-- Logo --}}
     <img
       src="{{ asset('images/logo.png') }}"
       alt="PUPCOM Logo"
@@ -52,7 +50,7 @@
             value="{{ old('login') }}"
             placeholder="iskolar@pup.edu.ph"
             required
-            class="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:ring-2 focus:ring-[#6C1517]/25 focus:border-[#6C1517]">
+            class="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 outline-none text-black focus:ring-2 focus:ring-[#6C1517]/25 focus:border-[#6C1517]">
           @error('login')
           <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
           @enderror
@@ -61,14 +59,12 @@
         <!-- Password -->
         <div>
           <label class="block text-sm font-semibold text-gray-800">Password</label>
-
           <input
             type="password"
             name="password"
             placeholder="Password"
             required
-            class="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:ring-2 focus:ring-[#6C1517]/25 focus:border-[#6C1517]">
-
+            class="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 outline-none text-black focus:ring-2 focus:ring-[#6C1517]/25 focus:border-[#6C1517]">
           @error('password')
           <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
           @enderror

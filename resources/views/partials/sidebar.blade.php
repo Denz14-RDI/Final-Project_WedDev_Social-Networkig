@@ -58,12 +58,12 @@
                 href="{{ route('notifications') }}"
                 class="flex items-center justify-between gap-3 px-4 py-3 rounded-xl {{ $navItem('notifications') }}"
                 @click.prevent="
-          @if(!$onNotificationsPage)
-            toggleNotif()
-          @else
-            window.location.href='{{ route('notifications') }}'
-          @endif
-        ">
+                    @if(!$onNotificationsPage)
+                        toggleNotif()
+                    @else
+                        window.location.href='{{ route('notifications') }}'
+                    @endif
+                ">
                 <div class="flex items-center gap-3">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -80,114 +80,9 @@
                 </template>
             </a>
 
-            {{-- POPOVER --}}
-            <div
-                x-show="notifOpen"
-                x-transition.origin.top.left
-                @click.outside="closeAll()"
-                class="absolute left-[calc(100%+16px)] top-[120px] w-[360px] max-w-[360px]
-               bg-app-card text-app rounded-2xl shadow-app border border-app overflow-hidden z-50"
-                style="display:none;">
-
-                {{-- header --}}
-                <div class="px-4 py-3 flex items-center justify-between border-b border-app">
-                    <div class="text-lg font-extrabold text-app">Notifications</div>
-
-                    {{-- ⋯ menu --}}
-                    <div class="relative">
-                        <button
-                            type="button"
-                            class="h-9 w-9 rounded-xl hover-app grid place-items-center text-app"
-                            title="More"
-                            @click.stop="menuOpen = !menuOpen">
-                            ⋯
-                        </button>
-
-                        <div
-                            x-show="menuOpen"
-                            x-transition
-                            @click.outside="menuOpen=false"
-                            class="absolute right-0 mt-2 w-52 rounded-xl bg-app-card border border-app shadow-app overflow-hidden"
-                            style="display:none;">
-                            <button
-                                type="button"
-                                class="w-full text-left px-4 py-3 text-sm hover-app text-app"
-                                @click="markAllRead()">
-                                Mark all as read
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- tabs + see all --}}
-                <div class="px-4 py-3 flex items-center gap-2 border-b border-app">
-                    <button
-                        type="button"
-                        class="px-3 py-1.5 rounded-full text-sm font-semibold"
-                        :class="notifTab==='all' ? 'bg-app-input text-app border border-app' : 'hover-app text-app-muted border border-transparent'"
-                        @click="notifTab='all'">
-                        All
-                    </button>
-
-                    <button
-                        type="button"
-                        class="px-3 py-1.5 rounded-full text-sm font-semibold"
-                        :class="notifTab==='unread' ? 'bg-app-input text-app border border-app' : 'hover-app text-app-muted border border-transparent'"
-                        @click="notifTab='unread'">
-                        Unread
-                    </button>
-
-                    <div class="ml-auto">
-                        <a
-                            href="{{ route('notifications') }}"
-                            class="text-sm text-app-muted hover:underline underline-offset-4">
-                            See all
-                        </a>
-                    </div>
-                </div>
-
-                {{-- list --}}
-                <div class="max-h-[540px] overflow-y-auto">
-                    <template x-for="n in filtered()" :key="n.id">
-                        <div class="px-4 py-3 flex gap-3 hover-app border-t border-app">
-                            <div class="relative shrink-0">
-                                <img :src="n.avatar" class="h-12 w-12 rounded-full object-cover border border-app" alt="avatar">
-                                <div class="absolute -right-1 -bottom-1 h-5 w-5 rounded-full bg-app-accent grid place-items-center text-[11px] font-extrabold text-white">
-                                    <span x-text="n.type === 'like' ? '❤' : (n.type === 'invite' ? '⇄' : '!')"></span>
-                                </div>
-                            </div>
-
-                            <div class="flex-1 leading-tight">
-                                <div class="text-sm">
-                                    <span class="font-extrabold text-app" x-text="n.name"></span>
-                                    <span class="text-app-muted" x-text="' ' + n.text"></span>
-                                </div>
-                                <div class="text-xs text-app-muted mt-1" x-text="n.time"></div>
-
-                                <div class="mt-2 flex gap-2" x-show="n.type === 'invite'">
-                                    <button type="button" class="px-4 py-2 rounded-xl btn-brand text-sm font-semibold hover:opacity-95">
-                                        Accept
-                                    </button>
-                                    <button type="button" class="px-4 py-2 rounded-xl btn-ghost text-sm font-semibold">
-                                        Decline
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="pt-2">
-                                <div class="h-2.5 w-2.5 rounded-full bg-app-brand" x-show="n.unread"></div>
-                            </div>
-                        </div>
-                    </template>
-
-                    <div class="px-4 py-4 text-sm text-app-muted" x-show="filtered().length === 0">
-                        No notifications here.
-                    </div>
-                </div>
-            </div>
-
-            {{-- Profile --}}
-            <a href="{{ route('profile') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl {{ $navItem('profile') }}">
+            {{-- Profile (✅ updated to use shortcut route) --}}
+            <a href="{{ route('profile') }}"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl {{ $navItem('profile') }}">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round">
                     <path d="M20 21a8 8 0 10-16 0"></path>
@@ -205,7 +100,6 @@
                 </svg>
                 <span class="text-[15px] font-semibold">Settings</span>
             </a>
-
         </nav>
 
         {{-- divider above user --}}
@@ -213,20 +107,14 @@
             <div class="h-px bg-app-divider"></div>
         </div>
 
-        @php
-        $me = [
-        'name' => 'Juan Dela Cruz',
-        'handle' => '@juanisko',
-        'avatar' => 'https://i.pravatar.cc/120?img=12',
-        ];
-        @endphp
-
+        {{-- User info + logout --}}
         <div class="px-6 py-5 flex items-center gap-3">
             <a href="{{ route('profile') }}" class="flex items-center gap-3 flex-1 hover:opacity-90 transition">
-                <img src="{{ $me['avatar'] }}" class="h-11 w-11 rounded-full object-cover" alt="me">
+                <img src="{{ asset(Auth::user()->profile_pic ?? 'images/default.png') }}"
+                    class="h-11 w-11 rounded-full object-cover" alt="me">
                 <div class="leading-tight">
-                    <div class="text-sm font-semibold text-app">{{ $me['name'] }}</div>
-                    <div class="text-xs text-app-muted">{{ $me['handle'] }}</div>
+                    <div class="text-sm font-semibold text-app">{{ Auth::user()->first_name }} {{ Auth::user()->last_name }}</div>
+                    <div class="text-xs text-app-muted">{{ '@' . Auth::user()->username }}</div>
                 </div>
             </a>
 
@@ -245,6 +133,5 @@
                 </button>
             </form>
         </div>
-
     </div>
 </aside>

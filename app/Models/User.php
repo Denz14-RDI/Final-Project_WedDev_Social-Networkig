@@ -2,15 +2,18 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
+
+
+    // Primary key
+
+    protected $primaryKey = 'user_id';
 
     /**
      * The attributes that are mass assignable.
@@ -18,9 +21,13 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name',
+        'username',
         'email',
         'password',
+        'bio',
+        'profile_pic',
     ];
 
     /**
@@ -45,4 +52,25 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function posts()
+    {
+        return $this->hasMany(Post::class, 'user_id');
+    }
+
+
+    // public function comments()
+    // {
+    //     return $this->hasMany(Comment::class);
+    // }
+
+    // public function likes()
+    // {
+    //     return $this->hasMany(Like::class);
+    // }
+
+    // public function reports()
+    // {
+    //     return $this->hasMany(Report::class, 'reported_by');
+    // }
 }

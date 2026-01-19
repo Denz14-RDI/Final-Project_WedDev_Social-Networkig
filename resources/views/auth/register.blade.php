@@ -53,7 +53,7 @@
               name="first_name"
               value="{{ old('first_name') }}"
               placeholder="Juan"
-              class="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:ring-2 focus:ring-[#6C1517]/25 focus:border-[#6C1517]"
+              class="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none text-black focus:ring-2 focus:ring-[#6C1517]/25 focus:border-[#6C1517]"
               required>
             @error('first_name')
             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -67,7 +67,7 @@
               name="last_name"
               value="{{ old('last_name') }}"
               placeholder="Dela Cruz"
-              class="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:ring-2 focus:ring-[#6C1517]/25 focus:border-[#6C1517]"
+              class="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none text-black focus:ring-2 focus:ring-[#6C1517]/25 focus:border-[#6C1517]"
               required>
             @error('last_name')
             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -83,7 +83,7 @@
             name="username"
             value="{{ old('username') }}"
             placeholder="juan_dc"
-            class="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:ring-2 focus:ring-[#6C1517]/25 focus:border-[#6C1517]"
+            class="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none text-black focus:ring-2 focus:ring-[#6C1517]/25 focus:border-[#6C1517]"
             required>
           @error('username')
           <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -98,7 +98,7 @@
             name="email"
             value="{{ old('email') }}"
             placeholder="iskolar@pup.edu.ph"
-            class="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:ring-2 focus:ring-[#6C1517]/25 focus:border-[#6C1517]"
+            class="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none text-black focus:ring-2 focus:ring-[#6C1517]/25 focus:border-[#6C1517]"
             required>
           @error('email')
           <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -112,7 +112,7 @@
             type="password"
             name="password"
             placeholder="••••••••"
-            class="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:ring-2 focus:ring-[#6C1517]/25 focus:border-[#6C1517]"
+            class="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none text-black focus:ring-2 focus:ring-[#6C1517]/25 focus:border-[#6C1517]"
             required>
           @error('password')
           <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -126,7 +126,7 @@
             type="password"
             name="password_confirmation"
             placeholder="••••••••"
-            class="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:ring-2 focus:ring-[#6C1517]/25 focus:border-[#6C1517]"
+            class="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none text-black focus:ring-2 focus:ring-[#6C1517]/25 focus:border-[#6C1517]"
             required>
         </div>
 
