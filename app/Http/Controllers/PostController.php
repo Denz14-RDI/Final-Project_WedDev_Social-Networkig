@@ -21,17 +21,47 @@ class PostController extends Controller
     {
         $validated = $request->validate([
             'post_content' => 'required|string|max:1000',
-            'category' => 'required|in:academic,events,announcement,campus_life,help_wanted',
-            'link' => 'nullable|url',
-            'image' => 'nullable|string',
+            'category'     => 'required|in:academic,events,announcement,campus_life,help_wanted',
+            'link'         => 'nullable|url',
+            'image'        => 'nullable|string',
         ]);
 
         $validated['user_id'] = Auth::id();
-        $validated['status'] = 'active';
 
         Post::create($validated);
 
-        return redirect()->back()->with('success', 'Post created successfully!');
+        return redirect()->route('feed')->with('success', 'Post created successfully!');
+    }
+
+    // Show edit form
+    public function edit(Post $post)
+    {
+        // Only allow owner to edit
+        if ($post->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        return view('posts.edit', compact('post'));
+    }
+
+    // Update post
+    public function update(Request $request, Post $post)
+    {
+        // Only allow owner to update
+        if ($post->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $validated = $request->validate([
+            'post_content' => 'required|string|max:1000',
+            'category'     => 'required|in:academic,events,announcement,campus_life,help_wanted',
+            'link'         => 'nullable|url',
+            'image'        => 'nullable|string',
+        ]);
+
+        $post->update($validated);
+
+        return redirect()->route('feed')->with('success', 'Post updated successfully!');
     }
 
     // Delete a post (soft delete)
@@ -39,13 +69,12 @@ class PostController extends Controller
     {
         $post = Post::findOrFail($id);
 
-        // Only allow owner to delete
         if ($post->user_id !== Auth::id()) {
             abort(403, 'Unauthorized action.');
         }
 
         $post->delete();
 
-        return redirect()->back()->with('success', 'Post deleted successfully!');
+        return redirect()->route('feed')->with('success', 'Post deleted successfully!');
     }
 }

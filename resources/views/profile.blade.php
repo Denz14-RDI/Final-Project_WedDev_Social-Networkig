@@ -73,7 +73,13 @@
                       <div class="flex items-start justify-between gap-4">
                         <div class="leading-tight">
                           <div class="font-extrabold text-app">{{ $user->first_name }} {{ $user->last_name }}</div>
-                          <div class="mt-1 text-sm text-app-muted">{{ '@' . $user->username }} · {{ $p->created_at->diffForHumans() }}</div>
+                          <div class="mt-1 text-sm text-app-muted">
+                            {{ '@' . $user->username }} · {{ $p->created_at->diffForHumans() }}
+                          </div>
+                          {{-- ✅ Show category --}}
+                          <div class="text-xs text-app-muted mt-1">
+                            📌 {{ ucfirst(str_replace('_',' ', $p->category)) }}
+                          </div>
                         </div>
                         @if($authId === $user->user_id)
                         <form action="{{ route('posts.destroy', $p->post_id) }}" method="POST">
@@ -98,6 +104,15 @@
                       </div>
                       @endif
                     </div>
+                  </div>
+
+                  {{-- Optional footer for likes/comments --}}
+                  <div class="px-5 py-3 text-sm text-app-muted flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-app-brand text-white text-[11px]">🔥</span>
+                      <span>0</span>
+                    </div>
+                    <div>0 comments</div>
                   </div>
                 </div>
                 @empty

@@ -30,6 +30,8 @@ Route::middleware('auth')->group(function () {
     // Feed (dynamic posts)
     Route::get('/feed', [PostController::class, 'index'])->name('feed');
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
+    Route::get('/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit'); // ✅ added
+    Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update'); // ✅ added
     Route::delete('/posts/{id}', [PostController::class, 'destroy'])->name('posts.destroy');
 
     // Search
@@ -49,7 +51,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', function () {
         return redirect()->route('profile.show', ['id' => Auth::id()]);
     })->name('profile');
-
 
     // Logout
     Route::post('/logout', function () {

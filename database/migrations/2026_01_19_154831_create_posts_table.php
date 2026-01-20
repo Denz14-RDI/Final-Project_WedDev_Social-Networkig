@@ -17,8 +17,8 @@ return new class extends Migration
 
             // Foreign key to users table
             $table->foreignId('user_id')
-                  ->constrained('users', 'user_id')
-                  ->onDelete('cascade');
+                ->constrained('users', 'user_id')
+                ->onDelete('cascade');
 
             // Post content
             $table->text('post_content');
@@ -31,6 +31,10 @@ return new class extends Migration
                 'campus_life',
                 'help_wanted'
             ]);
+
+            // Optional image and link
+            $table->string('image')->nullable();
+            $table->string('link')->nullable();
 
             // Timestamps and soft delete
             $table->timestamps();

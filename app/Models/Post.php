@@ -10,22 +10,18 @@ class Post extends Model
 {
     use HasFactory, SoftDeletes;
 
-    // Primary key
     protected $primaryKey = 'post_id';
 
-    // Mass assignable fields
     protected $fillable = [
         'user_id',
-        'post_content',
         'category',
-        'link',
+        'post_content',
         'image',
-        'status',
+        'link',
     ];
 
-    // Relationship: Post belongs to a User
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 }

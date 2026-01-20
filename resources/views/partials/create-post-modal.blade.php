@@ -19,8 +19,8 @@
         {{-- header --}}
         <div class="px-6 py-5 border-b border-app flex items-center justify-between gap-3">
             <div>
-                <div class="text-lg font-extrabold text-app">Create Post</div>
-                <div class="text-sm text-app-muted">Share something with the PUP community.</div>
+                <div class="text-lg font-extrabold text-app" x-text="editMode ? 'Edit Post' : 'Create Post'"></div>
+                <div class="text-sm text-app-muted" x-text="editMode ? 'Update your post details.' : 'Share something with the PUP community.'"></div>
             </div>
 
             {{-- close --}}
@@ -34,8 +34,14 @@
         </div>
 
         {{-- form --}}
-        <form class="p-6 space-y-5" method="POST" action="#">
+        <form class="p-6 space-y-5"
+              method="POST"
+              :action="editMode ? '/posts/' + editPost.post_id : '{{ route('posts.store') }}'">
+
             @csrf
+            <template x-if="editMode">
+                <input type="hidden" name="_method" value="PUT">
+            </template>
 
             {{-- audience --}}
             <div class="flex items-center justify-between">
@@ -49,10 +55,11 @@
             <div>
                 <label class="block text-sm font-semibold text-app mb-2">What’s on your mind?</label>
                 <textarea
-                    name="content"
+                    name="post_content"
                     rows="4"
+                    x-model="editMode ? editPost.post_content : ''"
                     class="w-full rounded-2xl bg-app-input border border-app px-4 py-3 text-sm text-app outline-none focus:ring-2 focus:ring-[var(--brand)] placeholder:text-app-muted"
-                    placeholder="Write something..."></textarea>
+                    placeholder="Write something..." required></textarea>
                 <div class="mt-2 text-xs text-app-muted">Tip: Keep it respectful and helpful.</div>
             </div>
 
@@ -62,21 +69,36 @@
                     <label class="block text-sm font-semibold text-app mb-2">Photo URL (optional)</label>
                     <input
                         type="url"
-                        name="image_url"
+                        name="image"
+                        x-model="editMode ? editPost.image : ''"
                         class="w-full rounded-xl bg-app-input border border-app px-4 py-3 text-sm text-app outline-none focus:ring-2 focus:ring-[var(--brand)] placeholder:text-app-muted"
                         placeholder="https://..." />
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-app mb-2">Type</label>
+                    <label class="block text-sm font-semibold text-app mb-2">Category</label>
                     <select
-                        name="type"
-                        class="w-full rounded-xl bg-app-input border border-app px-4 py-3 text-sm text-app outline-none focus:ring-2 focus:ring-[var(--brand)]">
-                        <option value="post" selected>Post</option>
-                        <option value="event">Event</option>
-                        <option value="lost_found">Lost &amp; Found</option>
+                        name="category"
+                        x-model="editMode ? editPost.category : ''"
+                        class="w-full rounded-xl bg-app-input border border-app px-4 py-3 text-sm text-app outline-none focus:ring-2 focus:ring-[var(--brand)]" required>
+                        <option value="academic">Academic</option>
+                        <option value="events">Events</option>
+                        <option value="announcement">Announcement</option>
+                        <option value="campus_life">Campus Life</option>
+                        <option value="help_wanted">Help Wanted</option>
                     </select>
                 </div>
+            </div>
+
+            {{-- link --}}
+            <div>
+                <label class="block text-sm font-semibold text-app mb-2">Link (optional)</label>
+                <input
+                    type="url"
+                    name="link"
+                    x-model="editMode ? editPost.link : ''"
+                    class="w-full rounded-xl bg-app-input border border-app px-4 py-3 text-sm text-app outline-none focus:ring-2 focus:ring-[var(--brand)] placeholder:text-app-muted"
+                    placeholder="https://..." />
             </div>
 
             {{-- footer buttons --}}
@@ -90,8 +112,8 @@
 
                 <button
                     type="submit"
-                    class="rounded-xl btn-brand px-5 py-2.5 text-sm font-semibold hover:opacity-95 active:opacity-90">
-                    Post
+                    class="rounded-xl btn-brand px-5 py-2.5 text-sm font-semibold hover:opacity-95 active:opacity-90"
+                    x-text="editMode ? 'Update' : 'Post'">
                 </button>
             </div>
         </form>
