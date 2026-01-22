@@ -1,5 +1,5 @@
 <div id="editProfileModal"
-  class="hidden fixed inset-0 z-[999] items-center justify-center px-4">
+  class="hidden fixed inset-0 z-[999] flex items-center justify-center px-4">
 
   {{-- backdrop --}}
   <button id="closeEditProfileBackdrop"
@@ -13,6 +13,7 @@
     {{-- header --}}
     <div class="px-6 py-5 border-b border-app flex items-center justify-between">
       <h2 class="text-lg font-extrabold text-app">Edit Profile</h2>
+
       <button id="closeEditProfileX"
         type="button"
         class="h-8 w-8 rounded-xl hover-app grid place-items-center text-app-muted"
@@ -28,7 +29,6 @@
       @csrf
       @method('PUT')
 
-      {{-- Hidden source field --}}
       <input type="hidden" name="source" value="profile">
 
       {{-- First Name --}}

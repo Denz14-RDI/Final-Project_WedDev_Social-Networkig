@@ -18,17 +18,14 @@
                 $isExploreAll = ($scope === 'all') && empty($activeCategory ?? null);
                 @endphp
 
+                {{-- All / Clear filter (Explore all posts) --}}
                 <a href="{{ route('feed', ['scope' => 'all']) }}"
                     class="block mb-4 text-sm font-semibold {{ $isExploreAll ? 'text-app' : 'text-app-muted hover:text-app' }}">
                     📌 All Categories
                 </a>
 
                 <div class="space-y-3 text-sm">
-                    @php
-                    $highlightItems = $highlights ?? collect();
-                    @endphp
-
-                    @forelse($highlightItems as $i => $h)
+                    @forelse(($highlights ?? collect()) as $i => $h)
                     @php
                     $isActive = ($scope === 'all') && (($activeCategory ?? null) === ($h['key'] ?? null));
                     @endphp
@@ -71,53 +68,39 @@
 
                 <div class="space-y-4">
                     @php $suggestions = $whoToFollow ?? collect(); @endphp
+
                     @forelse($suggestions as $u)
                     @php
-                    $isFollowing = ($followMap[$u->user_id] ?? null) === 'Following';
+                    $isFollowing = ($followMap[$u->user_id] ?? null) === 'following'; // ✅ lowercase
                     $friendId = $followIdMap[$u->user_id] ?? null;
                     @endphp
 
                     <div class="flex items-center justify-between gap-4">
-                        <div class="flex items-center gap-3 min-w-0">
-                            {{-- Avatar (NOT clickable) --}}
+                        <a href="{{ route('profile.show', $u->user_id) }}"
+                            class="flex items-center gap-3 min-w-0 group">
                             <img src="{{ asset(!empty($u->profile_pic) ? $u->profile_pic : 'images/default.png') }}"
                                 class="h-10 w-10 rounded-full object-cover border border-app"
                                 alt="avatar">
 
                             <div class="leading-tight min-w-0">
-                                {{-- Name clickable --}}
-                                <div class="text-sm font-semibold text-app truncate">
-                                    <a href="{{ route('profile.show', $u->user_id) }}" class="hover:underline">
-                                        {{ $u->first_name }} {{ $u->last_name }}
-                                    </a>
+                                <div class="text-sm font-semibold text-app truncate group-hover:underline">
+                                    {{ $u->first_name }} {{ $u->last_name }}
                                 </div>
-                                {{-- Username clickable --}}
-                                <div class="text-xs text-app-muted truncate">
-                                    @if(!empty($u->username))
-                                    <a href="{{ route('profile.show', $u->user_id) }}" class="hover:underline">
-                                        {{ '@' . $u->username }}
-                                    </a>
-                                    @else
-                                    <span class="italic">No username</span>
-                                    @endif
+
+                                <div class="text-xs text-app-muted truncate group-hover:underline">
+                                    {{ !empty($u->username) ? '@'.$u->username : 'No username' }}
                                 </div>
                             </div>
-                        </div>
+                        </a>
 
-                        {{-- Button (toggle) --}}
                         <div class="shrink-0">
-                            @if($isFollowing && $friendId)
-                            {{-- Unfollow --}}
-                            <form action="{{ route('friends.unfollow', $friendId) }}" method="POST">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit"
-                                    class="px-4 py-2 rounded-full border border-app text-app font-semibold bg-transparent hover:bg-app-input transition">
-                                    Following
-                                </button>
-                            </form>
+                            @if($isFollowing)
+                            <button type="button"
+                                class="px-4 py-2 rounded-full border border-app text-app font-semibold bg-app-input opacity-70 cursor-not-allowed"
+                                disabled>
+                                Following
+                            </button>
                             @else
-                            {{-- Follow --}}
                             <form action="{{ route('friends.store', $u->user_id) }}" method="POST">
                                 @csrf
                                 <button type="submit"
@@ -127,7 +110,6 @@
                             </form>
                             @endif
                         </div>
-
                     </div>
                     @empty
                     <p class="text-xs text-app-muted">No suggestions right now.</p>
@@ -138,7 +120,3 @@
                     © 2025 PUPCOM · Polytechnic University of the Philippines
                 </div>
             </div>
-
-        </div>
-    </div>
-</aside>

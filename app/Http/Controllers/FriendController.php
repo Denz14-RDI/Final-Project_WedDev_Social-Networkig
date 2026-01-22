@@ -55,7 +55,9 @@ class FriendController extends Controller
             ]);
         }
 
-        return back()->with('success', 'You are now following this user.');
+        return back()
+            ->with('success', 'You are now following this user.')
+            ->with('just_followed', $user->user_id);
     }
 
     // Unfollow a user (by Friend record ID)
@@ -64,8 +66,8 @@ class FriendController extends Controller
         $authUser = Auth::user();
 
         $friend = Friend::where('friend_id', $friendId) // or 'id' if your PK is 'id'
-                        ->where('user_id_1', $authUser->user_id)
-                        ->first();
+            ->where('user_id_1', $authUser->user_id)
+            ->first();
 
         if (!$friend) {
             return back()->with('error', 'Follow relationship not found.');

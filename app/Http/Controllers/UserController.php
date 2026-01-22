@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    // Create a new user
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -45,34 +44,67 @@ class UserController extends Controller
             ->with('success', 'Registration successful! Please log in.');
     }
 
-
-    // Show user profile with posts
+    // ✅ Show profile + posts + followers/following + follow state
     public function show($id)
     {
         $user = User::findOrFail($id);
+
+        // Posts of this profile user
+        $posts = $user->posts()->latest()->get();
+
         $authId = Auth::id();
-        $isFollowing = false;
-        $friendId = null;
 
-        if ($authId && $authId !== $user->user_id) {
-            $friend = Friend::where('user_id_1', $authId)
-                ->where('user_id_2', $user->user_id)
-                ->whereNull('deleted_at')
-                ->where('status', 'following')
-                ->first();
-
-            $isFollowing = $friend !== null;
-            $friendId = $friend?->friend_id ?? null; // or $friend->id if your PK is 'id'
-        }
-
-        $posts = Post::where('user_id', $user->user_id)
+        // FOLLOWING (profile user follows others)
+        $followingRows = Friend::query()
+            ->where('user_id_1', $user->user_id)
+            ->where('status', 'following')
+            ->whereNull('deleted_at')
+            ->with(['following']) // user_id_2
             ->latest()
             ->get();
 
-        return view('profile', compact('user', 'authId', 'isFollowing', 'friendId', 'posts'));
+        // FOLLOWERS (others follow profile user)
+        $followersRows = Friend::query()
+            ->where('user_id_2', $user->user_id)
+            ->where('status', 'following')
+            ->whereNull('deleted_at')
+            ->with(['follower']) // user_id_1
+            ->latest()
+            ->get();
+
+        $followingCount = $followingRows->count();
+        $followersCount = $followersRows->count();
+
+        // ✅ follow button state (AUTH viewing someone)
+        $isFollowing = false;
+        $friendId = null;
+
+        if ($authId && (int)$authId !== (int)$user->user_id) {
+            $friend = Friend::query()
+                ->where('user_id_1', $authId)
+                ->where('user_id_2', $user->user_id)
+                ->where('status', 'following')
+                ->whereNull('deleted_at')
+                ->first();
+
+            $isFollowing = $friend !== null;
+            $friendId = $friend?->friend_id;
+        }
+
+        return view('profile', compact(
+            'user',
+            'posts',
+            'authId',
+            'followingRows',
+            'followersRows',
+            'followingCount',
+            'followersCount',
+            'isFollowing',
+            'friendId'
+        ));
     }
 
-    // Update user account
+    // ✅ Update user profile
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
@@ -98,12 +130,11 @@ class UserController extends Controller
             'password.min' => 'Password must be at least 8 characters long.',
         ]);
 
-        // Handle password change with current password validation
+        // Password change (requires current password)
         if (!empty($validated['password'])) {
             if (empty($validated['current_password']) || !Hash::check($validated['current_password'], $user->password)) {
                 return back()->withErrors(['current_password' => 'Current password is incorrect.']);
             }
-
             $validated['password'] = bcrypt($validated['password']);
         } else {
             unset($validated['password']); // don’t overwrite with null
@@ -123,15 +154,6 @@ class UserController extends Controller
             ->with('success', 'Profile updated successfully!');
     }
 
-    // Feed page
-    public function feed()
-    {
-        $me = Auth::user();
-        $posts = Post::with('user')->latest()->get();
-        return view('feed', compact('me', 'posts'));
-    }
-
-    // Delete user
     public function destroy($id)
     {
         $user = User::findOrFail($id);

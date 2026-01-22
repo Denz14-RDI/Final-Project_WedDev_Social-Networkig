@@ -55,7 +55,7 @@ Route::middleware('auth')->group(function () {
     // Friends / follow system
     Route::get('/friends', [FriendController::class, 'index'])->name('friends.index');
     Route::post('/friends/{user}', [FriendController::class, 'store'])->name('friends.store');
-    Route::delete('/friends/{user}/unfollow', [FriendController::class, 'unfollow'])->name('friends.unfollow');
+    Route::post('/friends/{user}/unfollow', [FriendController::class, 'unfollow'])->name('friends.unfollow'); 
 
     // Profile
     Route::get('/profile/{id}', [UserController::class, 'show'])->name('profile.show');
