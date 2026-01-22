@@ -14,27 +14,21 @@ use App\Models\Friend;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         View::composer('partials.right-sidebar', function ($view) {
 
             /**
-             * ✅ HIGHLIGHTS OF THE WEEK (works on every page with right-sidebar)
+             * ✅ HIGHLIGHTS OF THE WEEK
              */
             $allowed = ['academic','events','announcement','campus_life','help_wanted'];
 
-            $activeCategory = request()->query('category'); // /feed?category=academic
+            $activeCategory = request()->query('category');
             if (!in_array($activeCategory, $allowed, true)) {
                 $activeCategory = null;
             }
@@ -48,7 +42,6 @@ class AppServiceProvider extends ServiceProvider
                 ->orderByDesc('total')
                 ->get();
 
-            // labels only (no icons)
             $labels = [
                 'academic'      => 'Academics',
                 'events'        => 'Events',
@@ -69,31 +62,32 @@ class AppServiceProvider extends ServiceProvider
             $view->with('activeCategory', $activeCategory);
 
             /**
-             * ✅ WHO TO FOLLOW (your existing code, kept)
+             * ✅ WHO TO FOLLOW (toggle-ready)
              */
             $authUser = Auth::user();
 
             if (!$authUser) {
                 $view->with('whoToFollow', collect());
                 $view->with('followMap', []);
+                $view->with('followIdMap', []);
                 return;
             }
 
-            // Get all users you are currently following
+            // ✅ Get following rows including friend_id
             $followingRows = Friend::query()
                 ->where('user_id_1', $authUser->user_id)
                 ->where('status', 'following')
-                ->get(['user_id_2']);
+                ->get(['friend_id', 'user_id_2']);
 
-            $followingIds = $followingRows->pluck('user_id_2')->values();
-
-            // Map for quick status check in Blade: user_id => 'following'
             $followMap = [];
-            foreach ($followingIds as $id) {
-                $followMap[$id] = 'following';
+            $followIdMap = [];
+
+            foreach ($followingRows as $row) {
+                $followMap[$row->user_id_2] = 'following';
+                $followIdMap[$row->user_id_2] = $row->friend_id; // ✅ used by unfollow route
             }
 
-            // Suggestions: exclude yourself; we DO NOT exclude following here so it can show "Following" state
+            // Suggestions: exclude yourself
             $whoToFollow = User::query()
                 ->where('user_id', '!=', $authUser->user_id)
                 ->inRandomOrder()
@@ -102,6 +96,7 @@ class AppServiceProvider extends ServiceProvider
 
             $view->with('whoToFollow', $whoToFollow);
             $view->with('followMap', $followMap);
+            $view->with('followIdMap', $followIdMap);
         });
     }
 }

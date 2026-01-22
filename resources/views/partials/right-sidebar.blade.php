@@ -63,52 +63,58 @@
 
                 <div class="space-y-4">
                     @forelse(($whoToFollow ?? collect()) as $u)
-                    @php
-                    $isFollowing = ($followMap[$u->user_id] ?? null) === 'following';
-                    @endphp
+                        @php
+                            $isFollowing = ($followMap[$u->user_id] ?? null) === 'following';
+                            $friendId = $followIdMap[$u->user_id] ?? null; // ✅ needed for unfollow
+                        @endphp
 
-                    <div class="flex items-center justify-between gap-4">
-                        <div class="flex items-center gap-3 min-w-0">
-                            <img
-                                src="{{ asset(!empty($u->profile_pic) ? $u->profile_pic : 'images/default.png') }}"
-                                class="h-10 w-10 rounded-full object-cover border border-app"
-                                alt="avatar">
+                        <div class="flex items-center justify-between gap-4">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <img
+                                    src="{{ asset(!empty($u->profile_pic) ? $u->profile_pic : 'images/default.png') }}"
+                                    class="h-10 w-10 rounded-full object-cover border border-app"
+                                    alt="avatar">
 
-                            <div class="leading-tight min-w-0">
-                                <div class="text-sm font-semibold text-app truncate">
-                                    {{ $u->first_name }} {{ $u->last_name }}
-                                </div>
+                                <div class="leading-tight min-w-0">
+                                    <div class="text-sm font-semibold text-app truncate">
+                                        {{ $u->first_name }} {{ $u->last_name }}
+                                    </div>
 
-                                <div class="text-xs text-app-muted truncate">
-                                    @if(!empty($u->username))
-                                    {{ '@' . $u->username }}
-                                    @else
-                                    <span class="italic">No username</span>
-                                    @endif
+                                    <div class="text-xs text-app-muted truncate">
+                                        @if(!empty($u->username))
+                                            {{ '@' . $u->username }}
+                                        @else
+                                            <span class="italic">No username</span>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {{-- Button --}}
-                        <div class="shrink-0">
-                            @if($isFollowing)
-                            <button type="button" disabled
-                                class="px-4 py-2 rounded-full border border-gray-300 text-gray-700 font-semibold bg-transparent opacity-70 cursor-not-allowed">
-                                Following
-                            </button>
-                            @else
-                            <form action="{{ route('friends.store', $u) }}" method="POST">
-                                @csrf
-                                <button type="submit"
-                                    class="px-4 py-2 rounded-full btn-ghost text-sm font-semibold">
-                                    Follow
-                                </button>
-                            </form>
-                            @endif
+                            {{-- Button (toggle) --}}
+                            <div class="shrink-0">
+                                @if($isFollowing && $friendId)
+                                    {{-- Click "Following" => Unfollow --}}
+                                    <form action="{{ route('friends.unfollow', $friendId) }}" method="POST">
+                                        @csrf
+                                        <button type="submit"
+                                            class="px-4 py-2 rounded-full border border-gray-300 text-gray-200 font-semibold bg-transparent hover:bg-white/10 transition">
+                                            Following
+                                        </button>
+                                    </form>
+                                @else
+                                    {{-- Click "Follow" => Follow --}}
+                                    <form action="{{ route('friends.store', $u) }}" method="POST">
+                                        @csrf
+                                        <button type="submit"
+                                            class="px-4 py-2 rounded-full btn-ghost text-sm font-semibold">
+                                            Follow
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
                         </div>
-                    </div>
                     @empty
-                    <p class="text-xs text-app-muted">No suggestions right now.</p>
+                        <p class="text-xs text-app-muted">No suggestions right now.</p>
                     @endforelse
                 </div>
 
