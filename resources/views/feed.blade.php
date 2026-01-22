@@ -5,8 +5,8 @@
 
 @section('content')
 <div x-data="{ createOpen:false, editMode:false, editPost:{} }"
-     @open-edit.window="editMode=true; editPost=$event.detail.post; createOpen=true"
-     class="h-screen overflow-hidden">
+  @open-edit.window="editMode=true; editPost=$event.detail.post; createOpen=true"
+  class="h-screen overflow-hidden">
 
   <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] h-full">
 
@@ -22,11 +22,11 @@
 
         {{-- Composer --}}
         <button type="button"
-                class="w-full text-left bg-app-card rounded-2xl border border-app shadow-app overflow-hidden hover-app transition"
-                @click="editMode=false; editPost={}; createOpen=true">
+          class="w-full text-left bg-app-card rounded-2xl border border-app shadow-app overflow-hidden hover-app transition"
+          @click="editMode=false; editPost={}; createOpen=true">
           <div class="p-4 flex items-center gap-4">
             <img src="{{ asset(Auth::user()->profile_pic ?? 'images/default.png') }}"
-                 class="h-12 w-12 rounded-full object-cover border border-app" alt="avatar" />
+              class="h-12 w-12 rounded-full object-cover border border-app" alt="avatar" />
             <div class="flex-1">
               <div class="h-11 rounded-full bg-app-input border border-app flex items-center px-5 text-sm text-app-muted">
                 What’s on your mind, {{ Auth::user()->first_name }}?
@@ -43,7 +43,7 @@
             <div class="flex items-start justify-between gap-4">
               <div class="flex items-start gap-3">
                 <img src="{{ asset($post->user->profile_pic ?? 'images/default.png') }}"
-                     class="h-12 w-12 rounded-full object-cover border border-app" alt="avatar" />
+                  class="h-12 w-12 rounded-full object-cover border border-app" alt="avatar" />
                 <div class="leading-tight">
                   <div class="font-extrabold text-app">
                     {{ $post->user->first_name }} {{ $post->user->last_name }}
@@ -60,49 +60,39 @@
               {{-- Dropdown --}}
               <div x-data="{ openMenu:false }" class="relative">
                 <button type="button"
-                        class="h-10 w-10 rounded-xl flex items-center justify-center text-app-muted hover:text-app bg-app-input border border-app"
-                        @click="openMenu = !openMenu"
-                        aria-label="Post options">
+                  class="h-10 w-10 rounded-xl flex items-center justify-center text-app-muted hover:text-app bg-app-input border border-app"
+                  @click="openMenu = !openMenu"
+                  aria-label="Post options">
                   ⋯
                 </button>
 
                 <div x-show="openMenu"
-                     @click.away="openMenu=false"
-                     class="absolute right-0 mt-2 w-44 bg-app-card border border-app rounded-xl shadow-lg z-50 origin-top-right">
+                  @click.away="openMenu=false"
+                  class="absolute right-0 mt-2 w-44 bg-app-card border border-app rounded-xl shadow-lg z-50 origin-top-right">
 
                   @if(Auth::id() === $post->user_id)
-                    {{-- Edit Post --}}
-                    <button type="button"
-                            @click="$dispatch('open-edit', { post: {{ $post->toJson() }} }); openMenu=false"
-                            class="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-app hover:bg-app-input">
-                      <svg class="h-4 w-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M12 20h9" />
-                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
-                      </svg>
-                      Edit Post
-                    </button>
+                  {{-- Edit Post --}}
+                  <button type="button"
+                    @click="$dispatch('open-edit', { post: {{ $post->toJson() }} }); openMenu=false"
+                    class="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-app hover:bg-app-input">
+                    ✏️ Edit Post
+                  </button>
 
-                    {{-- Delete Post --}}
-                    <form action="{{ route('posts.destroy', $post->post_id) }}" method="POST">
-                      @csrf
-                      @method('DELETE')
-                      <button type="submit"
-                              class="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-app hover:bg-app-input">
-                        <svg class="h-4 w-4 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                          <path d="M6 6h12M9 6v12m6-12v12M4 6h16l-1 14H5L4 6z" />
-                        </svg>
-                        Delete Post
-                      </button>
-                    </form>
-                  @else
-                    {{-- Report (only for non-owners) --}}
-                    <button type="button"
-                            class="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-app hover:bg-app-input">
-                      <svg class="h-4 w-4 text-yellow-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M12 9v2m0 4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
-                      </svg>
-                      Report
+                  {{-- Delete Post --}}
+                  <form action="{{ route('posts.destroy', $post->post_id) }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit"
+                      class="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-app hover:bg-app-input">
+                      🗑️ Delete Post
                     </button>
+                  </form>
+                  @else
+                  {{-- Report (only for non-owners) --}}
+                  <button type="button"
+                    class="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-app hover:bg-app-input">
+                    ⚠️ Report
+                  </button>
                   @endif
                 </div>
               </div>
@@ -111,28 +101,20 @@
             <div class="mt-4 text-sm text-app space-y-3">
               <div class="text-app">{{ $post->post_content }}</div>
               @if($post->link)
-                <a href="{{ $post->link }}" target="_blank" class="text-app-muted underline">{{ $post->link }}</a>
+              <a href="{{ $post->link }}" target="_blank" class="text-app-muted underline">{{ $post->link }}</a>
               @endif
             </div>
 
             @if($post->image)
             <div class="mt-5 overflow-hidden rounded-2xl bg-app-input border border-app">
               <img src="{{ $post->image }}" alt="post image"
-                   class="h-[420px] md:h-[480px] w-full object-cover" loading="lazy" />
+                class="h-[420px] md:h-[480px] w-full object-cover" loading="lazy" />
             </div>
             @endif
           </div>
-
-          <div class="px-5 py-3 text-sm text-app-muted flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-app-brand text-white text-[11px]">🔥</span>
-              <span>0</span>
-            </div>
-            <div>0 comments</div>
-          </div>
         </div>
         @empty
-          <p class="text-center text-app-muted">No posts yet.</p>
+        <p class="text-center text-app-muted">No posts yet.</p>
         @endforelse
 
       </div>
@@ -143,6 +125,103 @@
   </div>
 
   {{-- Create/Edit Post Modal --}}
-  @include('partials.create-post-modal')
+  <div x-show="createOpen"
+    x-transition.opacity
+    class="fixed inset-0 z-[999] flex items-center justify-center px-4"
+    style="display:none;"
+    @keydown.escape.window="createOpen=false">
+
+    {{-- backdrop --}}
+    <button type="button"
+      class="absolute inset-0 bg-black/50"
+      @click="createOpen=false"
+      aria-label="Close modal"></button>
+
+    {{-- modal --}}
+    <div class="relative w-full max-w-xl bg-app-card border border-app rounded-2xl shadow-app overflow-hidden">
+
+      {{-- header --}}
+      <div class="px-6 py-5 border-b border-app flex items-center justify-between gap-3">
+        <div>
+          <div class="text-lg font-extrabold text-app" x-text="editMode ? 'Edit Post' : 'Create Post'"></div>
+          <div class="text-sm text-app-muted" x-text="editMode ? 'Update your post details.' : 'Share something with the PUP community.'"></div>
+        </div>
+        <button type="button"
+          class="h-10 w-10 rounded-xl hover-app grid place-items-center text-app-muted"
+          title="Close"
+          @click="createOpen=false">
+          <span class="text-xl leading-none">×</span>
+        </button>
+      </div>
+
+      {{-- form --}}
+      <form class="p-6 space-y-5"
+        method="POST"
+        :action="editMode ? '/posts/' + editPost.post_id : '{{ route('posts.store') }}'">
+
+        @csrf
+        <template x-if="editMode">
+          <input type="hidden" name="_method" value="PUT">
+        </template>
+
+        {{-- content --}}
+        <div>
+          <label class="block text-sm font-semibold text-app mb-2">What’s on your mind?</label>
+          <textarea name="post_content"
+            rows="4"
+            x-model="editMode ? editPost.post_content : ''"
+            class="w-full rounded-2xl bg-app-input border border-app px-4 py-3 text-sm text-app outline-none focus:ring-2 focus:ring-[var(--brand)] placeholder:text-app-muted"
+            placeholder="Write something..." required></textarea>
+        </div>
+
+        {{-- attachment --}}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-semibold text-app mb-2">Photo URL (optional)</label>
+            <input type="url" name="image"
+              x-model="editMode ? editPost.image : ''"
+              class="w-full rounded-xl bg-app-input border border-app px-4 py-3 text-sm text-app outline-none focus:ring-2 focus:ring-[var(--brand)] placeholder:text-app-muted"
+              placeholder="https://..." />
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-app mb-2">Category</label>
+            <select name="category"
+              x-model="editMode ? editPost.category : ''"
+              class="w-full rounded-xl bg-app-input border border-app px-4 py-3 text-sm text-app outline-none focus:ring-2 focus:ring-[var(--brand)]" required>
+              <option value="academic">Academic</option>
+              <option value="events">Events</option>
+              <option value="announcement">Announcement</option>
+              <option value="campus_life">Campus Life</option>
+              <option value="help_wanted">Help Wanted</option>
+            </select>
+          </div>
+        </div>
+
+        {{-- link --}}
+        <div>
+          <label class="block text-sm font-semibold text-app mb-2">Link (optional)</label>
+          <input type="url" name="link"
+            x-model="editMode ? editPost.link : ''"
+            class="w-full rounded-xl bg-app-input border border-app px-4 py-3 text-sm text-app outline-none focus:ring-2 focus:ring-[var(--brand)] placeholder:text-app-muted"
+            placeholder="https://..." />
+        </div>
+
+        {{-- footer buttons --}}
+        <div class="pt-2 flex items-center justify-end gap-3">
+          <button type="button"
+            class="rounded-xl btn-ghost px-5 py-2.5 text-sm font-semibold"
+            @click="createOpen=false">
+            Cancel
+          </button>
+
+          <button type="submit"
+            class="rounded-xl btn-brand px-5 py-2.5 text-sm font-semibold hover:opacity-95 active:opacity-90"
+            x-text="editMode ? 'Update' : 'Post'">
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 @endsection

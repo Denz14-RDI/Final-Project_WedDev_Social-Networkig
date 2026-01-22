@@ -11,7 +11,6 @@ class PostController extends Controller
     // Show all posts (feed)
     public function index()
     {
-        // eager load user to avoid N+1 queries
         $posts = Post::with('user')->latest()->get();
         return view('feed', compact('posts'));
     }
@@ -30,24 +29,12 @@ class PostController extends Controller
 
         Post::create($validated);
 
-        return redirect()->route('feed')->with('success', 'Post created successfully!');
-    }
-
-    // Show edit form
-    public function edit(Post $post)
-    {
-        // Only allow owner to edit
-        if ($post->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        return view('posts.edit', compact('post'));
+        return back()->with('success', 'Post created successfully!');
     }
 
     // Update post
     public function update(Request $request, Post $post)
     {
-        // Only allow owner to update
         if ($post->user_id !== Auth::id()) {
             abort(403, 'Unauthorized action.');
         }
@@ -61,20 +48,18 @@ class PostController extends Controller
 
         $post->update($validated);
 
-        return redirect()->route('feed')->with('success', 'Post updated successfully!');
+        return back()->with('success', 'Post updated successfully!');
     }
 
-    // Delete a post (soft delete)
-    public function destroy($id)
+    // Delete a post
+    public function destroy(Post $post)
     {
-        $post = Post::findOrFail($id);
-
         if ($post->user_id !== Auth::id()) {
             abort(403, 'Unauthorized action.');
         }
 
         $post->delete();
 
-        return redirect()->route('feed')->with('success', 'Post deleted successfully!');
+        return back()->with('success', 'Post deleted successfully!');
     }
 }

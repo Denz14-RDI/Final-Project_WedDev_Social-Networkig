@@ -27,12 +27,12 @@ Route::post('/register', [UserController::class, 'store'])->name('register.store
 // --------------------
 Route::middleware('auth')->group(function () {
 
-    // Feed (dynamic posts)
+    // Feed & Posts
     Route::get('/feed', [PostController::class, 'index'])->name('feed');
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
-    Route::get('/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit'); // ✅ added
-    Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update'); // ✅ added
-    Route::delete('/posts/{id}', [PostController::class, 'destroy'])->name('posts.destroy');
+    Route::get('/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit');
+    Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update');
+    Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
 
     // Search
     Route::get('/search', fn() => view('search'))->name('search');

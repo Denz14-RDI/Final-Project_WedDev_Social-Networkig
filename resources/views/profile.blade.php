@@ -3,7 +3,9 @@
 @section('main_class', 'bg-app-page')
 
 @section('content')
-<div class="h-screen overflow-hidden">
+<div x-data="{ createOpen:false, editMode:false, editPost:{} }"
+     @open-edit.window="editMode=true; editPost=$event.detail.post; createOpen=true"
+     class="h-screen overflow-hidden">
   <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] h-full">
 
     {{-- CENTER --}}
@@ -21,8 +23,8 @@
                 {{-- avatar --}}
                 <div class="absolute -top-14 sm:-top-16 left-0">
                   <img src="{{ asset($user->profile_pic ?? 'images/default.png') }}"
-                    alt="avatar"
-                    class="h-32 w-32 sm:h-36 sm:w-36 rounded-full object-cover ring-4 ring-[var(--surface)] border border-app" />
+                       alt="avatar"
+                       class="h-32 w-32 sm:h-36 sm:w-36 rounded-full object-cover ring-4 ring-[var(--surface)] border border-app" />
                 </div>
 
                 <div class="mt-14 sm:mt-16">
@@ -37,7 +39,7 @@
                     {{-- Edit Profile button only for owner --}}
                     @if($authId === $user->user_id)
                     <button type="button" id="openEditProfile"
-                      class="shrink-0 inline-flex items-center justify-center rounded-xl btn-brand px-5 py-2.5 text-sm font-semibold hover:opacity-95 active:opacity-90">
+                            class="shrink-0 inline-flex items-center justify-center rounded-xl btn-brand px-5 py-2.5 text-sm font-semibold hover:opacity-95 active:opacity-90">
                       Edit Profile
                     </button>
                     @endif
@@ -67,7 +69,7 @@
                 <div class="bg-app-card rounded-2xl border border-app shadow-app p-6">
                   <div class="flex items-start gap-4">
                     <img src="{{ asset($user->profile_pic ?? 'images/default.png') }}"
-                      class="h-12 w-12 rounded-full object-cover border border-app" alt="me" />
+                         class="h-12 w-12 rounded-full object-cover border border-app" alt="me" />
 
                     <div class="flex-1">
                       <div class="flex items-start justify-between gap-4">
@@ -76,18 +78,50 @@
                           <div class="mt-1 text-sm text-app-muted">
                             {{ '@' . $user->username }} · {{ $p->created_at->diffForHumans() }}
                           </div>
-                          {{-- ✅ Show category --}}
                           <div class="text-xs text-app-muted mt-1">
                             📌 {{ ucfirst(str_replace('_',' ', $p->category)) }}
                           </div>
                         </div>
-                        @if($authId === $user->user_id)
-                        <form action="{{ route('posts.destroy', $p->post_id) }}" method="POST">
-                          @csrf
-                          @method('DELETE')
-                          <button class="text-app-muted hover:text-app">⋯</button>
-                        </form>
-                        @endif
+
+                        {{-- Dropdown for post actions --}}
+                        <div x-data="{ openMenu:false }" class="relative">
+                          <button type="button"
+                                  class="h-8 w-8 rounded-xl flex items-center justify-center text-app-muted hover:text-app bg-app-input border border-app"
+                                  @click="openMenu = !openMenu"
+                                  aria-label="Post options">
+                            ⋯
+                          </button>
+
+                          <div x-show="openMenu"
+                               @click.away="openMenu=false"
+                               class="absolute right-0 mt-2 w-44 bg-app-card border border-app rounded-xl shadow-lg z-50 origin-top-right">
+
+                            @if($authId === $user->user_id)
+                              {{-- Edit Post --}}
+                              <button type="button"
+                                      @click="$dispatch('open-edit', { post: {{ $p->toJson() }} }); openMenu=false"
+                                      class="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-app hover:bg-app-input">
+                                ✏️ Edit Post
+                              </button>
+
+                              {{-- Delete Post --}}
+                              <form action="{{ route('posts.destroy', $p->post_id) }}" method="POST">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                        class="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-app hover:bg-app-input">
+                                  🗑️ Delete Post
+                                </button>
+                              </form>
+                            @else
+                              {{-- Report --}}
+                              <button type="button"
+                                      class="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-app hover:bg-app-input">
+                                ⚠️ Report
+                              </button>
+                            @endif
+                          </div>
+                        </div>
                       </div>
 
                       <div class="mt-3 text-sm text-app">{{ $p->post_content }}</div>
@@ -104,15 +138,6 @@
                       </div>
                       @endif
                     </div>
-                  </div>
-
-                  {{-- Optional footer for likes/comments --}}
-                  <div class="px-5 py-3 text-sm text-app-muted flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                      <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-app-brand text-white text-[11px]">🔥</span>
-                      <span>0</span>
-                    </div>
-                    <div>0 comments</div>
                   </div>
                 </div>
                 @empty
@@ -134,6 +159,10 @@
 {{-- EDIT PROFILE MODAL only for owner --}}
 @if($authId === $user->user_id)
 @include('partials.edit-profile-modal')
+
+{{-- Create/Edit Post Modal --}}
+@include('partials.create-post-modal')
+
 @endif
 @endsection
 
@@ -148,7 +177,7 @@
     if (openBtn && modal) {
       openBtn.addEventListener('click', () => {
         modal.classList.remove('hidden');
-        modal.classList.add('flex'); // show as flexbox centered
+        modal.classList.add('flex');
       });
     }
 

@@ -1,5 +1,7 @@
 {{-- resources/views/partials/create-post-modal.blade.php --}}
 <div
+    x-data="{ createOpen:false, editMode:false, editPost:{} }"
+    @open-edit.window="editMode=true; editPost=$event.detail.post; createOpen=true"
     x-show="createOpen"
     x-transition.opacity
     class="fixed inset-0 z-[999] flex items-center justify-center px-4"
@@ -43,14 +45,6 @@
                 <input type="hidden" name="_method" value="PUT">
             </template>
 
-            {{-- audience --}}
-            <div class="flex items-center justify-between">
-                <div class="text-sm font-semibold text-app">Audience</div>
-                <div class="inline-flex items-center gap-2 rounded-full bg-app-input border border-app px-3 py-1.5 text-xs font-semibold text-app">
-                    🌐 Public
-                </div>
-            </div>
-
             {{-- content --}}
             <div>
                 <label class="block text-sm font-semibold text-app mb-2">What’s on your mind?</label>
@@ -60,7 +54,6 @@
                     x-model="editMode ? editPost.post_content : ''"
                     class="w-full rounded-2xl bg-app-input border border-app px-4 py-3 text-sm text-app outline-none focus:ring-2 focus:ring-[var(--brand)] placeholder:text-app-muted"
                     placeholder="Write something..." required></textarea>
-                <div class="mt-2 text-xs text-app-muted">Tip: Keep it respectful and helpful.</div>
             </div>
 
             {{-- attachment --}}
