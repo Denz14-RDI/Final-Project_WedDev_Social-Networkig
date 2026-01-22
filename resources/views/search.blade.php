@@ -5,45 +5,12 @@
 
 @section('content')
 @php
-$q = request('q', '');
+  $q = request('q', '');
+  $authUser = auth()->user();
 
-$people = [
-[
-'name' => 'Juan Dela Cruz',
-'handle' => '@juandc',
-'meta' => 'BSIT Student | Web Developer | Coffee Enthusiast',
-'avatar' => 'https://i.pravatar.cc/120?img=12',
-'badge' => null,
-],
-[
-'name' => 'PUP Central Student Organization',
-'handle' => '@pupcso',
-'meta' => 'Official student organization of PUP',
-'avatar' => 'https://i.pravatar.cc/120?img=32',
-'badge' => 'Organization',
-],
-[
-'name' => 'Prof. Maria Santos',
-'handle' => '@mariasantos',
-'meta' => 'Associate Professor | CCIS',
-'avatar' => 'https://i.pravatar.cc/120?img=49',
-'badge' => 'Faculty',
-],
-[
-'name' => 'PUP Tech Club',
-'handle' => '@puptechclub',
-'meta' => 'Technology and Innovation Club',
-'avatar' => 'https://i.pravatar.cc/120?img=15',
-'badge' => 'Organization',
-],
-[
-'name' => 'PUP Alumni Association',
-'handle' => '@pupalumni',
-'meta' => 'Connecting PUP graduates',
-'avatar' => 'https://i.pravatar.cc/120?img=8',
-'badge' => 'Alumni',
-],
-];
+  // Variables passed from SearchController
+  $users = $users ?? collect();
+  $friendMap = $friendMap ?? [];
 @endphp
 
 <div class="h-screen overflow-hidden">
@@ -56,7 +23,7 @@ $people = [
         {{-- Header --}}
         <div>
           <div class="text-3xl font-extrabold text-app leading-tight">Search</div>
-          <div class="text-sm text-app-muted">Find people, organizations, and trends in PUPCOM</div>
+          <div class="text-sm text-app-muted">Find people in PUPCOM</div>
         </div>
 
         {{-- Search box --}}
@@ -79,47 +46,110 @@ $people = [
           <div class="p-6 pb-4 flex items-center justify-between">
             <div class="text-lg font-extrabold flex items-center gap-2 text-app">
               <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-app-brand text-white text-sm">👥</span>
-              <span>People to Follow</span>
+              <span>People</span>
             </div>
 
             <div class="text-xs text-app-muted">
-              {{ count($people) }} results
+              {{ method_exists($users, 'total') ? $users->total() : $users->count() }} results
             </div>
           </div>
 
           <div class="px-6 pb-6 space-y-4">
-            @foreach($people as $p)
-            <div class="flex items-center justify-between gap-4 rounded-2xl border border-app bg-app-input p-4">
+            @forelse($users as $u)
+              @php
+                $isMe = $authUser && ($authUser->user_id == $u->user_id);
 
-              <div class="flex items-center gap-4 min-w-0">
-                <img
-                  class="h-12 w-12 rounded-full object-cover border border-app"
-                  src="{{ $p['avatar'] }}"
-                  alt="avatar">
+                $info = $friendMap[$u->user_id] ?? null;
+                $status = $info['status'] ?? null;        // following | unfollow | follow | null
+                $friendId = $info['friend_id'] ?? null;   // for unfollow route
+              @endphp
 
-                <div class="leading-tight min-w-0">
-                  <div class="flex items-center gap-2 flex-wrap">
-                    <div class="font-extrabold text-app truncate">{{ $p['name'] }}</div>
+              <div class="flex items-center justify-between gap-4 rounded-2xl border border-app bg-app-input p-4">
 
-                    @if(!empty($p['badge']))
-                    <span class="rounded-full bg-[var(--amber-bg)] border border-app px-2.5 py-1 text-xs font-semibold text-[var(--amber)]">
-                      {{ $p['badge'] }}
-                    </span>
+                <div class="flex items-center gap-4 min-w-0">
+                  <img
+                    class="h-12 w-12 rounded-full object-cover border border-app"
+                    src="{{ asset(!empty($u->profile_pic) ? $u->profile_pic : 'images/default.png') }}"
+                    alt="avatar">
+
+                  <div class="leading-tight min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <div class="font-extrabold text-app truncate">
+                        {{ $u->first_name }} {{ $u->last_name }}
+                      </div>
+                    </div>
+
+                    <div class="text-sm text-app-muted">
+                      @if(!empty($u->username))
+                        {{ '@' . $u->username }}
+                      @else
+                        <span class="italic text-app-mutedlight">No username</span>
+                      @endif
+                    </div>
+
+                    @if(!empty($u->bio))
+                      <div class="text-sm text-app-muted mt-1 line-clamp-2">{{ $u->bio }}</div>
                     @endif
                   </div>
-
-                  <div class="text-sm text-app-muted">{{ $p['handle'] }}</div>
-                  <div class="text-sm text-app-muted mt-1">{{ $p['meta'] }}</div>
                 </div>
+
+                {{-- Action button --}}
+                <div class="shrink-0">
+                  @if($isMe)
+                    <button type="button" disabled
+                      class="px-4 py-2 rounded-full btn-ghost text-sm font-semibold opacity-50 cursor-not-allowed">
+                      You
+                    </button>
+
+                  @elseif($status === 'following')
+                    <div class="flex gap-2">
+                      <button type="button" disabled
+                        class="px-4 py-2 rounded-full btn-ghost text-sm font-semibold opacity-60 cursor-not-allowed">
+                        Following
+                      </button>
+
+                      {{-- Unfollow --}}
+                      <form action="{{ route('friends.unfollow', $friendId) }}" method="POST">
+                        @csrf
+                        <button type="submit"
+                          class="px-4 py-2 rounded-full btn-ghost text-sm font-semibold">
+                          Unfollow
+                        </button>
+                      </form>
+                    </div>
+
+                  @else
+                    {{-- status null OR unfollow OR follow => show Follow (immediate follow system) --}}
+                    <form action="{{ route('friends.store', $u) }}" method="POST">
+                      @csrf
+                      <button type="submit"
+                        class="px-4 py-2 rounded-full btn-ghost text-sm font-semibold">
+                        Follow
+                      </button>
+                    </form>
+                  @endif
+                </div>
+
               </div>
-
-              <button type="button" class="shrink-0 px-4 py-2 rounded-full btn-ghost text-sm font-semibold">
-                Follow
-              </button>
-
-            </div>
-            @endforeach
+            @empty
+              <div class="px-6 pb-6">
+                <p class="text-app-muted">
+                  @if($q)
+                    No results found for "{{ $q }}".
+                  @else
+                    Type something to search.
+                  @endif
+                </p>
+              </div>
+            @endforelse
           </div>
+
+          {{-- Pagination --}}
+          @if(method_exists($users, 'links'))
+            <div class="px-6 pb-6">
+              {{ $users->links() }}
+            </div>
+          @endif
 
         </div>
 

@@ -4,7 +4,10 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\FriendController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\SearchController;
+
 
 // --------------------
 // Public pages
@@ -35,12 +38,17 @@ Route::middleware('auth')->group(function () {
     Route::delete('/posts/{id}', [PostController::class, 'destroy'])->name('posts.destroy');
 
     // Search
-    Route::get('/search', fn() => view('search'))->name('search');
+    Route::get('/search', [SearchController::class, 'index'])->name('search');
 
-    // Notifications, Friends, Settings
+    // Notifications, Settings
     Route::get('/notifications', fn() => view('notifications'))->name('notifications');
-    Route::get('/friends', fn() => view('friends'))->name('friends');
     Route::get('/settings', fn() => view('settings'))->name('settings');
+
+    // Friends / follow system
+    Route::get('/friends', [FriendController::class, 'index'])->name('friends.index');
+    Route::post('/friends/{user}', [FriendController::class, 'store'])->name('friends.store');
+    Route::post('/friends/{friend}/unfollow', [FriendController::class, 'unfollow'])->name('friends.unfollow');
+
 
     // Profile
     Route::get('/profile/{id}', [UserController::class, 'show'])->name('profile.show');
@@ -60,6 +68,10 @@ Route::middleware('auth')->group(function () {
         return redirect('/login');
     })->name('logout');
 });
+
+// --------------------
+// Friendship routes
+// --------------------
 
 // --------------------
 // Admin routes
