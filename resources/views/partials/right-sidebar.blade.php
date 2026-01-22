@@ -13,19 +13,24 @@
                     Based on posts from the last 7 days
                 </div>
 
-                {{-- All / Clear filter (pin only) --}}
-                <a href="{{ route('feed') }}"
-                   class="block mb-4 text-sm font-semibold {{ empty($activeCategory ?? null) ? 'text-app' : 'text-app-muted hover:text-app' }}">
+                @php
+                    $scope = request('scope');
+                    $isExploreAll = ($scope === 'all') && empty($activeCategory ?? null);
+                @endphp
+
+                {{-- All / Clear filter (Explore all posts) --}}
+                <a href="{{ route('feed', ['scope' => 'all']) }}"
+                   class="block mb-4 text-sm font-semibold {{ $isExploreAll ? 'text-app' : 'text-app-muted hover:text-app' }}">
                     📌 All Categories
                 </a>
 
                 <div class="space-y-3 text-sm">
                     @forelse(($highlights ?? collect()) as $i => $h)
                         @php
-                            $isActive = ($activeCategory ?? null) === ($h['key'] ?? null);
+                            $isActive = ($scope === 'all') && (($activeCategory ?? null) === ($h['key'] ?? null));
                         @endphp
 
-                        <a href="{{ route('feed', ['category' => $h['key']]) }}"
+                        <a href="{{ route('feed', ['category' => $h['key'], 'scope' => 'all']) }}"
                            class="block rounded-xl p-3 border border-app hover:bg-app-input transition
                                   {{ $isActive ? 'bg-app-input' : '' }}">
 
@@ -65,7 +70,7 @@
                     @forelse(($whoToFollow ?? collect()) as $u)
                         @php
                             $isFollowing = ($followMap[$u->user_id] ?? null) === 'following';
-                            $friendId = $followIdMap[$u->user_id] ?? null; // ✅ needed for unfollow
+                            $friendId = $followIdMap[$u->user_id] ?? null;
                         @endphp
 
                         <div class="flex items-center justify-between gap-4">
@@ -93,7 +98,6 @@
                             {{-- Button (toggle) --}}
                             <div class="shrink-0">
                                 @if($isFollowing && $friendId)
-                                    {{-- Click "Following" => Unfollow --}}
                                     <form action="{{ route('friends.unfollow', $friendId) }}" method="POST">
                                         @csrf
                                         <button type="submit"
@@ -102,7 +106,6 @@
                                         </button>
                                     </form>
                                 @else
-                                    {{-- Click "Follow" => Follow --}}
                                     <form action="{{ route('friends.store', $u) }}" method="POST">
                                         @csrf
                                         <button type="submit"

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\Friend;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -10,27 +11,67 @@ use Carbon\Carbon;
 
 class PostController extends Controller
 {
-    // Show all posts (feed)
+    // Show posts (feed + explore)
     public function index()
     {
-        // ✅ allowed categories (same as your validation)
+        $user = Auth::user();
+
         $allowed = ['academic', 'events', 'announcement', 'campus_life', 'help_wanted'];
 
-        // ✅ get category filter from URL: /feed?category=academic
         $activeCategory = request()->query('category');
+        if (!in_array($activeCategory, $allowed, true)) {
+            $activeCategory = null;
+        }
 
-        // eager load user to avoid N+1 queries (same behavior, but filter if category is valid)
-        $postsQuery = Post::with('user')->latest();
+        $scope = request()->query('scope'); // 'all' or null
 
-        if ($activeCategory && in_array($activeCategory, $allowed, true)) {
-            $postsQuery->where('category', $activeCategory);
+        // ✅ Always build follow maps for the feed UI (used in explore)
+        $followRows = Friend::query()
+            ->where('user_id_1', $user->user_id)
+            ->whereIn('status', ['follow', 'following']) // "follow"=requested, "following"=following
+            ->get(['friend_id', 'user_id_2', 'status']);
+
+        $followMap = [];    // user_id => status
+        $followIdMap = [];  // user_id => friend_id
+        foreach ($followRows as $r) {
+            $followMap[$r->user_id_2] = $r->status;
+            $followIdMap[$r->user_id_2] = $r->friend_id;
+        }
+
+        /**
+         * ✅ POSTS QUERY
+         */
+        if ($scope === 'all') {
+            // EXPLORE MODE: all users
+            $postsQuery = Post::with('user')->latest();
+
+            if ($activeCategory) {
+                $postsQuery->where('category', $activeCategory);
+            }
         } else {
-            $activeCategory = null; // ignore invalid category
+            // FEED MODE: only followed users + your own posts
+            $followingIds = Friend::query()
+                ->where('user_id_1', $user->user_id)
+                ->where('status', 'following')
+                ->pluck('user_id_2')
+                ->toArray();
+
+            $visibleUserIds = array_unique(array_merge($followingIds, [$user->user_id]));
+
+            $postsQuery = Post::with('user')
+                ->whereIn('user_id', $visibleUserIds)
+                ->latest();
+
+            if ($activeCategory) {
+                $postsQuery->where('category', $activeCategory);
+            }
         }
 
         $posts = $postsQuery->get();
 
-        // Highlights of the Week (last 7 days)
+        /**
+         * ✅ HIGHLIGHTS OF THE WEEK (ALL POSTS overall)
+         */
         $since = Carbon::now()->subDays(7);
 
         $counts = Post::select('category', DB::raw('COUNT(*) as total'))
@@ -40,7 +81,6 @@ class PostController extends Controller
             ->orderByDesc('total')
             ->get();
 
-        // labels only (no icons)
         $labels = [
             'academic'      => 'Academics',
             'events'        => 'Events',
@@ -57,9 +97,15 @@ class PostController extends Controller
             ];
         });
 
-
-        return view('feed', compact('posts', 'highlights', 'activeCategory'));
+        return view('feed', compact(
+            'posts',
+            'highlights',
+            'activeCategory',
+            'followMap',
+            'followIdMap'
+        ));
     }
+
 
     // Store a new post
     public function store(Request $request)
@@ -81,7 +127,6 @@ class PostController extends Controller
     // Show edit form
     public function edit(Post $post)
     {
-        // Only allow owner to edit
         if ($post->user_id !== Auth::id()) {
             abort(403, 'Unauthorized action.');
         }
@@ -92,7 +137,6 @@ class PostController extends Controller
     // Update post
     public function update(Request $request, Post $post)
     {
-        // Only allow owner to update
         if ($post->user_id !== Auth::id()) {
             abort(403, 'Unauthorized action.');
         }

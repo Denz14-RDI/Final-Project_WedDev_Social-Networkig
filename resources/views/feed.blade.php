@@ -18,6 +18,19 @@
         <div>
           <div class="text-3xl font-extrabold text-app leading-tight">Community Feed</div>
           <div class="text-sm text-app-muted">Stay updated with the PUP community</div>
+
+          @php
+            $scope = request('scope');
+            $cat = request('category');
+          @endphp
+
+          @if($scope === 'all')
+            <div class="mt-1 text-xs text-app-muted">
+              Exploring {{ $cat ? ucfirst(str_replace('_',' ', $cat)) : 'All Categories' }}
+            </div>
+          @else
+            <div class="mt-1 text-xs text-app-muted">Following</div>
+          @endif
         </div>
 
         {{-- Composer --}}
@@ -57,53 +70,106 @@
                 </div>
               </div>
 
-              {{-- Dropdown --}}
-              <div x-data="{ openMenu:false }" class="relative">
-                <button type="button"
-                        class="h-10 w-10 rounded-xl flex items-center justify-center text-app-muted hover:text-app bg-app-input border border-app"
-                        @click="openMenu = !openMenu"
-                        aria-label="Post options">
-                  ⋯
-                </button>
+              {{-- RIGHT SIDE: Follow toggle (Explore only) + Dropdown --}}
+              @php
+                $scope = request('scope');
+                $isExplore = ($scope === 'all');
+                $isMine = (Auth::id() === $post->user_id);
 
-                <div x-show="openMenu"
-                     @click.away="openMenu=false"
-                     class="absolute right-0 mt-2 w-44 bg-app-card border border-app rounded-xl shadow-lg z-50 origin-top-right">
+                // from PostController: $followMap + $followIdMap
+                $status = $followMap[$post->user_id] ?? null;      // follow | following | null
+                $friendId = $followIdMap[$post->user_id] ?? null;  // for unfollow
+              @endphp
 
-                  @if(Auth::id() === $post->user_id)
-                    {{-- Edit Post --}}
-                    <button type="button"
-                            @click="$dispatch('open-edit', { post: {{ $post->toJson() }} }); openMenu=false"
-                            class="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-app hover:bg-app-input">
-                      <svg class="h-4 w-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M12 20h9" />
-                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
-                      </svg>
-                      Edit Post
-                    </button>
+              <div class="flex items-center gap-2">
 
-                    {{-- Delete Post --}}
-                    <form action="{{ route('posts.destroy', $post->post_id) }}" method="POST">
+                {{-- ✅ Small Twitter-like follow toggle (Explore only) --}}
+                @if($isExplore && !$isMine)
+
+                  @if($status === 'following' && $friendId)
+                    {{-- Following (click to unfollow) --}}
+                    <form action="{{ route('friends.unfollow', $friendId) }}" method="POST">
                       @csrf
-                      @method('DELETE')
                       <button type="submit"
-                              class="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-app hover:bg-app-input">
-                        <svg class="h-4 w-4 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                          <path d="M6 6h12M9 6v12m6-12v12M4 6h16l-1 14H5L4 6z" />
-                        </svg>
-                        Delete Post
+                        class="h-9 px-4 rounded-full text-sm font-semibold
+                               border border-app text-app
+                               bg-transparent hover:bg-app-input transition">
+                        Following
                       </button>
                     </form>
-                  @else
-                    {{-- Report (only for non-owners) --}}
-                    <button type="button"
-                            class="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-app hover:bg-app-input">
-                      <svg class="h-4 w-4 text-yellow-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M12 9v2m0 4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
-                      </svg>
-                      Report
+
+                  @elseif($status === 'follow')
+                    {{-- Requested (disabled) --}}
+                    <button type="button" disabled
+                      class="h-9 px-4 rounded-full text-sm font-semibold
+                             border border-app text-app-muted
+                             bg-transparent opacity-70 cursor-not-allowed">
+                      Requested
                     </button>
+
+                  @else
+                    {{-- Follow (filled) --}}
+                    <form action="{{ route('friends.store', $post->user) }}" method="POST">
+                      @csrf
+                      <button type="submit"
+                        class="h-9 px-4 rounded-full text-sm font-semibold
+                               bg-app-brand text-white
+                               hover:opacity-90 transition">
+                        Follow
+                      </button>
+                    </form>
                   @endif
+
+                @endif
+
+                {{-- Dropdown --}}
+                <div x-data="{ openMenu:false }" class="relative">
+                  <button type="button"
+                          class="h-10 w-10 rounded-xl flex items-center justify-center text-app-muted hover:text-app bg-app-input border border-app"
+                          @click="openMenu = !openMenu"
+                          aria-label="Post options">
+                    ⋯
+                  </button>
+
+                  <div x-show="openMenu"
+                       @click.away="openMenu=false"
+                       class="absolute right-0 mt-2 w-44 bg-app-card border border-app rounded-xl shadow-lg z-50 origin-top-right">
+
+                    @if(Auth::id() === $post->user_id)
+                      {{-- Edit Post --}}
+                      <button type="button"
+                              @click="$dispatch('open-edit', { post: {{ $post->toJson() }} }); openMenu=false"
+                              class="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-app hover:bg-app-input">
+                        <svg class="h-4 w-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path d="M12 20h9" />
+                          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
+                        </svg>
+                        Edit Post
+                      </button>
+
+                      {{-- Delete Post --}}
+                      <form action="{{ route('posts.destroy', $post->post_id) }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit"
+                                class="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-app hover:bg-app-input">
+                          <svg class="h-4 w-4 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M6 6h12M9 6v12m6-12v12M4 6h16l-1 14H5L4 6z" />
+                          </svg>
+                          Delete Post
+                        </button>
+                      </form>
+                    @else
+                      {{-- Report --}}
+                      <button type="button"
+                              class="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-app hover:bg-app-input">
+                        <svg class="h-4 w-4 text-yellow-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path d="M12 9v2m0 4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
+                        </svg>
+                        Report
+                      </button>
+                    @endif
+                  </div>
                 </div>
               </div>
             </div>
