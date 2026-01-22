@@ -4,7 +4,10 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\FriendController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\SearchController;
+use App\Http\Controllers\ReportController;
 
 // --------------------
 // Public pages
@@ -34,13 +37,20 @@ Route::middleware('auth')->group(function () {
     Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update');
     Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
 
-    // Search
-    Route::get('/search', fn() => view('search'))->name('search');
+    // Reports
+    Route::post('/posts/{post}/report', [ReportController::class, 'store'])->name('posts.report');
 
-    // Notifications, Friends, Settings
+    // Search
+    Route::get('/search', [SearchController::class, 'index'])->name('search');
+
+    // Notifications, Settings
     Route::get('/notifications', fn() => view('notifications'))->name('notifications');
-    Route::get('/friends', fn() => view('friends'))->name('friends');
     Route::get('/settings', fn() => view('settings'))->name('settings');
+
+    // Friends / follow system
+    Route::get('/friends', [FriendController::class, 'index'])->name('friends.index');
+    Route::post('/friends/{user}', [FriendController::class, 'store'])->name('friends.store');
+    Route::post('/friends/{user}/unfollow', [FriendController::class, 'unfollow'])->name('friends.unfollow'); // ✅ FIXED
 
     // Profile
     Route::get('/profile/{id}', [UserController::class, 'show'])->name('profile.show');
@@ -75,4 +85,8 @@ Route::prefix('admin')
         Route::view('/posts', 'admin.posts')->name('posts');
         Route::view('/banned', 'admin.banned')->name('banned');
         Route::view('/settings', 'admin.settings')->name('settings');
+
+        // Admin reports management
+        Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::put('/reports/{report}/status', [ReportController::class, 'updateStatus'])->name('reports.updateStatus');
     });

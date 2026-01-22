@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Post;
+use App\Models\Friend;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -27,10 +29,8 @@ class UserController extends Controller
             'profile_pic' => 'nullable|string',
         ]);
 
-        // Hash password before saving
         $validated['password'] = bcrypt($validated['password']);
 
-        // Default profile picture if none provided
         if (empty($validated['profile_pic'])) {
             $validated['profile_pic'] = 'images/default.png';
         }
@@ -38,24 +38,32 @@ class UserController extends Controller
         User::create($validated);
 
         return redirect()->route('login')
-                         ->with('success', 'Registration successful! Please log in.');
+            ->with('success', 'Registration successful! Please log in.');
     }
 
     // Show user profile with posts
     public function show($id)
     {
         $user = User::findOrFail($id);
-
-        // Get posts for this user only
-        $posts = $user->posts()->latest()->get();
-
-        // Pass Auth ID explicitly for debugging and button logic
         $authId = Auth::id();
+        $isFollowing = false;
 
-        return view('profile', compact('user', 'posts', 'authId'));
+        if ($authId && $authId !== $user->user_id) {
+            $isFollowing = Friend::where('user_id_1', $authId)
+                ->where('user_id_2', $user->user_id)
+                ->whereNull('deleted_at')
+                ->where('status', 'Following')
+                ->exists();
+        }
+
+        $posts = Post::where('user_id', $user->user_id)
+            ->latest()
+            ->get();
+
+        return view('profile', compact('user', 'authId', 'isFollowing', 'posts'));
     }
 
-    // Update user profile
+    // Update user account
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
@@ -70,32 +78,51 @@ class UserController extends Controller
                 'unique:users,email,' . $id . ',user_id',
                 'ends_with:@iskolarngbayan.pup.edu.ph'
             ],
-            'password'    => 'sometimes|string|min:8',
+            'current_password' => 'nullable|string',
+            'password'    => 'nullable|string|min:8|confirmed',
             'bio'         => 'nullable|string',
             'profile_pic' => 'nullable|string',
+        ], [
+            // Custom error messages
+            'username.unique' => 'This username is already taken.',
+            'email.unique' => 'This email is already registered.',
+            'password.confirmed' => 'New password and confirmation do not match.',
+            'password.min' => 'Password must be at least 8 characters long.',
         ]);
 
-        if (isset($validated['password'])) {
+        // Handle password change with current password validation
+        if (!empty($validated['password'])) {
+            if (empty($validated['current_password']) || !Hash::check($validated['current_password'], $user->password)) {
+                return back()->withErrors(['current_password' => 'Current password is incorrect.']);
+            }
+
             $validated['password'] = bcrypt($validated['password']);
+        } else {
+            unset($validated['password']); // don’t overwrite with null
         }
 
-        // Default profile picture if none provided
         if (empty($validated['profile_pic'])) {
             $validated['profile_pic'] = 'images/default.png';
         }
 
         $user->update($validated);
 
-        // Redirect back to profile page with correct user_id
+        // Redirect based on source field
+        if ($request->input('source') === 'settings') {
+            return redirect()->route('settings')->with('success', 'Account updated successfully!');
+        }
+
         return redirect()->route('profile.show', ['id' => $user->user_id])
-                         ->with('success', 'Profile updated successfully!');
+            ->with('success', 'Profile updated successfully!');
     }
+
 
     // Feed page
     public function feed()
     {
-        $me = Auth::user(); // current logged-in user 
-        return view('feed', compact('me'));
+        $me = Auth::user();
+        $posts = Post::with('user')->latest()->get();
+        return view('feed', compact('me', 'posts'));
     }
 
     // Delete user
@@ -105,6 +132,6 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->route('login')
-                         ->with('success', 'User deleted successfully.');
+            ->with('success', 'User deleted successfully.');
     }
 }

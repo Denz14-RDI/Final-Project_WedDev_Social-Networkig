@@ -4,8 +4,9 @@
 @section('main_class', 'bg-app-page')
 
 @section('content')
-<div x-data="{ createOpen:false, editMode:false, editPost:{} }"
+<div x-data="{ createOpen:false, editMode:false, editPost:{}, reportOpen:false, reportPost:{} }"
   @open-edit.window="editMode=true; editPost=$event.detail.post; createOpen=true"
+  @open-report.window="reportPost=$event.detail.post; reportOpen=true"
   class="h-screen overflow-hidden">
 
   <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] h-full">
@@ -46,10 +47,15 @@
                   class="h-12 w-12 rounded-full object-cover border border-app" alt="avatar" />
                 <div class="leading-tight">
                   <div class="font-extrabold text-app">
-                    {{ $post->user->first_name }} {{ $post->user->last_name }}
+                    <a href="{{ route('profile.show', $post->user->user_id) }}" class="hover:underline">
+                      {{ $post->user->first_name }} {{ $post->user->last_name }}
+                    </a>
                   </div>
                   <div class="mt-1 text-sm text-app-muted">
-                    {{ '@' . $post->user->username }} · {{ $post->created_at->diffForHumans() }}
+                    <a href="{{ route('profile.show', $post->user->user_id) }}" class="hover:underline">
+                      {{ '@' . $post->user->username }}
+                    </a>
+                    · {{ $post->created_at->diffForHumans() }}
                   </div>
                   <div class="text-xs text-app-muted mt-1">
                     📌 {{ ucfirst(str_replace('_',' ', $post->category)) }}
@@ -90,6 +96,7 @@
                   @else
                   {{-- Report (only for non-owners) --}}
                   <button type="button"
+                    @click="$dispatch('open-report', { post: {{ $post->toJson() }} }); openMenu=false"
                     class="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-app hover:bg-app-input">
                     ⚠️ Report
                   </button>
@@ -188,13 +195,15 @@
             <label class="block text-sm font-semibold text-app mb-2">Category</label>
             <select name="category"
               x-model="editMode ? editPost.category : ''"
-              class="w-full rounded-xl bg-app-input border border-app px-4 py-3 text-sm text-app outline-none focus:ring-2 focus:ring-[var(--brand)]" required>
+              class="w-full rounded-xl bg-app-input border border-app px-4 py-3 text-sm text-app outline-none focus:ring-2 focus:ring-[var(--brand)]"
+              required>
               <option value="academic">Academic</option>
               <option value="events">Events</option>
               <option value="announcement">Announcement</option>
               <option value="campus_life">Campus Life</option>
               <option value="help_wanted">Help Wanted</option>
             </select>
+
           </div>
         </div>
 
@@ -223,5 +232,9 @@
       </form>
     </div>
   </div>
+
+  {{-- Report Modal --}}
+  @include('partials.create-report-modal')
+
 </div>
 @endsection

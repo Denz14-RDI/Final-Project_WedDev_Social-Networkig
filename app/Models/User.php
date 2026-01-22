@@ -14,6 +14,15 @@ class User extends Authenticatable
     // Primary key
 
     protected $primaryKey = 'user_id';
+    public $incrementing = true;
+    protected $keyType = 'int';
+
+ 
+    public function getRouteKeyName()
+    {
+        return 'user_id';
+    }
+
 
     /**
      * The attributes that are mass assignable.
@@ -56,6 +65,11 @@ class User extends Authenticatable
     public function posts()
     {
         return $this->hasMany(Post::class, 'user_id');
+    }
+
+    public function friends()
+    {
+        return $this->hasMany(Friend::class, 'user_id_1') ->orWhere('user_id_2', $this->user_id);
     }
 
 

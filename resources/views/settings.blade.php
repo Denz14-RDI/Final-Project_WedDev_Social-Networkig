@@ -5,7 +5,7 @@
 
 @section('content')
 @php
-$username = 'juandc';
+    $user = Auth::user(); // logged-in user
 @endphp
 
 <div class="h-screen overflow-hidden">
@@ -21,16 +21,28 @@ $username = 'juandc';
                     <div class="text-sm text-app-muted">Manage your account and display preferences.</div>
                 </div>
 
+                {{-- Flash messages --}}
+                @if(session('success'))
+                    <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-xl">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @if($errors->any())
+                    <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-xl">
+                        <ul class="list-disc list-inside">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 {{-- ACCOUNT --}}
                 <section class="bg-app-card rounded-2xl border border-app shadow-app overflow-hidden">
                     <div class="p-6 border-b border-app">
                         <div class="flex items-start gap-3">
-                            <div class="mt-0.5 text-app-muted">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                                    <circle cx="12" cy="7" r="4" />
-                                </svg>
-                            </div>
+                            <div class="mt-0.5 text-app-muted text-xl">👤</div>
                             <div>
                                 <div class="text-lg font-extrabold text-app">Account</div>
                                 <div class="text-sm text-app-muted">Manage your account settings</div>
@@ -38,52 +50,83 @@ $username = 'juandc';
                         </div>
                     </div>
 
-                    <div class="p-6 space-y-6">
+                    <form action="{{ route('profile.update', $user->user_id) }}" method="POST" class="p-6 space-y-6">
+                        @csrf
+                        @method('PUT')
+
+                        {{-- Hidden source field --}}
+                        <input type="hidden" name="source" value="settings">
+
+                        {{-- Username --}}
                         <div>
                             <label class="block text-sm font-semibold text-app mb-2">Username</label>
                             <input
-                                value="{{ $username }}"
-                                disabled
-                                class="w-full rounded-xl bg-app-input px-4 py-3 text-sm text-app border border-app outline-none opacity-90" />
-                            <p class="mt-2 text-xs text-app-muted">Your username is currently read-only (demo).</p>
+                                type="text"
+                                name="username"
+                                value="{{ old('username', $user->username) }}"
+                                class="w-full rounded-xl bg-app-input px-4 py-3 text-sm text-app border border-app outline-none focus:ring-2 focus:ring-[var(--brand)]" />
+                            @error('username')
+                                <p class="mt-2 text-xs text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
 
+                        {{-- Password --}}
                         <div class="pt-6 border-t border-app">
                             <div class="text-sm font-semibold text-app">Change Password</div>
-                            <div class="text-xs text-app-muted mt-1">Use at least 8 characters for a stronger password.</div>
+                            <div class="text-xs text-app-muted mt-1">Enter your current password and a new one.</div>
 
                             <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <input
-                                    type="password"
-                                    placeholder="New password"
-                                    class="w-full rounded-xl bg-app-input px-4 py-3 text-sm text-app border border-app outline-none focus:ring-2 focus:ring-[var(--brand)]" />
-                                <input
-                                    type="password"
-                                    placeholder="Confirm new password"
-                                    class="w-full rounded-xl bg-app-input px-4 py-3 text-sm text-app border border-app outline-none focus:ring-2 focus:ring-[var(--brand)]" />
+                                <div>
+                                    <input
+                                        type="password"
+                                        name="current_password"
+                                        placeholder="Current password"
+                                        class="w-full rounded-xl bg-app-input px-4 py-3 text-sm text-app border border-app outline-none focus:ring-2 focus:ring-[var(--brand)]" />
+                                    @error('current_password')
+                                        <p class="mt-2 text-xs text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <div>
+                                    <input
+                                        type="password"
+                                        name="password"
+                                        placeholder="New password"
+                                        class="w-full rounded-xl bg-app-input px-4 py-3 text-sm text-app border border-app outline-none focus:ring-2 focus:ring-[var(--brand)]" />
+                                    @error('password')
+                                        <p class="mt-2 text-xs text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
                             </div>
 
-                            <div class="mt-4 flex justify-end">
-                                <button
-                                    type="button"
-                                    class="w-full md:w-auto inline-flex items-center justify-center rounded-xl btn-brand px-5 py-3 text-sm font-semibold hover:opacity-95 active:opacity-90">
-                                    Update Password
-                                </button>
+                            <div class="mt-4">
+                                <input
+                                    type="password"
+                                    name="password_confirmation"
+                                    placeholder="Confirm new password"
+                                    class="w-full rounded-xl bg-app-input px-4 py-3 text-sm text-app border border-app outline-none focus:ring-2 focus:ring-[var(--brand)]" />
+                                @error('password_confirmation')
+                                    <p class="mt-2 text-xs text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
                         </div>
-                    </div>
+
+                        {{-- Update button --}}
+                        <div class="mt-4 flex justify-end">
+                            <button
+                                type="submit"
+                                class="w-full md:w-auto inline-flex items-center justify-center rounded-xl btn-brand px-5 py-3 text-sm font-semibold hover:opacity-95 active:opacity-90">
+                                Update Account
+                            </button>
+                        </div>
+                    </form>
                 </section>
 
                 {{-- DISPLAY --}}
                 <section class="bg-app-card rounded-2xl border border-app shadow-app overflow-hidden">
                     <div class="p-6 border-b border-app">
                         <div class="flex items-start gap-3">
-                            <div class="mt-0.5 text-app-muted">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M12 3a9 9 0 1 0 9 9" />
-                                    <path d="M21 12a9 9 0 0 0-9-9" />
-                                </svg>
-                            </div>
+                            <div class="mt-0.5 text-app-muted text-xl">🎨</div>
                             <div>
                                 <div class="text-lg font-extrabold text-app">Display</div>
                                 <div class="text-sm text-app-muted">Customize how PUPCOM looks</div>
@@ -91,7 +134,7 @@ $username = 'juandc';
                         </div>
                     </div>
 
-                    {{-- clickable row (ChatGPT-ish) --}}
+                    {{-- clickable row --}}
                     <button
                         id="themeRow"
                         type="button"
@@ -142,10 +185,7 @@ $username = 'juandc';
             paint();
         }
 
-        // whole row clickable
         row.addEventListener('click', flip);
-
-        // checkbox doesn't double-trigger row
         toggle.addEventListener('click', (e) => e.stopPropagation());
         toggle.addEventListener('change', flip);
 

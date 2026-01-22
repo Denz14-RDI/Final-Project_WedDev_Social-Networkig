@@ -2,49 +2,71 @@
 @section('title','Friends')
 
 @section('content')
-  <div class="min-h-screen bg-[var(--bg)]">
-    <div class="max-w-4xl mx-auto px-6 py-10">
-      <div class="bg-white rounded-2xl shadow p-6">
-        <h1 class="text-xl font-bold mb-4">Friends</h1>
+@php
+  $authUser = auth()->user();
+@endphp
 
-        <div class="space-y-4">
-          <div class="flex items-center justify-between border rounded-xl p-4">
-            <div>
-              <div class="font-semibold">PUP Administration</div>
-              <div class="text-sm text-gray-600">@pup_admin • Admin</div>
-            </div>
-            <button class="px-4 py-2 rounded-xl border border-[#6C1517] text-[#6C1517] font-semibold hover:bg-[#6C1517] hover:text-white transition">
-              Add Friend
-            </button>
-          </div>
+<div class="min-h-screen bg-[var(--bg)]">
+  <div class="max-w-4xl mx-auto px-6 py-10">
+    <div class="bg-white rounded-2xl shadow p-6">
 
-          <div class="flex items-center justify-between border rounded-xl p-4">
-            <div>
-              <div class="font-semibold">Juan Dela Cruz</div>
-              <div class="text-sm text-gray-600">@juan_delacruz • Student</div>
-            </div>
-            <button class="px-4 py-2 rounded-xl border border-[#6C1517] text-[#6C1517] font-semibold hover:bg-[#6C1517] hover:text-white transition">
-              Add Friend
-            </button>
-          </div>
+      {{-- Following List --}}
+      <h1 class="text-xl font-bold mb-4">
+        Following ({{ $following->total() }})
+      </h1>
+
+      <div class="space-y-4">
+        @forelse($following as $row)
+          @php
+            $target = $row->following; // user_id_2
+          @endphp
 
           <div class="flex items-center justify-between border rounded-xl p-4">
-            <div>
-              <div class="font-semibold">Central Student Council</div>
-              <div class="text-sm text-gray-600">@pup_csc • Organization</div>
-            </div>
-            <button class="px-4 py-2 rounded-xl border border-[#6C1517] text-[#6C1517] font-semibold hover:bg-[#6C1517] hover:text-white transition">
-              Add Friend
-            </button>
-          </div>
-        </div>
+            <div class="flex items-center gap-4 min-w-0">
+              <img
+                class="h-12 w-12 rounded-full object-cover border border-gray-200"
+                src="{{ asset(!empty($target->profile_pic) ? $target->profile_pic : 'images/default.png') }}"
+                alt="avatar">
 
-        <div class="mt-6">
-          <a href="{{ route('feed') }}" class="text-[#6C1517] font-semibold hover:underline">
-            ← Back to Feed
-          </a>
-        </div>
+              <div class="min-w-0">
+                <div class="font-semibold truncate">
+                  {{ $target->first_name ?? '' }} {{ $target->last_name ?? '' }}
+                </div>
+
+                <div class="text-sm text-gray-600">
+                  @if(!empty($target->username))
+                    {{ '@' . $target->username }}
+                  @else
+                    <span class="italic text-gray-400">No username</span>
+                  @endif
+                </div>
+              </div>
+            </div>
+
+            <form action="{{ route('friends.unfollow', $row) }}" method="POST" class="inline">
+              @csrf
+              <button type="submit"
+                class="px-4 py-2 rounded-xl border border-gray-300 text-gray-600 font-semibold hover:bg-gray-100 transition">
+                Unfollow
+              </button>
+            </form>
+          </div>
+        @empty
+          <p class="text-gray-500">You are not following anyone yet.</p>
+        @endforelse
       </div>
+
+      <div class="mt-6">
+        {{ $following->links() }}
+      </div>
+
+      <div class="mt-6">
+        <a href="{{ route('feed') }}" class="text-[#6C1517] font-semibold hover:underline">
+          ← Back to Feed
+        </a>
+      </div>
+
     </div>
   </div>
+</div>
 @endsection
