@@ -7,7 +7,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FriendController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\SearchController;
-
+use App\Http\Controllers\ReportController;
 
 // --------------------
 // Public pages
@@ -30,12 +30,15 @@ Route::post('/register', [UserController::class, 'store'])->name('register.store
 // --------------------
 Route::middleware('auth')->group(function () {
 
-    // Feed (dynamic posts)
+    // Feed & Posts
     Route::get('/feed', [PostController::class, 'index'])->name('feed');
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
-    Route::get('/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit'); // ✅ added
-    Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update'); // ✅ added
-    Route::delete('/posts/{id}', [PostController::class, 'destroy'])->name('posts.destroy');
+    Route::get('/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit');
+    Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update');
+    Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
+
+    // Reports
+    Route::post('/posts/{post}/report', [ReportController::class, 'store'])->name('posts.report');
 
     // Search
     Route::get('/search', [SearchController::class, 'index'])->name('search');
@@ -47,8 +50,7 @@ Route::middleware('auth')->group(function () {
     // Friends / follow system
     Route::get('/friends', [FriendController::class, 'index'])->name('friends.index');
     Route::post('/friends/{user}', [FriendController::class, 'store'])->name('friends.store');
-    Route::post('/friends/{friend}/unfollow', [FriendController::class, 'unfollow'])->name('friends.unfollow');
-
+    Route::post('/friends/{user}/unfollow', [FriendController::class, 'unfollow'])->name('friends.unfollow'); 
 
     // Profile
     Route::get('/profile/{id}', [UserController::class, 'show'])->name('profile.show');
@@ -70,10 +72,6 @@ Route::middleware('auth')->group(function () {
 });
 
 // --------------------
-// Friendship routes
-// --------------------
-
-// --------------------
 // Admin routes
 // --------------------
 Route::prefix('admin')
@@ -87,4 +85,8 @@ Route::prefix('admin')
         Route::view('/posts', 'admin.posts')->name('posts');
         Route::view('/banned', 'admin.banned')->name('banned');
         Route::view('/settings', 'admin.settings')->name('settings');
+
+        // Admin reports management
+        Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::put('/reports/{report}/status', [ReportController::class, 'updateStatus'])->name('reports.updateStatus');
     });

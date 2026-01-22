@@ -25,31 +25,27 @@ class PostController extends Controller
 
         $scope = request()->query('scope'); // 'all' or null
 
-        // ✅ Always build follow maps for the feed UI (used in explore)
+        // ✅ Build follow maps for the feed UI
         $followRows = Friend::query()
             ->where('user_id_1', $user->user_id)
-            ->whereIn('status', ['follow', 'following']) // "follow"=requested, "following"=following
+            ->whereIn('status', ['follow', 'following'])
             ->get(['friend_id', 'user_id_2', 'status']);
 
-        $followMap = [];    // user_id => status
-        $followIdMap = [];  // user_id => friend_id
+        $followMap = [];
+        $followIdMap = [];
         foreach ($followRows as $r) {
             $followMap[$r->user_id_2] = $r->status;
             $followIdMap[$r->user_id_2] = $r->friend_id;
         }
 
-        /**
-         * ✅ POSTS QUERY
-         */
+        // ✅ POSTS QUERY
         if ($scope === 'all') {
-            // EXPLORE MODE: all users
             $postsQuery = Post::with('user')->latest();
 
             if ($activeCategory) {
                 $postsQuery->where('category', $activeCategory);
             }
         } else {
-            // FEED MODE: only followed users + your own posts
             $followingIds = Friend::query()
                 ->where('user_id_1', $user->user_id)
                 ->where('status', 'following')
@@ -69,9 +65,7 @@ class PostController extends Controller
 
         $posts = $postsQuery->get();
 
-        /**
-         * ✅ HIGHLIGHTS OF THE WEEK (ALL POSTS overall)
-         */
+        // ✅ HIGHLIGHTS OF THE WEEK
         $since = Carbon::now()->subDays(7);
 
         $counts = Post::select('category', DB::raw('COUNT(*) as total'))
@@ -106,7 +100,6 @@ class PostController extends Controller
         ));
     }
 
-
     // Store a new post
     public function store(Request $request)
     {
@@ -114,30 +107,23 @@ class PostController extends Controller
             'post_content' => 'required|string|max:1000',
             'category'     => 'required|in:academic,events,announcement,campus_life,help_wanted',
             'link'         => 'nullable|url',
-            'image'        => 'nullable|string',
+            'image'        => 'nullable|url', // ✅ better than "string"
         ]);
 
-        $validated['user_id'] = Auth::id();
+        // ✅ IMPORTANT: your PK is user_id, not id
+        $validated['user_id'] = Auth::user()->user_id;
 
         Post::create($validated);
 
-        return redirect()->route('feed')->with('success', 'Post created successfully!');
-    }
-
-    // Show edit form
-    public function edit(Post $post)
-    {
-        if ($post->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        return view('posts.edit', compact('post'));
+        return back()->with('success', 'Post created successfully!');
     }
 
     // Update post
     public function update(Request $request, Post $post)
     {
-        if ($post->user_id !== Auth::id()) {
+        $authId = Auth::user()->user_id;
+
+        if ((int)$post->user_id !== (int)$authId) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -145,25 +131,25 @@ class PostController extends Controller
             'post_content' => 'required|string|max:1000',
             'category'     => 'required|in:academic,events,announcement,campus_life,help_wanted',
             'link'         => 'nullable|url',
-            'image'        => 'nullable|string',
+            'image'        => 'nullable|url',
         ]);
 
         $post->update($validated);
 
-        return redirect()->route('feed')->with('success', 'Post updated successfully!');
+        return back()->with('success', 'Post updated successfully!');
     }
 
-    // Delete a post (soft delete)
-    public function destroy($id)
+    // Delete a post
+    public function destroy(Post $post)
     {
-        $post = Post::findOrFail($id);
+        $authId = Auth::user()->user_id;
 
-        if ($post->user_id !== Auth::id()) {
+        if ((int)$post->user_id !== (int)$authId) {
             abort(403, 'Unauthorized action.');
         }
 
         $post->delete();
 
-        return redirect()->route('feed')->with('success', 'Post deleted successfully!');
+        return back()->with('success', 'Post deleted successfully!');
     }
 }

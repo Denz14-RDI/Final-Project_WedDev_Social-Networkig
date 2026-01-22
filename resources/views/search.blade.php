@@ -67,21 +67,27 @@
               <div class="flex items-center justify-between gap-4 rounded-2xl border border-app bg-app-input p-4">
 
                 <div class="flex items-center gap-4 min-w-0">
-                  <img
-                    class="h-12 w-12 rounded-full object-cover border border-app"
-                    src="{{ asset(!empty($u->profile_pic) ? $u->profile_pic : 'images/default.png') }}"
-                    alt="avatar">
+                  <a href="{{ route('profile.show', $u->user_id) }}">
+                    <img
+                      class="h-12 w-12 rounded-full object-cover border border-app"
+                      src="{{ asset(!empty($u->profile_pic) ? $u->profile_pic : 'images/default.png') }}"
+                      alt="avatar">
+                  </a>
 
                   <div class="leading-tight min-w-0">
                     <div class="flex items-center gap-2 flex-wrap">
                       <div class="font-extrabold text-app truncate">
-                        {{ $u->first_name }} {{ $u->last_name }}
+                        <a href="{{ route('profile.show', $u->user_id) }}" class="hover:underline">
+                          {{ $u->first_name }} {{ $u->last_name }}
+                        </a>
                       </div>
                     </div>
 
                     <div class="text-sm text-app-muted">
                       @if(!empty($u->username))
-                        {{ '@' . $u->username }}
+                        <a href="{{ route('profile.show', $u->user_id) }}" class="hover:underline">
+                          {{ '@' . $u->username }}
+                        </a>
                       @else
                         <span class="italic text-app-mutedlight">No username</span>
                       @endif

@@ -20,6 +20,7 @@ class Friend extends Model
         'status',
     ];
 
+    // Relationships
     public function follower()
     {
         return $this->belongsTo(User::class, 'user_id_1');
