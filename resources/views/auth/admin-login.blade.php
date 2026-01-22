@@ -4,7 +4,7 @@
 @section('content')
 <div class="min-h-screen grid grid-cols-1 md:grid-cols-2">
 
-    <!-- LEFT (same as login/register) -->
+    <!-- LEFT -->
     <div
         class="hidden md:flex items-center justify-center relative overflow-hidden"
         style="background-image: url('/images/pupbg.png'); background-size: cover; background-position: center;">
@@ -22,65 +22,97 @@
     <div class="flex items-center justify-center bg-[#F6F6F6] px-6 py-12">
         <div class="w-full max-w-md bg-white rounded-2xl border border-black/10 shadow-[0_18px_40px_rgba(0,0,0,.10)] p-8">
 
-            <h2 class="text-3xl font-extrabold text-gray-900">Login to PUPCOM as Admin</h2>
-            <p class="text-sm text-gray-500 mt-1">Frontend preview mode (no authentication yet)</p>
+            <h2 class="text-3xl font-extrabold text-black">Admin Login</h2>
+            <p class="text-sm text-black mt-1">Sign in to access the admin dashboard</p>
 
-            <!-- Tabs/Pill -->
+            <!-- Tabs -->
             <div class="mt-5 rounded-full bg-black/5 p-1 flex gap-1">
                 <div class="flex-1 text-center">
-                    <span class="block w-full rounded-full bg-white py-2 text-sm font-semibold text-gray-900 shadow-sm">
+                    <span class="block w-full rounded-full bg-white py-2 text-sm font-semibold text-black shadow-sm">
                         Admin Login
                     </span>
                 </div>
 
                 <a
                     href="{{ route('signin.choice') }}"
-                    class="flex-1 text-center block rounded-full py-2 text-sm font-semibold text-gray-700 hover:text-gray-900">
+                    class="flex-1 text-center block rounded-full py-2 text-sm font-semibold text-black hover:text-black">
                     Back
                 </a>
             </div>
 
-            {{-- FRONTEND-ONLY: just go to dashboard --}}
-            <form method="GET" action="{{ route('admin.dashboard') }}" class="mt-6 space-y-5">
+            <!-- Login Form -->
+            <form method="POST" action="{{ route('admin.login.submit') }}" class="mt-6 space-y-5">
+                @csrf
 
+                <!-- Email -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-800">Email or Username</label>
+                    <label for="email" class="block text-sm font-semibold text-black">Email</label>
                     <input
-                        type="text"
+                        type="email"
+                        name="email"
+                        id="email"
+                        value="{{ old('email') }}"
                         placeholder="admin@pup.edu.ph"
-                        class="mt-2 w-full rounded-xl border border-black/10 px-4 py-3 outline-none
-                        focus:ring-2 focus:ring-[#6C1517]/15 focus:border-[#6C1517]">
-                    <p class="mt-1 text-xs text-gray-500">This is a UI-only field for now.</p>
+                        required
+                        class="mt-2 w-full rounded-xl border border-black/10 px-4 py-3 text-black outline-none
+            focus:ring-2 focus:ring-[#6C1517]/15 focus:border-[#6C1517]">
+                    @error('email')
+                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
+                <!-- Password -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-800">Password</label>
+                    <label for="password" class="block text-sm font-semibold text-black">Password</label>
                     <input
                         type="password"
-                        placeholder="Password"
-                        class="mt-2 w-full rounded-xl border border-black/10 px-4 py-3 outline-none
-                        focus:ring-2 focus:ring-[#6C1517]/15 focus:border-[#6C1517]">
-                    <p class="mt-1 text-xs text-gray-500">This is a UI-only field for now.</p>
+                        name="password"
+                        id="password"
+                        placeholder="••••••••"
+                        required
+                        class="mt-2 w-full rounded-xl border border-black/10 px-4 py-3 text-black outline-none
+            focus:ring-2 focus:ring-[#6C1517]/15 focus:border-[#6C1517]">
+                    @error('password')
+                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
+                <!-- Remember Me -->
                 <div class="flex items-center gap-2">
                     <input
                         id="remember"
+                        name="remember"
                         type="checkbox"
                         class="h-4 w-4 rounded border-gray-300 text-[#6C1517] focus:ring-[#6C1517]/30">
-                    <label for="remember" class="text-sm text-gray-700">Remember me</label>
+                    <label for="remember" class="text-sm text-black">Remember me</label>
                 </div>
 
+                <!-- Submit -->
                 <button
                     type="submit"
-                    class="w-full rounded-xl bg-[#6C1517] py-3 font-semibold text-white shadow-sm hover:opacity-95">
-                    Continue to Admin Dashboard
+                    class="w-full rounded-xl bg-[#6C1517] py-3 font-semibold text-white shadow-sm hover:opacity-95 transition">
+                    Sign in
                 </button>
 
-                <div class="text-xs text-gray-500 text-center">
-                    You can access admin pages directly: <span class="font-semibold">/admin/dashboard</span>
+                <!-- Global Error Message -->
+                @if ($errors->any())
+                <div class="mt-4 text-sm text-red-600">
+                    <ul class="list-disc pl-5">
+                        @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
                 </div>
+                @endif
+
+                <!-- Flash Message -->
+                @if (session('error'))
+                <div class="mt-4 text-sm text-red-600">
+                    {{ session('error') }}
+                </div>
+                @endif
             </form>
+
 
         </div>
     </div>

@@ -24,9 +24,13 @@ class UserController extends Controller
                 'unique:users',
                 'ends_with:@iskolarngbayan.pup.edu.ph'
             ],
-            'password'    => 'required|string|min:8',
+            // 👇 add confirmed here
+            'password'    => 'required|string|min:8|confirmed',
             'bio'         => 'nullable|string',
             'profile_pic' => 'nullable|string',
+        ], [
+            'password.confirmed' => 'Password and confirmation do not match.',
+            'password.min' => 'Password must be at least 8 characters long.',
         ]);
 
         $validated['password'] = bcrypt($validated['password']);
@@ -40,6 +44,7 @@ class UserController extends Controller
         return redirect()->route('login')
             ->with('success', 'Registration successful! Please log in.');
     }
+
 
     // Show user profile with posts
     public function show($id)

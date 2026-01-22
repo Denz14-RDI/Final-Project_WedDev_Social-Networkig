@@ -8,6 +8,7 @@ use App\Http\Controllers\FriendController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\AdminAuthController;
 
 // --------------------
 // Public pages
@@ -19,7 +20,11 @@ Route::get('/login', fn() => view('auth.login'))->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 
 Route::get('/sign-in', fn() => view('auth.signin-choice'))->name('signin.choice');
-Route::get('/admin/login', fn() => view('auth.admin-login'))->name('admin.login');
+
+// Admin login (real controller, not just view)
+Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
+Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
+Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
 
 // Registration
 Route::get('/register', fn() => view('auth.register'))->name('register');
@@ -50,7 +55,7 @@ Route::middleware('auth')->group(function () {
     // Friends / follow system
     Route::get('/friends', [FriendController::class, 'index'])->name('friends.index');
     Route::post('/friends/{user}', [FriendController::class, 'store'])->name('friends.store');
-    Route::post('/friends/{user}/unfollow', [FriendController::class, 'unfollow'])->name('friends.unfollow'); // ✅ FIXED
+    Route::delete('/friends/{user}/unfollow', [FriendController::class, 'unfollow'])->name('friends.unfollow');
 
     // Profile
     Route::get('/profile/{id}', [UserController::class, 'show'])->name('profile.show');
@@ -76,6 +81,7 @@ Route::middleware('auth')->group(function () {
 // --------------------
 Route::prefix('admin')
     ->name('admin.')
+    ->middleware(['auth', 'admin']) // 👈 protected by auth + admin middleware
     ->group(function () {
         Route::get('/', fn() => redirect()->route('admin.dashboard'));
 
@@ -86,7 +92,6 @@ Route::prefix('admin')
         Route::view('/banned', 'admin.banned')->name('banned');
         Route::view('/settings', 'admin.settings')->name('settings');
 
-        // Admin reports management
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
         Route::put('/reports/{report}/status', [ReportController::class, 'updateStatus'])->name('reports.updateStatus');
     });
