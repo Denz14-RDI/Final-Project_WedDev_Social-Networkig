@@ -3,72 +3,135 @@
     <div class="h-full flex flex-col px-5 sm:px-7 py-6">
         <div class="space-y-5">
 
-            {{-- Trending --}}
+            {{-- Highlights of the Week --}}
             <div class="bg-app-card rounded-2xl shadow-app border border-app p-6">
-                <div class="font-extrabold text-app mb-4 flex items-center gap-2">
-                    <span>📌</span>
-                    <span>Trending in PUP</span>
+                <div class="font-extrabold text-app mb-1">
+                    Highlights of the Week
                 </div>
 
-                <div class="space-y-4 text-sm">
-                    <div>
-                        <div class="text-xs text-app-muted">1 · Trending</div>
-                        <div class="font-semibold text-app">#IskolarNgBayan</div>
-                        <div class="text-xs text-app-muted">1,234 posts</div>
-                    </div>
+                <div class="text-xs text-app-muted mb-4">
+                    Based on posts from the last 7 days
+                </div>
 
-                    <div>
-                        <div class="text-xs text-app-muted">2 · Trending</div>
-                        <div class="font-semibold text-app">#PUPEnrollment2025</div>
-                        <div class="text-xs text-app-muted">1,934 posts</div>
-                    </div>
+                @php
+                $scope = request('scope');
+                $isExploreAll = ($scope === 'all') && empty($activeCategory ?? null);
+                @endphp
 
-                    <div>
-                        <div class="text-xs text-app-muted">3 · Trending</div>
-                        <div class="font-semibold text-app">#finalsweek</div>
-                        <div class="text-xs text-app-muted">1,234 posts</div>
-                    </div>
+                <a href="{{ route('feed', ['scope' => 'all']) }}"
+                    class="block mb-4 text-sm font-semibold {{ $isExploreAll ? 'text-app' : 'text-app-muted hover:text-app' }}">
+                    📌 All Categories
+                </a>
 
-                    <div>
-                        <div class="text-xs text-app-muted">4 · Trending</div>
-                        <div class="font-semibold text-app">#CCISWeek</div>
-                        <div class="text-xs text-app-muted">2,234 posts</div>
-                    </div>
+                <div class="space-y-3 text-sm">
+                    @php
+                    $highlightItems = $highlights ?? collect();
+                    @endphp
+
+                    @forelse($highlightItems as $i => $h)
+                    @php
+                    $isActive = ($scope === 'all') && (($activeCategory ?? null) === ($h['key'] ?? null));
+                    @endphp
+
+                    <a href="{{ route('feed', ['category' => $h['key'], 'scope' => 'all']) }}"
+                        class="block rounded-xl p-3 border border-app hover:bg-app-input transition
+                                  {{ $isActive ? 'bg-app-input' : '' }}">
+
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="min-w-0">
+                                <div class="text-xs text-app-muted">
+                                    {{ $i + 1 }} · Top this week
+                                </div>
+
+                                <div class="font-semibold text-app truncate">
+                                    {{ $h['label'] ?? '' }}
+                                </div>
+
+                                <div class="text-xs text-app-muted">
+                                    {{ number_format($h['total'] ?? 0) }} posts
+                                </div>
+                            </div>
+
+                            @if($isActive)
+                            <span class="text-xs px-2 py-1 rounded-full bg-app-page border border-app text-app-muted">
+                                Active
+                            </span>
+                            @endif
+                        </div>
+                    </a>
+                    @empty
+                    <p class="text-xs text-app-muted">No posts this week yet.</p>
+                    @endforelse
                 </div>
             </div>
 
             {{-- Who to follow --}}
-            @php
-            $whoToFollow = [
-            ['name' => 'Juan Dela Cruz', 'handle' => '@juanisko', 'avatar' => 'https://i.pravatar.cc/120?img=11'],
-            ['name' => 'Anne Garcia', 'handle' => '@annegarcia', 'avatar' => 'https://i.pravatar.cc/120?img=47'],
-            ['name' => 'PUP Tech Club', 'handle' => '@puptechclub', 'avatar' => 'https://i.pravatar.cc/120?img=15'],
-            ['name' => 'Prof. Maria Santos', 'handle' => '@mariasantos', 'avatar' => 'https://i.pravatar.cc/120?img=49'],
-            ];
-            @endphp
-
             <div class="bg-app-card rounded-2xl shadow-app border border-app p-6">
                 <div class="font-extrabold text-app mb-4">Who to follow</div>
 
                 <div class="space-y-4">
-                    @foreach($whoToFollow as $u)
+                    @php $suggestions = $whoToFollow ?? collect(); @endphp
+                    @forelse($suggestions as $u)
+                    @php
+                    $isFollowing = ($followMap[$u->user_id] ?? null) === 'Following';
+                    $friendId = $followIdMap[$u->user_id] ?? null;
+                    @endphp
+
                     <div class="flex items-center justify-between gap-4">
                         <div class="flex items-center gap-3 min-w-0">
-                            <img
-                                src="{{ $u['avatar'] }}"
+                            {{-- Avatar (NOT clickable) --}}
+                            <img src="{{ asset(!empty($u->profile_pic) ? $u->profile_pic : 'images/default.png') }}"
                                 class="h-10 w-10 rounded-full object-cover border border-app"
                                 alt="avatar">
+
                             <div class="leading-tight min-w-0">
-                                <div class="text-sm font-semibold text-app truncate">{{ $u['name'] }}</div>
-                                <div class="text-xs text-app-muted truncate">{{ $u['handle'] }}</div>
+                                {{-- Name clickable --}}
+                                <div class="text-sm font-semibold text-app truncate">
+                                    <a href="{{ route('profile.show', $u->user_id) }}" class="hover:underline">
+                                        {{ $u->first_name }} {{ $u->last_name }}
+                                    </a>
+                                </div>
+                                {{-- Username clickable --}}
+                                <div class="text-xs text-app-muted truncate">
+                                    @if(!empty($u->username))
+                                    <a href="{{ route('profile.show', $u->user_id) }}" class="hover:underline">
+                                        {{ '@' . $u->username }}
+                                    </a>
+                                    @else
+                                    <span class="italic">No username</span>
+                                    @endif
+                                </div>
                             </div>
                         </div>
 
-                        <button type="button" class="shrink-0 px-4 py-2 rounded-full btn-ghost text-sm font-semibold">
-                            Follow
-                        </button>
+                        {{-- Button (toggle) --}}
+                        <div class="shrink-0">
+                            @if($isFollowing && $friendId)
+                            {{-- Unfollow --}}
+                            <form action="{{ route('friends.unfollow', $friendId) }}" method="POST">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                    class="px-4 py-2 rounded-full border border-app text-app font-semibold bg-transparent hover:bg-app-input transition">
+                                    Following
+                                </button>
+                            </form>
+                            @else
+                            {{-- Follow --}}
+                            <form action="{{ route('friends.store', $u->user_id) }}" method="POST">
+                                @csrf
+                                <button type="submit"
+                                    class="px-4 py-2 rounded-full btn-ghost text-sm font-semibold">
+                                    Follow
+                                </button>
+                            </form>
+                            @endif
+                        </div>
+
                     </div>
-                    @endforeach
+                    @empty
+                    <p class="text-xs text-app-muted">No suggestions right now.</p>
+                    @endforelse
                 </div>
 
                 <div class="mt-6 text-xs text-app-muted">

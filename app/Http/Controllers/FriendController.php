@@ -14,9 +14,9 @@ class FriendController extends Controller
         $user = Auth::user();
 
         $following = Friend::where('user_id_1', $user->user_id)
-            ->where('status', 'Following') // ✅ match ENUM value
-            ->whereNull('deleted_at')      // ✅ only active follows
-            ->with('following')            // assumes you defined a relation in Friend model
+            ->where('status', 'following') // ✅ lowercase
+            ->whereNull('deleted_at')
+            ->with('following')
             ->paginate(20);
 
         return view('friends.index', compact('following'));
@@ -31,7 +31,6 @@ class FriendController extends Controller
             return back()->with('error', 'You cannot follow yourself.');
         }
 
-        // Find existing row (A -> B), include soft-deleted
         $existing = Friend::withTrashed()
             ->where('user_id_1', $authUser->user_id)
             ->where('user_id_2', $user->user_id)
@@ -40,32 +39,32 @@ class FriendController extends Controller
         if ($existing) {
             $existing->restore();
 
-            if ($existing->status === 'Following') {
+            if ($existing->status === 'following') {
                 return back()->with('info', 'Already following.');
             }
 
             $existing->update([
-                'status' => 'Following',
+                'status' => 'following',
                 'deleted_at' => null,
             ]);
         } else {
             Friend::create([
                 'user_id_1' => $authUser->user_id,
                 'user_id_2' => $user->user_id,
-                'status'    => 'Following',
+                'status'    => 'following',
             ]);
         }
 
         return back()->with('success', 'You are now following this user.');
     }
 
-    // Unfollow a user
-    public function unfollow($id)
+    // Unfollow a user (by Friend record ID)
+    public function unfollow($friendId)
     {
         $authUser = Auth::user();
 
-        $friend = Friend::where('user_id_1', $authUser->user_id)
-                        ->where('user_id_2', $id)
+        $friend = Friend::where('friend_id', $friendId) // or 'id' if your PK is 'id'
+                        ->where('user_id_1', $authUser->user_id)
                         ->first();
 
         if (!$friend) {
@@ -73,7 +72,7 @@ class FriendController extends Controller
         }
 
         $friend->update([
-            'status' => 'Unfollow',
+            'status' => 'unfollow',
             'deleted_at' => now(),
         ]);
 

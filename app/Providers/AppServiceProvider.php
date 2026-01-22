@@ -3,22 +3,100 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+use App\Models\Post;
+
+use App\Models\User;
+use App\Models\Friend;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
-        //
+        View::composer('partials.right-sidebar', function ($view) {
+
+            /**
+             * ✅ HIGHLIGHTS OF THE WEEK
+             */
+            $allowed = ['academic','events','announcement','campus_life','help_wanted'];
+
+            $activeCategory = request()->query('category');
+            if (!in_array($activeCategory, $allowed, true)) {
+                $activeCategory = null;
+            }
+
+            $since = Carbon::now()->subDays(7);
+
+            $counts = Post::select('category', DB::raw('COUNT(*) as total'))
+                ->whereIn('category', $allowed)
+                ->where('created_at', '>=', $since)
+                ->groupBy('category')
+                ->orderByDesc('total')
+                ->get();
+
+            $labels = [
+                'academic'      => 'Academics',
+                'events'        => 'Events',
+                'announcement'  => 'Announcements',
+                'campus_life'   => 'Campus Life',
+                'help_wanted'   => 'Help Wanted',
+            ];
+
+            $highlights = $counts->map(function ($row) use ($labels) {
+                return [
+                    'key'   => $row->category,
+                    'label' => $labels[$row->category] ?? ucfirst(str_replace('_', ' ', $row->category)),
+                    'total' => (int) $row->total,
+                ];
+            });
+
+            $view->with('highlights', $highlights);
+            $view->with('activeCategory', $activeCategory);
+
+            /**
+             * ✅ WHO TO FOLLOW (toggle-ready)
+             */
+            $authUser = Auth::user();
+
+            if (!$authUser) {
+                $view->with('whoToFollow', collect());
+                $view->with('followMap', []);
+                $view->with('followIdMap', []);
+                return;
+            }
+
+            // ✅ Get following rows including friend_id
+            $followingRows = Friend::query()
+                ->where('user_id_1', $authUser->user_id)
+                ->where('status', 'following')
+                ->get(['friend_id', 'user_id_2']);
+
+            $followMap = [];
+            $followIdMap = [];
+
+            foreach ($followingRows as $row) {
+                $followMap[$row->user_id_2] = 'following';
+                $followIdMap[$row->user_id_2] = $row->friend_id; // ✅ used by unfollow route
+            }
+
+            // Suggestions: exclude yourself
+            $whoToFollow = User::query()
+                ->where('user_id', '!=', $authUser->user_id)
+                ->inRandomOrder()
+                ->limit(4)
+                ->get();
+
+            $view->with('whoToFollow', $whoToFollow);
+            $view->with('followMap', $followMap);
+            $view->with('followIdMap', $followIdMap);
+        });
     }
 }

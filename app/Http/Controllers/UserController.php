@@ -47,20 +47,24 @@ class UserController extends Controller
         $user = User::findOrFail($id);
         $authId = Auth::id();
         $isFollowing = false;
+        $friendId = null;
 
         if ($authId && $authId !== $user->user_id) {
-            $isFollowing = Friend::where('user_id_1', $authId)
+            $friend = Friend::where('user_id_1', $authId)
                 ->where('user_id_2', $user->user_id)
                 ->whereNull('deleted_at')
-                ->where('status', 'Following')
-                ->exists();
+                ->where('status', 'following')
+                ->first();
+
+            $isFollowing = $friend !== null;
+            $friendId = $friend?->friend_id ?? null; // or $friend->id if your PK is 'id'
         }
 
         $posts = Post::where('user_id', $user->user_id)
             ->latest()
             ->get();
 
-        return view('profile', compact('user', 'authId', 'isFollowing', 'posts'));
+        return view('profile', compact('user', 'authId', 'isFollowing', 'friendId', 'posts'));
     }
 
     // Update user account
@@ -83,7 +87,6 @@ class UserController extends Controller
             'bio'         => 'nullable|string',
             'profile_pic' => 'nullable|string',
         ], [
-            // Custom error messages
             'username.unique' => 'This username is already taken.',
             'email.unique' => 'This email is already registered.',
             'password.confirmed' => 'New password and confirmation do not match.',
@@ -107,7 +110,6 @@ class UserController extends Controller
 
         $user->update($validated);
 
-        // Redirect based on source field
         if ($request->input('source') === 'settings') {
             return redirect()->route('settings')->with('success', 'Account updated successfully!');
         }
@@ -115,7 +117,6 @@ class UserController extends Controller
         return redirect()->route('profile.show', ['id' => $user->user_id])
             ->with('success', 'Profile updated successfully!');
     }
-
 
     // Feed page
     public function feed()
