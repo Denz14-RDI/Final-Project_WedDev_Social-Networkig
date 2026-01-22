@@ -13,7 +13,8 @@ class FriendController extends Controller
     {
         $user = Auth::user();
 
-        $following = Friend::where('user_id_1', $user->user_id)
+        $following = Friend::query()
+            ->where('user_id_1', $user->user_id)
             ->where('status', 'following')
             ->with(['following'])
             ->paginate(20);
@@ -39,7 +40,6 @@ class FriendController extends Controller
         if ($existing) {
             $existing->restore();
 
-            // If already following, do nothing
             if ($existing->status === 'following') {
                 return back();
             }

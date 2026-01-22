@@ -4,12 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Post;
+use App\Models\Friend;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
-    // Create a new user
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -27,10 +27,8 @@ class UserController extends Controller
             'profile_pic' => 'nullable|string',
         ]);
 
-        // Hash password before saving
         $validated['password'] = bcrypt($validated['password']);
 
-        // Default profile picture if none provided
         if (empty($validated['profile_pic'])) {
             $validated['profile_pic'] = 'images/default.png';
         }
@@ -38,24 +36,47 @@ class UserController extends Controller
         User::create($validated);
 
         return redirect()->route('login')
-                         ->with('success', 'Registration successful! Please log in.');
+            ->with('success', 'Registration successful! Please log in.');
     }
 
-    // Show user profile with posts
     public function show($id)
     {
         $user = User::findOrFail($id);
 
-        // Get posts for this user only
         $posts = $user->posts()->latest()->get();
 
-        // Pass Auth ID explicitly for debugging and button logic
         $authId = Auth::id();
 
-        return view('profile', compact('user', 'posts', 'authId'));
+        // Following (user_id_1 = profile user, user_id_2 = target)
+        $followingRows = Friend::query()
+            ->where('user_id_1', $user->user_id)
+            ->where('status', 'following')
+            ->with(['following'])
+            ->latest()
+            ->get();
+
+        // Followers (user_id_2 = profile user, user_id_1 = follower)
+        $followersRows = Friend::query()
+            ->where('user_id_2', $user->user_id)
+            ->where('status', 'following')
+            ->with(['follower'])
+            ->latest()
+            ->get();
+
+        $followingCount = $followingRows->count();
+        $followersCount = $followersRows->count();
+
+        return view('profile', compact(
+            'user',
+            'posts',
+            'authId',
+            'followingRows',
+            'followersRows',
+            'followingCount',
+            'followersCount'
+        ));
     }
 
-    // Update user profile
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
@@ -79,32 +100,28 @@ class UserController extends Controller
             $validated['password'] = bcrypt($validated['password']);
         }
 
-        // Default profile picture if none provided
         if (empty($validated['profile_pic'])) {
             $validated['profile_pic'] = 'images/default.png';
         }
 
         $user->update($validated);
 
-        // Redirect back to profile page with correct user_id
         return redirect()->route('profile.show', ['id' => $user->user_id])
-                         ->with('success', 'Profile updated successfully!');
+            ->with('success', 'Profile updated successfully!');
     }
 
-    // Feed page
     public function feed()
     {
-        $me = Auth::user(); // current logged-in user 
+        $me = Auth::user();
         return view('feed', compact('me'));
     }
 
-    // Delete user
     public function destroy($id)
     {
         $user = User::findOrFail($id);
         $user->delete();
 
         return redirect()->route('login')
-                         ->with('success', 'User deleted successfully.');
+            ->with('success', 'User deleted successfully.');
     }
 }

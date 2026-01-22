@@ -52,77 +52,95 @@
                     <span>Joined {{ $user->created_at->format('F Y') }}</span>
                   </div>
 
-                  <div class="mt-4 text-sm text-app">
-                    <span class="font-extrabold">{{ $user->iskoolmates ?? 0 }}</span>
-                    <span class="ml-1 text-app-muted">Iskoolmates</span>
+                  {{-- FOLLOWERS / FOLLOWING (clickable -> modals) --}}
+                  <div class="mt-5 flex items-center gap-8 text-sm">
+                    {{-- Followers --}}
+                    <button type="button" id="openFollowersModal"
+                      class="group inline-flex items-center gap-2 text-app hover:opacity-95 transition">
+                      <span class="font-extrabold text-app text-base">
+                        {{ $followersCount ?? 0 }}
+                      </span>
+                      <span class="text-app-muted group-hover:underline underline-offset-4">
+                        Followers
+                      </span>
+                    </button>
+
+                    {{-- Following --}}
+                    <button type="button" id="openFollowingModal"
+                      class="group inline-flex items-center gap-2 text-app hover:opacity-95 transition">
+                      <span class="font-extrabold text-app text-base">
+                        {{ $followingCount ?? 0 }}
+                      </span>
+                      <span class="text-app-muted group-hover:underline underline-offset-4">
+                        Following
+                      </span>
+                    </button>
                   </div>
-                </div>
-              </div>
 
-              <div class="mt-8 border-t border-app"></div>
 
-              {{-- posts --}}
-              <div class="mt-6 space-y-6">
-                @forelse($posts as $p)
-                <div class="bg-app-card rounded-2xl border border-app shadow-app p-6">
-                  <div class="flex items-start gap-4">
-                    <img src="{{ asset($user->profile_pic ?? 'images/default.png') }}"
-                      class="h-12 w-12 rounded-full object-cover border border-app" alt="me" />
+                  <div class="mt-8 border-t border-app"></div>
 
-                    <div class="flex-1">
-                      <div class="flex items-start justify-between gap-4">
-                        <div class="leading-tight">
-                          <div class="font-extrabold text-app">{{ $user->first_name }} {{ $user->last_name }}</div>
-                          <div class="mt-1 text-sm text-app-muted">
-                            {{ '@' . $user->username }} · {{ $p->created_at->diffForHumans() }}
+                  {{-- posts --}}
+                  <div class="mt-6 space-y-6">
+                    @forelse($posts as $p)
+                    <div class="bg-app-card rounded-2xl border border-app shadow-app p-6">
+                      <div class="flex items-start gap-4">
+                        <img src="{{ asset($user->profile_pic ?? 'images/default.png') }}"
+                          class="h-12 w-12 rounded-full object-cover border border-app" alt="me" />
+
+                        <div class="flex-1">
+                          <div class="flex items-start justify-between gap-4">
+                            <div class="leading-tight">
+                              <div class="font-extrabold text-app">{{ $user->first_name }} {{ $user->last_name }}</div>
+                              <div class="mt-1 text-sm text-app-muted">
+                                {{ '@' . $user->username }} · {{ $p->created_at->diffForHumans() }}
+                              </div>
+                              <div class="text-xs text-app-muted mt-1">
+                                📌 {{ ucfirst(str_replace('_',' ', $p->category)) }}
+                              </div>
+                            </div>
+
+                            @if($authId === $user->user_id)
+                            <form action="{{ route('posts.destroy', $p->post_id) }}" method="POST">
+                              @csrf
+                              @method('DELETE')
+                              <button class="text-app-muted hover:text-app">⋯</button>
+                            </form>
+                            @endif
                           </div>
-                          {{-- ✅ Show category --}}
-                          <div class="text-xs text-app-muted mt-1">
-                            📌 {{ ucfirst(str_replace('_',' ', $p->category)) }}
+
+                          <div class="mt-3 text-sm text-app">{{ $p->post_content }}</div>
+
+                          @if($p->image)
+                          <div class="mt-5 overflow-hidden rounded-2xl bg-app-input border border-app">
+                            <img src="{{ $p->image }}" class="h-56 sm:h-64 w-full object-cover" alt="post image" loading="lazy">
                           </div>
+                          @endif
+
+                          @if($p->link)
+                          <div class="mt-2 text-sm text-app-muted">
+                            <a href="{{ $p->link }}" target="_blank">{{ $p->link }}</a>
+                          </div>
+                          @endif
                         </div>
-                        @if($authId === $user->user_id)
-                        <form action="{{ route('posts.destroy', $p->post_id) }}" method="POST">
-                          @csrf
-                          @method('DELETE')
-                          <button class="text-app-muted hover:text-app">⋯</button>
-                        </form>
-                        @endif
                       </div>
 
-                      <div class="mt-3 text-sm text-app">{{ $p->post_content }}</div>
-
-                      @if($p->image)
-                      <div class="mt-5 overflow-hidden rounded-2xl bg-app-input border border-app">
-                        <img src="{{ $p->image }}" class="h-56 sm:h-64 w-full object-cover" alt="post image" loading="lazy">
+                      <div class="px-5 py-3 text-sm text-app-muted flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                          <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-app-brand text-white text-[11px]">🔥</span>
+                          <span>0</span>
+                        </div>
+                        <div>0 comments</div>
                       </div>
-                      @endif
-
-                      @if($p->link)
-                      <div class="mt-2 text-sm text-app-muted">
-                        <a href="{{ $p->link }}" target="_blank">{{ $p->link }}</a>
-                      </div>
-                      @endif
                     </div>
-                  </div>
-
-                  {{-- Optional footer for likes/comments --}}
-                  <div class="px-5 py-3 text-sm text-app-muted flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                      <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-app-brand text-white text-[11px]">🔥</span>
-                      <span>0</span>
-                    </div>
-                    <div>0 comments</div>
+                    @empty
+                    <p class="text-center text-app-muted">No posts yet.</p>
+                    @endforelse
                   </div>
                 </div>
-                @empty
-                <p class="text-center text-app-muted">No posts yet.</p>
-                @endforelse
               </div>
             </div>
           </div>
-        </div>
-      </div>
     </main>
 
     {{-- RIGHT SIDEBAR --}}
@@ -130,6 +148,10 @@
 
   </div>
 </div>
+
+{{-- ✅ FOLLOWERS/FOLLOWING MODALS --}}
+@include('partials.profile-followers-modal')
+@include('partials.profile-following-modal')
 
 {{-- EDIT PROFILE MODAL only for owner --}}
 @if($authId === $user->user_id)
@@ -139,26 +161,40 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    const openBtn = document.getElementById('openEditProfile');
-    const modal = document.getElementById('editProfileModal');
-    const closeBtn = document.getElementById('closeEditProfileBtn');
-    const closeBackdrop = document.getElementById('closeEditProfileBackdrop');
-    const closeX = document.getElementById('closeEditProfileX');
+    // Followers modal
+    const followersModal = document.getElementById('followersModal');
+    const openFollowers = document.getElementById('openFollowersModal');
+    const closeFollowersBackdrop = document.getElementById('closeFollowersBackdrop');
+    const closeFollowersX = document.getElementById('closeFollowersX');
 
-    if (openBtn && modal) {
-      openBtn.addEventListener('click', () => {
-        modal.classList.remove('hidden');
-        modal.classList.add('flex'); // show as flexbox centered
-      });
+    function showFollowers() {
+      if (followersModal) followersModal.classList.remove('hidden');
     }
 
-    function closeModal() {
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
+    function hideFollowers() {
+      if (followersModal) followersModal.classList.add('hidden');
     }
 
-    if (closeBtn) closeBtn.addEventListener('click', closeModal);
-    if (closeBackdrop) closeBackdrop.addEventListener('click', closeModal);
-    if (closeX) closeX.addEventListener('click', closeModal);
+    if (openFollowers) openFollowers.addEventListener('click', showFollowers);
+    if (closeFollowersBackdrop) closeFollowersBackdrop.addEventListener('click', hideFollowers);
+    if (closeFollowersX) closeFollowersX.addEventListener('click', hideFollowers);
+
+    // Following modal
+    const followingModal = document.getElementById('followingModal');
+    const openFollowing = document.getElementById('openFollowingModal');
+    const closeFollowingBackdrop = document.getElementById('closeFollowingBackdrop');
+    const closeFollowingX = document.getElementById('closeFollowingX');
+
+    function showFollowing() {
+      if (followingModal) followingModal.classList.remove('hidden');
+    }
+
+    function hideFollowing() {
+      if (followingModal) followingModal.classList.add('hidden');
+    }
+
+    if (openFollowing) openFollowing.addEventListener('click', showFollowing);
+    if (closeFollowingBackdrop) closeFollowingBackdrop.addEventListener('click', hideFollowing);
+    if (closeFollowingX) closeFollowingX.addEventListener('click', hideFollowing);
   });
 </script>
