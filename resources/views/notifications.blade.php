@@ -56,7 +56,8 @@ $notifications = [
         <div class="space-y-4">
           @foreach($notifications as $n)
           <div class="bg-app-card rounded-2xl border border-app shadow-app overflow-hidden">
-            <div class="p-5" style="{{ $n['unread'] ? 'background: var(--amber-bg);' : '' }}">
+            <div class="p-5" @if($n['unread']) style="background: var(--amber-bg);" @endif>
+
               <div class="flex items-center gap-4">
 
                 <div class="h-12 w-12 rounded-full bg-app-input border border-app flex items-center justify-center font-bold text-app">

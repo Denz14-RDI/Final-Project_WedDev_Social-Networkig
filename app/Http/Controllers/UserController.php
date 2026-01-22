@@ -38,7 +38,7 @@ class UserController extends Controller
         User::create($validated);
 
         return redirect()->route('login')
-                         ->with('success', 'Registration successful! Please log in.');
+            ->with('success', 'Registration successful! Please log in.');
     }
 
     // Show user profile with posts
@@ -46,11 +46,21 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
 
-        // Get posts for this user only
-        $posts = $user->posts()->latest()->get();
+        $authUserId = Auth::user()->user_id; // correct for your schema
 
-        // Pass Auth ID explicitly for debugging and button logic
-        $authId = Auth::id();
+        // Load posts + likes_count + liked_by_me
+        $posts = Post::where('user_id', $user->user_id)
+            ->latest()
+            ->withCount('likes') // likes_count
+            ->withCount('comments') // comments_count
+            ->withCount([
+                'likes as liked_by_me' => function ($q) use ($authUserId) {
+                    $q->where('user_id', $authUserId);
+                }
+            ])
+            ->get();
+
+        $authId = $authUserId; // keep your blade logic working
 
         return view('profile', compact('user', 'posts', 'authId'));
     }
@@ -88,7 +98,7 @@ class UserController extends Controller
 
         // Redirect back to profile page with correct user_id
         return redirect()->route('profile.show', ['id' => $user->user_id])
-                         ->with('success', 'Profile updated successfully!');
+            ->with('success', 'Profile updated successfully!');
     }
 
     // Feed page
@@ -105,6 +115,6 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->route('login')
-                         ->with('success', 'User deleted successfully.');
+            ->with('success', 'User deleted successfully.');
     }
 }

@@ -11,8 +11,17 @@ class PostController extends Controller
     // Show all posts (feed)
     public function index()
     {
-        // eager load user to avoid N+1 queries
-        $posts = Post::with('user')->latest()->get();
+        $userId = Auth::user()->user_id;
+
+        $posts = Post::with('user')
+            ->withCount('likes') // adds likes_count
+            ->withCount('comments') // adds comments_count
+            ->withCount(['likes as liked_by_me' => function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            }])
+            ->latest()
+            ->get();
+
         return view('feed', compact('posts'));
     }
 
@@ -26,7 +35,7 @@ class PostController extends Controller
             'image'        => 'nullable|string',
         ]);
 
-        $validated['user_id'] = Auth::id();
+        $validated['user_id'] = Auth::user()->user_id;
 
         Post::create($validated);
 
@@ -37,7 +46,7 @@ class PostController extends Controller
     public function edit(Post $post)
     {
         // Only allow owner to edit
-        if ($post->user_id !== Auth::id()) {
+        if ($post->user_id !== Auth::user()->user_id) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -48,7 +57,7 @@ class PostController extends Controller
     public function update(Request $request, Post $post)
     {
         // Only allow owner to update
-        if ($post->user_id !== Auth::id()) {
+        if ($post->user_id !== Auth::user()->user_id) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -69,7 +78,7 @@ class PostController extends Controller
     {
         $post = Post::findOrFail($id);
 
-        if ($post->user_id !== Auth::id()) {
+        if ($post->user_id !== Auth::user()->user_id) {
             abort(403, 'Unauthorized action.');
         }
 
