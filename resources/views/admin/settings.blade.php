@@ -56,9 +56,8 @@
                         <input type="password" name="current_password"
                             class="mt-2 w-full rounded-xl border border-black/10 px-4 py-3 outline-none focus:ring-2 focus:ring-[#6C1517]/20 focus:border-[#6C1517]"
                             placeholder="Enter current password" required>
-                        {{-- Validation message placeholder --}}
                         @error('current_password')
-                            <div class="text-sm text-red-600 mt-1">{{ $message }}</div>
+                            <div class="text-sm text-red-600 mt-1">❌ {{ $message }}</div>
                         @enderror
                     </div>
 
@@ -67,6 +66,9 @@
                         <input type="password" name="new_password"
                             class="mt-2 w-full rounded-xl border border-black/10 px-4 py-3 outline-none focus:ring-2 focus:ring-[#6C1517]/20 focus:border-[#6C1517]"
                             placeholder="Enter new password" required>
+                        @error('new_password')
+                            <div class="text-sm text-red-600 mt-1">❌ {{ $message }}</div>
+                        @enderror
                     </div>
 
                     <div>
@@ -74,9 +76,8 @@
                         <input type="password" name="new_password_confirmation"
                             class="mt-2 w-full rounded-xl border border-black/10 px-4 py-3 outline-none focus:ring-2 focus:ring-[#6C1517]/20 focus:border-[#6C1517]"
                             placeholder="Confirm new password" required>
-                        {{-- Validation message placeholder --}}
                         @error('new_password_confirmation')
-                            <div class="text-sm text-red-600 mt-1">{{ $message }}</div>
+                            <div class="text-sm text-red-600 mt-1">❌ {{ $message }}</div>
                         @enderror
                     </div>
 
