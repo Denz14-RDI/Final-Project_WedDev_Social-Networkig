@@ -8,38 +8,81 @@ use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
-    
-    // Get all notifications for the authenticated user.
+    // ✅ Blade page: /notifications
+    public function page()
+    {
+        $authId = Auth::user()->user_id;
+
+        $notifications = Notification::where('user_id', $authId)
+            ->orderByDesc('created_at')
+            ->get();
+
+        $unreadCount = Notification::where('user_id', $authId)
+            ->whereNull('read_at')
+            ->count();
+
+        return view('notifications', compact('notifications', 'unreadCount'));
+    }
+
+    // ✅ JSON list (optional): /notifications/json
     public function index()
     {
-        $user = Auth::user();
-        $notifications = Notification::where('user_id', $user->user_id ?? $user->id)
+        $authId = Auth::user()->user_id;
+
+        $notifications = Notification::where('user_id', $authId)
             ->orderByDesc('created_at')
             ->get();
+
         return response()->json($notifications);
     }
 
-    // Get only unread notifications for the authenticated user.
-    public function unread(){
+    // ✅ JSON unread count: /notifications/unread
+    public function unread()
+    {
+        $authId = Auth::user()->user_id;
 
-        $user = Auth::user();
-        $notifications = Notification::where('user_id', $user->user_id ?? $user->id)
+        $count = Notification::where('user_id', $authId)
             ->whereNull('read_at')
-            ->orderByDesc('created_at')
-            ->get();
-        return response()->json($notifications);
+            ->count();
+
+        return response()->json(['count' => $count]);
     }
 
-    // Mark a specific notification as read
-    public function markAsRead(Notification $notification){
-        if ($notification->user_id !== Auth::id()){
+    // ✅ Mark ONE as read: /notifications/{notification}/read
+    public function markAsRead(Notification $notification)
+    {
+        $authId = Auth::user()->user_id;
+
+        if ((int) $notification->user_id !== (int) $authId) {
             abort(403, 'Unauthorized');
         }
 
-        $notification->update([
-            'read_at' => now(),
+        if (is_null($notification->read_at)) {
+            $notification->update(['read_at' => now()]);
+        }
+
+        $count = Notification::where('user_id', $authId)
+            ->whereNull('read_at')
+            ->count();
+
+        return response()->json([
+            'ok' => true,
+            'count' => $count,
         ]);
-        
-        return response()->json(['message' => 'Notification marked as read.']);
+    }
+
+    // ✅ Mark ALL as read: /notifications/read-all
+    public function markAllAsRead()
+    {
+        $authId = Auth::user()->user_id;
+
+        Notification::where('user_id', $authId)
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
+
+        return response()->json([
+            'ok' => true,
+            'count' => 0,
+        ]);
     }
 }

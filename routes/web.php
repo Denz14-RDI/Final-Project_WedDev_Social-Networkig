@@ -10,7 +10,10 @@ use App\Http\Controllers\LikeController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\SearchController;
-
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\AdminAuthController;
+use App\Http\Controllers\AdminSettingsController;
+use App\Models\Notification;
 
 // --------------------
 // Public pages
@@ -22,7 +25,11 @@ Route::get('/login', fn() => view('auth.login'))->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 
 Route::get('/sign-in', fn() => view('auth.signin-choice'))->name('signin.choice');
-Route::get('/admin/login', fn() => view('auth.admin-login'))->name('admin.login');
+
+// Admin login
+Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
+Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
+Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
 
 // Registration
 Route::get('/register', fn() => view('auth.register'))->name('register');
@@ -33,12 +40,16 @@ Route::post('/register', [UserController::class, 'store'])->name('register.store
 // --------------------
 Route::middleware('auth')->group(function () {
 
-    // Feed (dynamic posts)
+    // Feed & Posts
     Route::get('/feed', [PostController::class, 'index'])->name('feed');
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
-    Route::get('/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit'); // ✅ added
-    Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update'); // ✅ added
-    Route::delete('/posts/{id}', [PostController::class, 'destroy'])->name('posts.destroy');
+    Route::get('/posts/{post}', [PostController::class, 'show'])->name('posts.show');
+    Route::get('/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit');
+    Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update');
+    Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
+
+    // Reports (user side)
+    Route::post('/posts/{post}/report', [ReportController::class, 'store'])->name('posts.report');
 
     // Likes
     Route::post('/posts/{post}/like', [LikeController::class, 'toggle'])
@@ -51,23 +62,36 @@ Route::middleware('auth')->group(function () {
     Route::put('/comments/{comment}', [CommentController::class, 'update'])->name('comments.update');
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
 
-    // Notifications
-    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
-    Route::get('/notifications/unread', [NotificationController::class, 'unread'])->name('notifications.unread');
-    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+    // Notifications (Blade page)
+    Route::get('/notifications', [NotificationController::class, 'page'])
+        ->name('notifications');
+
+    // Notifications (JSON endpoints)
+    Route::get('/notifications/unread', [NotificationController::class, 'unread'])
+        ->name('notifications.unread');
+
+    Route::get('/notifications/json', [NotificationController::class, 'index'])
+        ->name('notifications.index'); // optional (list in JSON)
+
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])
+        ->name('notifications.markAsRead');
+
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])
+        ->name('notifications.markAllAsRead');
+
+
 
     // Search
     Route::get('/search', [SearchController::class, 'index'])->name('search');
 
     // Notifications, Settings
-    Route::get('/notifications', fn() => view('notifications'))->name('notifications');
+    //Route::get('/notifications', fn() => view('notifications'))->name('notifications');
     Route::get('/settings', fn() => view('settings'))->name('settings');
 
     // Friends / follow system
     Route::get('/friends', [FriendController::class, 'index'])->name('friends.index');
     Route::post('/friends/{user}', [FriendController::class, 'store'])->name('friends.store');
-    Route::post('/friends/{friend}/unfollow', [FriendController::class, 'unfollow'])->name('friends.unfollow');
-
+    Route::post('/friends/{user}/unfollow', [FriendController::class, 'unfollow'])->name('friends.unfollow');
 
     // Profile
     Route::get('/profile/{id}', [UserController::class, 'show'])->name('profile.show');
@@ -89,21 +113,32 @@ Route::middleware('auth')->group(function () {
 });
 
 // --------------------
-// Friendship routes
-// --------------------
-
-// --------------------
 // Admin routes
 // --------------------
 Route::prefix('admin')
     ->name('admin.')
+    ->middleware(['auth', 'admin'])
     ->group(function () {
         Route::get('/', fn() => redirect()->route('admin.dashboard'));
 
+        // Dashboard
         Route::view('/dashboard', 'admin.dashboard')->name('dashboard');
-        Route::view('/moderation', 'admin.moderation')->name('moderation');
+
+        // Moderation panel (supports ?tab=pending|resolved|dismissed)
+        Route::get('/moderation', [ReportController::class, 'moderationView'])->name('reports.moderation');
+
+        // Report management
+        Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::get('/reports/{report}', [ReportController::class, 'show'])->name('reports.show');
+        Route::put('/reports/{report}/status', [ReportController::class, 'updateStatus'])->name('reports.updateStatus');
+
+        // Admin views
         Route::view('/users', 'admin.users')->name('users');
         Route::view('/posts', 'admin.posts')->name('posts');
         Route::view('/banned', 'admin.banned')->name('banned');
         Route::view('/settings', 'admin.settings')->name('settings');
+
+        // Admin Settings actions
+        Route::post('/settings/update-password', [AdminSettingsController::class, 'updatePassword'])
+            ->name('updatePassword');
     });

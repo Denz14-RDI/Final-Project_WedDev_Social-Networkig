@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Like;
+use App\Models\Notification;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -33,6 +34,32 @@ class LikeController extends Controller
                 ]);
             }
             $liked = true;
+
+            // ✅ CREATE NOTIFICATION (only if liking someone else's post)
+            if ((int)$post->user_id !== (int)$user->user_id) {
+
+                // prevent duplicates (important dahil may restore)
+                $exists = Notification::where('user_id', $post->user_id)
+                    ->where('notif_type', 'new_like')
+                    ->where('entity_type', 'post')
+                    ->where('entity_id', $post->post_id)
+                    ->whereJsonContains('notif_data->actor_id', $user->user_id)
+                    ->exists();
+
+                if (!$exists) {
+                    Notification::create([
+                        'user_id'    => $post->user_id,     // receiver (post owner)
+                        'notif_type' => 'new_like',
+                        'entity_type' => 'post',
+                        'entity_id'  => $post->post_id,
+                        'notif_data' => [
+                            'actor_id'   => $user->user_id,
+                            'actor_name' => $user->first_name . ' ' . $user->last_name,
+                            'post_id'    => $post->post_id,
+                        ],
+                    ]);
+                }
+            }
         }
 
         $post->loadCount('likes');

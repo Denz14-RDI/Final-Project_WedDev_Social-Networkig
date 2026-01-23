@@ -3,26 +3,113 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\Friend;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class PostController extends Controller
 {
-    // Show all posts (feed)
+    // Show posts (feed + explore)
     public function index()
     {
-        $userId = Auth::user()->user_id;
+        $user = Auth::user();
+        $userId = $user->user_id;
 
-        $posts = Post::with('user')
-            ->withCount('likes') // adds likes_count
-            ->withCount('comments') // adds comments_count
-            ->withCount(['likes as liked_by_me' => function ($q) use ($userId) {
-                $q->where('user_id', $userId);
-            }])
-            ->latest()
+        $allowed = ['academic', 'events', 'announcement', 'campus_life', 'help_wanted'];
+
+        $activeCategory = request()->query('category');
+        if (!in_array($activeCategory, $allowed, true)) {
+            $activeCategory = null;
+        }
+
+        $scope = request()->query('scope'); // 'all' or null
+
+        // ✅ Build follow maps for the feed UI
+        $followRows = Friend::query()
+            ->where('user_id_1', $userId)
+            ->whereIn('status', ['follow', 'following'])
+            ->get(['friend_id', 'user_id_2', 'status']);
+
+        $followMap = [];
+        $followIdMap = [];
+        foreach ($followRows as $r) {
+            $followMap[$r->user_id_2] = $r->status;
+            $followIdMap[$r->user_id_2] = $r->friend_id;
+        }
+
+        // ✅ POSTS QUERY (with counts needed by comments + likes UI)
+        if ($scope === 'all') {
+            $postsQuery = Post::with('user')
+                ->withCount('likes')
+                ->withCount('comments')
+                ->withCount(['likes as liked_by_me' => function ($q) use ($userId) {
+                    $q->where('user_id', $userId);
+                }])
+                ->latest();
+
+            if ($activeCategory) {
+                $postsQuery->where('category', $activeCategory);
+            }
+        } else {
+            $followingIds = Friend::query()
+                ->where('user_id_1', $userId)
+                ->where('status', 'following')
+                ->pluck('user_id_2')
+                ->toArray();
+
+            $visibleUserIds = array_unique(array_merge($followingIds, [$userId]));
+
+            $postsQuery = Post::with('user')
+                ->withCount('likes')
+                ->withCount('comments')
+                ->withCount(['likes as liked_by_me' => function ($q) use ($userId) {
+                    $q->where('user_id', $userId);
+                }])
+                ->whereIn('user_id', $visibleUserIds)
+                ->latest();
+
+            if ($activeCategory) {
+                $postsQuery->where('category', $activeCategory);
+            }
+        }
+
+        $posts = $postsQuery->get();
+
+        // ✅ HIGHLIGHTS OF THE WEEK
+        $since = Carbon::now()->subDays(7);
+
+        $counts = Post::select('category', DB::raw('COUNT(*) as total'))
+            ->whereIn('category', $allowed)
+            ->where('created_at', '>=', $since)
+            ->groupBy('category')
+            ->orderByDesc('total')
             ->get();
 
-        return view('feed', compact('posts'));
+        $labels = [
+            'academic'      => 'Academics',
+            'events'        => 'Events',
+            'announcement'  => 'Announcements',
+            'campus_life'   => 'Campus Life',
+            'help_wanted'   => 'Help Wanted',
+        ];
+
+        $highlights = $counts->map(function ($row) use ($labels) {
+            return [
+                'key'   => $row->category,
+                'label' => $labels[$row->category] ?? ucfirst(str_replace('_', ' ', $row->category)),
+                'total' => (int) $row->total,
+            ];
+        });
+
+        return view('feed', compact(
+            'posts',
+            'highlights',
+            'activeCategory',
+            'followMap',
+            'followIdMap'
+        ));
     }
 
     // Store a new post
@@ -32,7 +119,7 @@ class PostController extends Controller
             'post_content' => 'required|string|max:1000',
             'category'     => 'required|in:academic,events,announcement,campus_life,help_wanted',
             'link'         => 'nullable|url',
-            'image'        => 'nullable|string',
+            'image'        => 'nullable|url',
         ]);
 
         $validated['user_id'] = Auth::user()->user_id;
@@ -42,10 +129,40 @@ class PostController extends Controller
         return redirect()->route('feed')->with('success', 'Post created successfully!');
     }
 
+    public function show(Post $post)
+    {
+        $user = Auth::user();
+
+        // load counts + relationships needed sa feed UI
+        $post->load('user');
+        $post->loadCount(['likes', 'comments']);
+
+        // reuse followMap logic (same as index mo)
+        $followRows = Friend::query()
+            ->where('user_id_1', $user->user_id)
+            ->whereIn('status', ['follow', 'following'])
+            ->get(['friend_id', 'user_id_2', 'status']);
+
+        $followMap = [];
+        $followIdMap = [];
+        foreach ($followRows as $r) {
+            $followMap[$r->user_id_2] = $r->status;
+            $followIdMap[$r->user_id_2] = $r->friend_id;
+        }
+
+        // ✅ only 1 post
+        $posts = collect([$post]);
+
+        // optional flag para maitago composer/header stuff
+        $singlePost = true;
+
+        return view('feed', compact('posts', 'followMap', 'followIdMap', 'singlePost'));
+    }
+
+
     // Show edit form
     public function edit(Post $post)
     {
-        // Only allow owner to edit
         if ($post->user_id !== Auth::user()->user_id) {
             abort(403, 'Unauthorized action.');
         }
@@ -56,8 +173,9 @@ class PostController extends Controller
     // Update post
     public function update(Request $request, Post $post)
     {
-        // Only allow owner to update
-        if ($post->user_id !== Auth::user()->user_id) {
+        $authId = Auth::user()->user_id;
+
+        if ((int)$post->user_id !== (int)$authId) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -65,25 +183,25 @@ class PostController extends Controller
             'post_content' => 'required|string|max:1000',
             'category'     => 'required|in:academic,events,announcement,campus_life,help_wanted',
             'link'         => 'nullable|url',
-            'image'        => 'nullable|string',
+            'image'        => 'nullable|url',
         ]);
 
         $post->update($validated);
 
-        return redirect()->route('feed')->with('success', 'Post updated successfully!');
+        return back()->with('success', 'Post updated successfully!');
     }
 
-    // Delete a post (soft delete)
-    public function destroy($id)
+    // Delete a post
+    public function destroy(Post $post)
     {
-        $post = Post::findOrFail($id);
+        $authId = Auth::user()->user_id;
 
-        if ($post->user_id !== Auth::user()->user_id) {
+        if ((int)$post->user_id !== (int)$authId) {
             abort(403, 'Unauthorized action.');
         }
 
         $post->delete();
 
-        return redirect()->route('feed')->with('success', 'Post deleted successfully!');
+        return back()->with('success', 'Post deleted successfully!');
     }
 }

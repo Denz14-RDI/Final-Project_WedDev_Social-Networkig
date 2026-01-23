@@ -38,6 +38,29 @@
         </a>
       </div>
 
+      <!-- ✅ Flash Messages -->
+      @if (session('success'))
+        <div class="mb-4 rounded-lg bg-green-100 border border-green-400 text-green-700 px-4 py-3">
+          {{ session('success') }}
+        </div>
+      @endif
+
+      @if ($errors->any())
+        <div class="mb-4 rounded-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3">
+          <ul class="list-disc pl-5">
+            @foreach ($errors->all() as $error)
+              <li>{{ $error }}</li>
+            @endforeach
+          </ul>
+        </div>
+      @endif
+
+      @if (session('error'))
+        <div class="mb-4 rounded-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3">
+          {{ session('error') }}
+        </div>
+      @endif
+
       <form method="POST" action="{{ route('login') }}" class="mt-6 space-y-5">
         @csrf
 
@@ -48,7 +71,7 @@
             type="text"
             name="login"
             value="{{ old('login') }}"
-            placeholder="iskolar@pup.edu.ph"
+            placeholder="@iskolarngbayan.pup.edu.ph"
             required
             class="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 outline-none text-black focus:ring-2 focus:ring-[#6C1517]/25 focus:border-[#6C1517]">
           @error('login')

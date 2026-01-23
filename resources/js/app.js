@@ -62,14 +62,35 @@ window.notifSidebar = function notifSidebar() {
     notifOpen: false,
     notifTab: "all",
     menuOpen: false,
-    unreadCount: 3,
-    items: [
-      { id: 1, unread: true,  name: "Cyril Lucero",       text: "invited you to like LemPang.",                time: "1d", type: "invite", avatar: "https://i.pravatar.cc/120?img=11" },
-      { id: 2, unread: true,  name: "Chyll Mixel Carlos", text: "invited you to like Cloud Collectibles.",     time: "2d", type: "invite", avatar: "https://i.pravatar.cc/120?img=15" },
-      { id: 3, unread: true,  name: "James De Guzman",    text: "invited you to follow Athena East.",          time: "2d", type: "invite", avatar: "https://i.pravatar.cc/120?img=28" },
-      { id: 4, unread: false, name: "PUPCOM",             text: "Your birthday is 3 days away. 🎉",            time: "3d", type: "info",   avatar: "/images/logo.png" },
-      { id: 5, unread: false, name: "Migz Labiano",       text: "reacted to your post.",                       time: "1w", type: "like",   avatar: "https://i.pravatar.cc/120?img=49" },
-    ],
+
+    // ✅ start 0, then fetch real count
+    unreadCount: 0,
+
+    async init() {
+      // 1) fetch unread count on load
+      await this.fetchUnreadCount();
+
+      // 2) listen for updates from notifications page (mark read / mark all read)
+      window.addEventListener("notif-updated", (e) => {
+        this.unreadCount = e.detail?.count ?? 0;
+      });
+    },
+
+    async fetchUnreadCount() {
+      try {
+        const res = await fetch("/notifications/unread", {
+          headers: { Accept: "application/json" },
+        });
+        if (!res.ok) return;
+
+        const data = await res.json();
+
+        // your controller returns { count: n }
+        this.unreadCount = data.count ?? 0;
+      } catch (err) {
+        // ignore
+      }
+    },
 
     toggleNotif() {
       this.notifOpen = !this.notifOpen;
@@ -78,16 +99,6 @@ window.notifSidebar = function notifSidebar() {
 
     closeAll() {
       this.notifOpen = false;
-      this.menuOpen = false;
-    },
-
-    filtered() {
-      return this.items.filter((i) => (this.notifTab === "all" ? true : i.unread));
-    },
-
-    markAllRead() {
-      this.items = this.items.map((i) => ({ ...i, unread: false }));
-      this.unreadCount = 0;
       this.menuOpen = false;
     },
   };

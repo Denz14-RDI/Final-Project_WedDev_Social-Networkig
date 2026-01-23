@@ -15,6 +15,7 @@ class Notification extends Model
     public $timestamps = false;
 
     protected $fillable = [
+        'user_id',
         'notif_type',
         'entity_type',
         'entity_id',
@@ -28,6 +29,11 @@ class Notification extends Model
         'created_at' => 'datetime',
     ];
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
+    }
+
     public function entity(){
         switch($this->entity_type){
             case 'user':
@@ -35,7 +41,7 @@ class Notification extends Model
             case 'post':
                 return $this->belongsTo(Post::class, 'entity_id', 'post_id');
             case 'comment':
-                return $this->belongsTo(Comment::class, 'entity_id', 'comment_id');
+                return $this->belongsTo(Comment::class, 'entity_id', 'com_id');
             default:
                 return null;
         }

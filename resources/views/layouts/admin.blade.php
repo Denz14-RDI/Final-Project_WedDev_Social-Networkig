@@ -16,6 +16,20 @@
 
         <main class="min-h-screen">
             <div class="px-6 py-8 lg:px-10">
+
+                {{-- ✅ Flash Messages --}}
+                @if(session('success'))
+                    <div class="mb-4 px-4 py-3 rounded-xl bg-green-50 text-green-800 font-semibold flex items-center gap-2">
+                         {{ session('success') }}
+                    </div>
+                @endif
+
+                @if($errors->any())
+                    <div class="mb-4 px-4 py-3 rounded-xl bg-red-50 text-red-800 font-semibold flex items-center gap-2">
+                         {{ $errors->first() }}
+                    </div>
+                @endif
+
                 @yield('content')
             </div>
         </main>

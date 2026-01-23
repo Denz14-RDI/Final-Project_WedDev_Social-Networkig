@@ -2,6 +2,7 @@
 <aside
     class="bg-app-sidebar lg:sticky lg:top-0 lg:h-screen border-r border-app"
     x-data="notifSidebar()"
+    x-init="init()"
     @keydown.escape.window="closeAll()">
 
     <div class="h-full flex flex-col">
@@ -56,14 +57,7 @@
             {{-- Notifications --}}
             <a
                 href="{{ route('notifications') }}"
-                class="flex items-center justify-between gap-3 px-4 py-3 rounded-xl {{ $navItem('notifications') }}"
-                @click.prevent="
-                    @if(!$onNotificationsPage)
-                        toggleNotif()
-                    @else
-                        window.location.href='{{ route('notifications') }}'
-                    @endif
-                ">
+                class="flex items-center justify-between gap-3 px-4 py-3 rounded-xl {{ $navItem('notifications') }}">
                 <div class="flex items-center gap-3">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -79,6 +73,7 @@
                     </span>
                 </template>
             </a>
+
 
             {{-- Profile --}}
             <a href="{{ route('profile') }}"

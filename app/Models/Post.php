@@ -22,6 +22,7 @@ class Post extends Model
         'link',
     ];
 
+    // Relationship: Post belongs to a User
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
@@ -35,6 +36,11 @@ class Post extends Model
     public function comments()
     {
         return $this->hasMany(Comment::class, 'post_id', 'post_id');
+    }
+
+    public function reports()
+    {
+        return $this->hasMany(Report::class, 'post_id', 'post_id');
     }
 
     public function getRouteKeyName()
