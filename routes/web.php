@@ -9,6 +9,7 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AdminAuthController;
+use App\Http\Controllers\AdminSettingsController; // ✅ new controller for settings
 
 // --------------------
 // Public pages
@@ -21,7 +22,7 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 
 Route::get('/sign-in', fn() => view('auth.signin-choice'))->name('signin.choice');
 
-// Admin login (real controller, not just view)
+// Admin login
 Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
 Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
@@ -42,7 +43,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update');
     Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
 
-    // Reports
+    // Reports (user side)
     Route::post('/posts/{post}/report', [ReportController::class, 'store'])->name('posts.report');
 
     // Search
@@ -55,7 +56,7 @@ Route::middleware('auth')->group(function () {
     // Friends / follow system
     Route::get('/friends', [FriendController::class, 'index'])->name('friends.index');
     Route::post('/friends/{user}', [FriendController::class, 'store'])->name('friends.store');
-    Route::post('/friends/{user}/unfollow', [FriendController::class, 'unfollow'])->name('friends.unfollow'); 
+    Route::post('/friends/{user}/unfollow', [FriendController::class, 'unfollow'])->name('friends.unfollow');
 
     // Profile
     Route::get('/profile/{id}', [UserController::class, 'show'])->name('profile.show');
@@ -81,17 +82,28 @@ Route::middleware('auth')->group(function () {
 // --------------------
 Route::prefix('admin')
     ->name('admin.')
-    ->middleware(['auth', 'admin']) // 👈 protected by auth + admin middleware
+    ->middleware(['auth', 'admin'])
     ->group(function () {
         Route::get('/', fn() => redirect()->route('admin.dashboard'));
 
+        // Dashboard
         Route::view('/dashboard', 'admin.dashboard')->name('dashboard');
-        Route::view('/moderation', 'admin.moderation')->name('moderation');
+
+        // Moderation panel (supports ?tab=pending|resolved|dismissed)
+        Route::get('/moderation', [ReportController::class, 'moderationView'])->name('reports.moderation');
+
+        // Report management
+        Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::get('/reports/{report}', [ReportController::class, 'show'])->name('reports.show');
+        Route::put('/reports/{report}/status', [ReportController::class, 'updateStatus'])->name('reports.updateStatus');
+
+        // Admin views
         Route::view('/users', 'admin.users')->name('users');
         Route::view('/posts', 'admin.posts')->name('posts');
         Route::view('/banned', 'admin.banned')->name('banned');
         Route::view('/settings', 'admin.settings')->name('settings');
 
-        Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-        Route::put('/reports/{report}/status', [ReportController::class, 'updateStatus'])->name('reports.updateStatus');
+        // Admin Settings actions
+        Route::post('/settings/update-password', [AdminSettingsController::class, 'updatePassword'])
+            ->name('updatePassword');
     });

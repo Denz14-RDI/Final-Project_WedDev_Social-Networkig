@@ -23,7 +23,6 @@ class UserController extends Controller
                 'unique:users',
                 'ends_with:@iskolarngbayan.pup.edu.ph'
             ],
-            // 👇 add confirmed here
             'password'    => 'required|string|min:8|confirmed',
             'bio'         => 'nullable|string',
             'profile_pic' => 'nullable|string',
@@ -38,44 +37,46 @@ class UserController extends Controller
             $validated['profile_pic'] = 'images/default.png';
         }
 
+        // Force all registrations to be members
+        $validated['role'] = 'member';
+
         User::create($validated);
 
         return redirect()->route('login')
             ->with('success', 'Registration successful! Please log in.');
     }
 
-    // ✅ Show profile + posts + followers/following + follow state
     public function show($id)
     {
         $user = User::findOrFail($id);
 
-        // Posts of this profile user
-        $posts = $user->posts()->latest()->get();
+        // Block access to admin profiles in community
+        if ($user->role === 'admin') {
+            abort(404); // or redirect()->route('feed')->withErrors('Profile not found.');
+        }
 
+        $posts = $user->posts()->latest()->get();
         $authId = Auth::id();
 
-        // FOLLOWING (profile user follows others)
         $followingRows = Friend::query()
             ->where('user_id_1', $user->user_id)
             ->where('status', 'following')
             ->whereNull('deleted_at')
-            ->with(['following']) // user_id_2
+            ->with(['following'])
             ->latest()
             ->get();
 
-        // FOLLOWERS (others follow profile user)
         $followersRows = Friend::query()
             ->where('user_id_2', $user->user_id)
             ->where('status', 'following')
             ->whereNull('deleted_at')
-            ->with(['follower']) // user_id_1
+            ->with(['follower'])
             ->latest()
             ->get();
 
         $followingCount = $followingRows->count();
         $followersCount = $followersRows->count();
 
-        // ✅ follow button state (AUTH viewing someone)
         $isFollowing = false;
         $friendId = null;
 
@@ -104,10 +105,14 @@ class UserController extends Controller
         ));
     }
 
-    // ✅ Update user profile
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
+
+        // Prevent admin accounts from being updated via community settings
+        if ($user->role === 'admin') {
+            abort(403, 'Unauthorized action.');
+        }
 
         $validated = $request->validate([
             'first_name'  => 'sometimes|string|max:200',
@@ -130,19 +135,21 @@ class UserController extends Controller
             'password.min' => 'Password must be at least 8 characters long.',
         ]);
 
-        // Password change (requires current password)
         if (!empty($validated['password'])) {
             if (empty($validated['current_password']) || !Hash::check($validated['current_password'], $user->password)) {
                 return back()->withErrors(['current_password' => 'Current password is incorrect.']);
             }
             $validated['password'] = bcrypt($validated['password']);
         } else {
-            unset($validated['password']); // don’t overwrite with null
+            unset($validated['password']);
         }
 
         if (empty($validated['profile_pic'])) {
             $validated['profile_pic'] = 'images/default.png';
         }
+
+        // Prevent role changes via profile update
+        unset($validated['role']);
 
         $user->update($validated);
 
@@ -157,6 +164,12 @@ class UserController extends Controller
     public function destroy($id)
     {
         $user = User::findOrFail($id);
+
+        // Prevent deleting admin accounts via community
+        if ($user->role === 'admin') {
+            abort(403, 'Unauthorized action.');
+        }
+
         $user->delete();
 
         return redirect()->route('login')

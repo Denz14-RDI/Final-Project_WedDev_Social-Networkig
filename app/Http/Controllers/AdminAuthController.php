@@ -15,19 +15,30 @@ class AdminAuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
+            'email'    => 'required|email',
             'password' => 'required',
         ]);
 
-        if ($request->email !== 'admin@pup.edu.ph') {
-            return back()->withErrors(['email' => 'Unauthorized email']);
-        }
-
+        // Attempt authentication
         if (Auth::attempt($request->only('email', 'password'))) {
-            return redirect()->route('admin.dashboard');
+            $user = Auth::user();
+
+            // Only allow users with role = 'admin'
+            if ($user->role === 'admin') {
+                return redirect()->route('admin.dashboard');
+            }
+
+            // If a member tries to log in here, log them out immediately
+            Auth::logout();
+            return back()->withErrors([
+                'email' => 'Community members cannot log in here.',
+            ]);
         }
 
-        return back()->withErrors(['password' => 'Invalid credentials']);
+        // Invalid credentials
+        return back()->withErrors([
+            'email' => 'Invalid credentials provided.',
+        ]);
     }
 
     public function logout()
@@ -35,6 +46,7 @@ class AdminAuthController extends Controller
         Auth::logout();
         request()->session()->invalidate();
         request()->session()->regenerateToken();
+
         return redirect()->route('admin.login');
     }
 }

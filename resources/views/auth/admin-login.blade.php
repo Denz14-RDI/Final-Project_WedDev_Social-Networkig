@@ -40,6 +40,29 @@
                 </a>
             </div>
 
+            <!-- ✅ Flash Messages -->
+            @if (session('success'))
+                <div class="mb-4 rounded-lg bg-green-100 border border-green-400 text-green-700 px-4 py-3">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if ($errors->any())
+                <div class="mb-4 rounded-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3">
+                    <ul class="list-disc pl-5">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="mb-4 rounded-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3">
+                    {{ session('error') }}
+                </div>
+            @endif
+
             <!-- Login Form -->
             <form method="POST" action="{{ route('admin.login.submit') }}" class="mt-6 space-y-5">
                 @csrf
@@ -52,12 +75,12 @@
                         name="email"
                         id="email"
                         value="{{ old('email') }}"
-                        placeholder="admin@pup.edu.ph"
+                        placeholder="admin only"
                         required
                         class="mt-2 w-full rounded-xl border border-black/10 px-4 py-3 text-black outline-none
-            focus:ring-2 focus:ring-[#6C1517]/15 focus:border-[#6C1517]">
+                        focus:ring-2 focus:ring-[#6C1517]/15 focus:border-[#6C1517]">
                     @error('email')
-                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
 
@@ -71,9 +94,9 @@
                         placeholder="••••••••"
                         required
                         class="mt-2 w-full rounded-xl border border-black/10 px-4 py-3 text-black outline-none
-            focus:ring-2 focus:ring-[#6C1517]/15 focus:border-[#6C1517]">
+                        focus:ring-2 focus:ring-[#6C1517]/15 focus:border-[#6C1517]">
                     @error('password')
-                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
 
@@ -93,26 +116,7 @@
                     class="w-full rounded-xl bg-[#6C1517] py-3 font-semibold text-white shadow-sm hover:opacity-95 transition">
                     Sign in
                 </button>
-
-                <!-- Global Error Message -->
-                @if ($errors->any())
-                <div class="mt-4 text-sm text-red-600">
-                    <ul class="list-disc pl-5">
-                        @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-                @endif
-
-                <!-- Flash Message -->
-                @if (session('error'))
-                <div class="mt-4 text-sm text-red-600">
-                    {{ session('error') }}
-                </div>
-                @endif
             </form>
-
 
         </div>
     </div>

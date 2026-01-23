@@ -12,24 +12,37 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('reports', function (Blueprint $table) {
-            // Primary Key
-            $table->id('report_id');
+            $table->bigIncrements('report_id'); // Primary key
+            $table->unsignedBigInteger('post_id'); // FK to posts
+            $table->unsignedBigInteger('reported_by'); // FK to users
 
-            // Foreign Keys
-            $table->unsignedBigInteger('post_id');
-            $table->unsignedBigInteger('reported_by');
+            // ✅ Restrict reason values to known categories
+            $table->enum('reason', [
+                'spam',
+                'harassment',
+                'misinformation',
+                'inappropriate',
+                'other'
+            ]);
 
-            // Relationships
-            $table->foreign('post_id')->references('post_id')->on('posts')->onDelete('cascade');
-            $table->foreign('reported_by')->references('user_id')->on('users')->onDelete('cascade');
+            $table->text('details')->nullable(); // optional details
+            $table->string('status')->default('pending'); // pending, resolved, dismissed
+            $table->timestamps();
 
-            // ENUM fields
-            $table->enum('reason', ['spam', 'harassment', 'misinformation', 'inappropriate', 'other']);
-            $table->text('details')->nullable();
-            $table->enum('status', ['pending', 'resolved', 'dismissed'])->default('pending');
+            // ✅ Unique constraint: one user can only report a post once
+            $table->unique(['post_id', 'reported_by']);
 
-            // Timestamps
-            $table->timestamps(); // created_at, updated_at
+            // ✅ Index for faster lookups by status
+            $table->index('status');
+
+            // ✅ Foreign keys
+            $table->foreign('post_id')
+                  ->references('post_id')->on('posts')
+                  ->onDelete('cascade');
+
+            $table->foreign('reported_by')
+                  ->references('user_id')->on('users')
+                  ->onDelete('cascade');
         });
     }
 

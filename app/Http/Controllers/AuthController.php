@@ -21,10 +21,23 @@ class AuthController extends Controller
         // Attempt login
         if (Auth::attempt([$fieldType => $credentials['login'], 'password' => $credentials['password']])) {
             $request->session()->regenerate();
+
+            $user = Auth::user();
+
+            // 🚫 Block admin accounts from logging in here
+            if ($user->role === 'admin') {
+                Auth::logout();
+                // Return generic message for security purposes
+                return back()->withErrors([
+                    'login' => 'Invalid credentials provided.',
+                ])->onlyInput('login');
+            }
+
+            // ✅ Allow members
             return redirect()->route('feed')->with('success', 'Welcome back!');
         }
 
-        // If login fails
+        // 🚫 If login fails
         return back()->withErrors([
             'login' => 'Invalid credentials provided.',
         ])->onlyInput('login');
