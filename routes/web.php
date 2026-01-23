@@ -9,7 +9,7 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AdminAuthController;
-use App\Http\Controllers\AdminSettingsController; // ✅ new controller for settings
+use App\Http\Controllers\AdminSettingsController; 
 
 // --------------------
 // Public pages
