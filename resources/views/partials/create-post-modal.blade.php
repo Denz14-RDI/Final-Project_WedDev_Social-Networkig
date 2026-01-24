@@ -91,18 +91,6 @@
         </div>
       </div>
 
-      {{-- link --}}
-      <div>
-        <label class="block text-sm font-semibold text-app mb-2">Link (optional)</label>
-        <input
-          type="url"
-          name="link"
-          x-model="editPost.link"
-          class="w-full rounded-xl bg-app-input border border-app px-4 py-3 text-sm text-app outline-none focus:ring-2 focus:ring-[var(--brand)] placeholder:text-app-muted"
-          placeholder="https://..."
-        />
-      </div>
-
       {{-- footer --}}
       <div class="pt-2 flex items-center justify-end gap-3">
         <button

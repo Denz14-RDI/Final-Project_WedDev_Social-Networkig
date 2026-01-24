@@ -8,7 +8,7 @@
   x-data="{
     createOpen:false,
     editMode:false,
-    editPost:{ post_content:'', image:'', category:'academic', link:'' },
+    editPost:{ post_content:'', image:'', category:'academic' },
     reportOpen:false,
     reportPost:{}
   }"
@@ -28,23 +28,82 @@
     <section class="px-4 sm:px-6 lg:px-10 py-8 overflow-y-auto">
       <div class="w-full max-w-[840px] mx-auto space-y-5">
 
-        {{-- Header --}}
+        {{-- Header + Filters --}}
         <div>
           <div class="text-3xl font-extrabold text-app leading-tight">Community Feed</div>
           <div class="text-sm text-app-muted">Stay updated with the PUP community</div>
 
           @php
+          // scope: default is "following" unless explicitly set to "all"
           $scope = request('scope');
-          $cat = request('category');
+          $scope = ($scope === 'all') ? 'all' : 'following';
+
+          $cat = request('category'); // can be null/empty
+
+          // category options (values should match what you save in DB)
+          $categories = [
+          'academic' => 'Academic',
+          'events' => 'Events',
+          'announcement' => 'Announcement',
+          'campus_life' => 'Campus Life',
+          'help_wanted' => 'Help Wanted',
+          'lost_found' => 'Lost & Found',
+          ];
+
+          // helper urls (stays on same page)
+          $followingUrl = request()->fullUrlWithQuery(['scope' => null]); // removes scope
+          $exploreUrl = request()->fullUrlWithQuery(['scope' => 'all']);
           @endphp
 
-          @if($scope === 'all')
-          <div class="mt-1 text-xs text-app-muted">
-            Exploring {{ $cat ? ucfirst(str_replace('_',' ', $cat)) : 'All Categories' }}
+          {{-- FILTER UI (chips like reference) --}}
+          <div class="mt-4 space-y-3">
+
+            {{-- Row 1: Following / All --}}
+            <div class="inline-flex items-center gap-1 rounded-2xl bg-app-input border border-app p-1">
+              <a
+                href="{{ $followingUrl }}"
+                class="px-4 h-9 inline-flex items-center gap-2 rounded-xl text-sm font-semibold transition
+        {{ $scope !== 'all' ? 'bg-app-card text-app shadow-sm' : 'text-app-muted hover:text-app hover-app' }}">
+                <span class="text-[12px]">👥</span>
+                Following
+              </a>
+
+              <a
+                href="{{ $exploreUrl }}"
+                class="px-4 h-9 inline-flex items-center gap-2 rounded-xl text-sm font-semibold transition
+        {{ $scope === 'all' ? 'bg-app-card text-app shadow-sm' : 'text-app-muted hover:text-app hover-app' }}">
+                <span class="text-[12px]">🌍</span>
+                All
+              </a>
+            </div>
+
+            {{-- Row 2: Category chips (horizontal scroll) --}}
+            <div class="-mx-1 px-1">
+              <div class="flex items-center gap-2 overflow-x-auto no-scrollbar whitespace-nowrap">
+                {{-- All Categories chip --}}
+                <a
+                  href="{{ request()->fullUrlWithQuery(['category' => null]) }}"
+                  class="shrink-0 h-10 px-4 inline-flex items-center gap-2 rounded-2xl border border-app text-sm font-semibold transition
+        {{ empty($cat) ? 'bg-app-card text-app shadow-sm' : 'bg-app-input text-app-muted hover:text-app hover-app' }}">
+                  <span class="text-[12px]">🏷️</span>
+                  All Categories
+                </a>
+
+                @foreach($categories as $value => $label)
+                <a
+                  href="{{ request()->fullUrlWithQuery(['category' => $value]) }}"
+                  class="shrink-0 h-10 px-4 inline-flex items-center gap-2 rounded-2xl border border-app text-sm font-semibold transition
+          {{ $cat === $value ? 'bg-app-card text-app shadow-sm' : 'bg-app-input text-app-muted hover:text-app hover-app' }}">
+                  {{ $label }}
+                </a>
+                @endforeach
+              </div>
+            </div>
+
+
+            {{-- subtle divider --}}
+            <div class="h-px bg-app-divider"></div>
           </div>
-          @else
-          <div class="mt-1 text-xs text-app-muted">Following</div>
-          @endif
         </div>
 
         @if(empty($singlePost))
@@ -54,7 +113,7 @@
           class="w-full text-left bg-app-card rounded-2xl border border-app shadow-app overflow-hidden hover-app transition"
           @click="
             editMode=false;
-            editPost={ post_content:'', image:'', category:'academic', link:'' };
+            editPost={ post_content:'', image:'', category:'academic' };
             createOpen=true
           ">
           <div class="p-4 flex items-center gap-4">

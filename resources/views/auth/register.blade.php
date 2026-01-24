@@ -1,4 +1,4 @@
-@extends('layouts.guest')
+@extends('layouts.guest') 
 @section('title', 'Create your account')
 
 @section('content')
@@ -24,7 +24,15 @@
   <div class="flex items-center justify-center bg-[#F2EADA] px-6 py-12">
     <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
 
-      <h2 class="text-3xl font-extrabold text-gray-900">Create your account</h2>
+      <!-- ✅ Return button -->
+      <a
+        href="{{ route('signin.choice') }}"
+        class="inline-flex items-center gap-2 text-sm font-semibold text-[#6C1517] hover:underline">
+        <span aria-hidden="true">←</span>
+        Return to Sign in choice
+      </a>
+
+      <h2 class="mt-3 text-3xl font-extrabold text-gray-900">Create your account</h2>
 
       {{-- Tabs/Pill --}}
       <div class="mt-5 rounded-full bg-[#E9E0E0] p-1 flex gap-1">
@@ -97,7 +105,7 @@
             type="email"
             name="email"
             value="{{ old('email') }}"
-            placeholder="iskolar@pup.edu.ph"
+            placeholder="@iskolarngbayan.pup.edu.ph"
             class="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none text-black focus:ring-2 focus:ring-[#6C1517]/25 focus:border-[#6C1517]"
             required>
           @error('email')
