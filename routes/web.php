@@ -132,13 +132,8 @@ Route::prefix('admin')
         Route::get('/reports/{report}', [ReportController::class, 'show'])->name('reports.show');
         Route::put('/reports/{report}/status', [ReportController::class, 'updateStatus'])->name('reports.updateStatus');
 
-        // Admin views
-        Route::view('/users', 'admin.users')->name('users');
-        Route::view('/posts', 'admin.posts')->name('posts');
-        Route::view('/banned', 'admin.banned')->name('banned');
-        Route::view('/settings', 'admin.settings')->name('settings');
-
         // Admin Settings actions
+        Route::view('/settings', 'admin.settings')->name('settings');
         Route::post('/settings/update-password', [AdminSettingsController::class, 'updatePassword'])
             ->name('updatePassword');
     });
