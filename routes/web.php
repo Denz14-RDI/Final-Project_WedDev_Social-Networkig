@@ -66,12 +66,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'page'])
         ->name('notifications');
 
-    // Notifications (JSON endpoints)
+    // Notifications 
     Route::get('/notifications/unread', [NotificationController::class, 'unread'])
         ->name('notifications.unread');
-
-    Route::get('/notifications/json', [NotificationController::class, 'index'])
-        ->name('notifications.index'); // optional (list in JSON)
 
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])
         ->name('notifications.markAsRead');
