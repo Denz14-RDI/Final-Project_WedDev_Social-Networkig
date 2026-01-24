@@ -4,8 +4,8 @@
 @section('content')
 <div
   class="min-h-screen relative flex items-center justify-center px-6 py-10 bg-cover bg-center bg-no-repeat"
-  style="background-image: url('{{ asset('images/welcome-bg.png') }}');">
-
+  style="background-image: url('{{ asset('images/welcome-bg.png') }}');"
+>
   {{-- warm overlay (matches login/register) --}}
   <div class="absolute inset-0 bg-gradient-to-tr from-[#F59E0B]/45 via-[#EF4444]/30 to-[#6C1517]/55"></div>
   <div class="absolute inset-0 bg-black/10"></div>
@@ -34,12 +34,14 @@
         </span>
       </h1>
 
-      {{-- subtitle --}}
+      {{-- subtitle (FIXED) --}}
       <p class="mt-6 text-lg sm:text-xl md:text-2xl text-[#F2EADA]/95 max-w-3xl mx-auto leading-relaxed
-        drop-shadow-[0_
+        drop-shadow-[0_10px_25px_rgba(0,0,0,.45)]">
+        Connect with fellow PUP students, share campus updates, and join conversations that matter.
+      </p>
 
-    {{-- button --}}
-    <div class=" mt-10 flex items-center justify-center">
+      {{-- button --}}
+      <div class="mt-10 flex items-center justify-center">
         <a href="{{ route('signin.choice') }}"
           class="inline-flex items-center justify-center gap-2
           px-10 py-4 rounded-2xl
@@ -48,6 +50,8 @@
           hover:opacity-95">
           Get Started <span class="text-xl">→</span>
         </a>
+      </div>
+
     </div>
 
     {{-- feature cards --}}
@@ -68,11 +72,12 @@
         </p>
       </div>
 
+      {{-- CHANGED: remove AI wording --}}
       <div class="bg-white/75 backdrop-blur rounded-3xl border border-white/60 shadow-[0_18px_40px_rgba(0,0,0,.15)] p-10">
-        <div class="h-14 w-14 rounded-2xl bg-blue-100 flex items-center justify-center text-2xl">⚡</div>
+        <div class="h-14 w-14 rounded-2xl bg-blue-100 flex items-center justify-center text-2xl">✨</div>
         <h3 class="mt-6 text-xl font-extrabold text-[#0F172A]">Discover</h3>
         <p class="mt-3 text-base text-gray-700 leading-relaxed">
-          Use AI-powered tools to discover relevant academic content.
+          Explore campus life, announcements, events, and posts from the PUP community.
         </p>
       </div>
     </div>
