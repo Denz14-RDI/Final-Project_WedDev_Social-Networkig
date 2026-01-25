@@ -28,7 +28,7 @@ class ReportController extends Controller
 
         // ✅ Create new report if none exists
         Report::create([
-            'post_id'     => $post->post_id,  
+            'post_id'     => $post->post_id,
             'reported_by' => Auth::user()->user_id,
             'reason'      => $validated['reason'],
             'details'     => $validated['details'] ?? null,
@@ -41,18 +41,26 @@ class ReportController extends Controller
     // List all reports
     public function index()
     {
-        $reports = Report::with(['post.user', 'reporter'])->latest()->get();
+        $reports = Report::with([
+            'post' => fn($q) => $q->withTrashed()->with('user'),
+            'reporter'
+        ])->latest()->get();
+
         return view('admin.reports.index', compact('reports'));
     }
 
-    // Show a single report (optional, can keep for detail view)
+    // Show a single report
     public function show(Report $report)
     {
-        $report->load(['post.user', 'reporter']);
+        $report->load([
+            'post' => fn($q) => $q->withTrashed()->with('user'),
+            'reporter'
+        ]);
+
         return view('admin.reports.show', compact('report'));
     }
 
-    // Update report status (resolve/dismiss just changes status, no deletion)
+    // Update report status (resolve/dismiss logic)
     public function updateStatus(Request $request, Report $report)
     {
         $validated = $request->validate([
@@ -62,6 +70,13 @@ class ReportController extends Controller
         if ($validated['status'] === 'resolved') {
             // ✅ Cascade: mark ALL reports for this post as resolved
             Report::where('post_id', $report->post_id)->update(['status' => 'resolved']);
+
+            // ✅ Soft delete the post itself
+            $post = Post::withTrashed()->find($report->post_id);
+            if ($post && !$post->trashed()) {
+                $post->delete(); // soft delete
+            }
+
         } elseif ($validated['status'] === 'dismissed') {
             // ✅ Only dismiss this single report
             $report->status = 'dismissed';
@@ -72,8 +87,21 @@ class ReportController extends Controller
     }
 
     // Moderation dashboard view
-    public function moderationView()
+    public function moderationView(Request $request)
     {
-        return view('admin.moderation');
+        $tab = $request->get('tab', 'pending');
+
+        $reports = Report::with([
+            'post' => fn($q) => $q->withTrashed()->with('user'),
+            'reporter'
+        ])->where('status', $tab)->latest()->get();
+
+        $tabs = [
+            ['key'=>'pending','label'=>'Pending','count'=>Report::where('status','pending')->count()],
+            ['key'=>'resolved','label'=>'Resolved','count'=>Report::where('status','resolved')->count()],
+            ['key'=>'dismissed','label'=>'Dismissed','count'=>Report::where('status','dismissed')->count()],
+        ];
+
+        return view('admin.moderation', compact('reports','tabs','tab'));
     }
 }
