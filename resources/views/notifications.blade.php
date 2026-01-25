@@ -62,7 +62,6 @@
               } elseif ($n->notif_type === 'new_friend') {
                 $message = "<span class='font-semibold'>{$actorName}</span> followed you.";
                 $actorId = $data['actor_id'] ?? $n->entity_id;
-                // adjust this if your profile route uses profile.show
                 $href = route('profile.show', $actorId);
               }
             @endphp
@@ -88,7 +87,12 @@
                     <div class="text-sm text-app">
                       {!! $message !!}
                     </div>
-                    <div class="text-xs text-app-muted mt-1">{{ optional($n->created_at)->diffForHumans() }}</div>
+                    <div class="text-xs text-app-muted mt-1">
+                      {{-- Exact timestamp + "time ago" --}}
+                      {{ optional($n->created_at)->timezone(config('app.timezone'))->format('M d, Y h:i A') }}
+                      &nbsp;|&nbsp;
+                      {{ optional($n->created_at)->diffForHumans() }}
+                    </div>
                   </div>
 
                   <template x-if="!readMap[{{ $n->notif_id }}]">
@@ -120,12 +124,10 @@ function notifPage({ markUrlBase, unreadUrl, markAllUrl, csrf, initialUnread }) 
     readMap: {},
 
     syncSidebarCount(count){
-      // update sidebar badge via global event
       window.dispatchEvent(new CustomEvent('notif-updated', { detail: { count } }));
     },
 
     async openNotif(e, notifId, href, alreadyRead){
-      // if unread -> mark as read first
       if (!alreadyRead && !this.readMap[notifId]) {
         const res = await fetch(`${markUrlBase}/${notifId}/read`, {
           method: 'POST',
@@ -143,7 +145,7 @@ function notifPage({ markUrlBase, unreadUrl, markAllUrl, csrf, initialUnread }) 
         }
       }
 
-      window.location.href = href; // go to target
+      window.location.href = href;
     },
 
     async markAll(){
@@ -160,7 +162,6 @@ function notifPage({ markUrlBase, unreadUrl, markAllUrl, csrf, initialUnread }) 
       const data = await res.json();
       this.unreadCount = data.count ?? 0;
 
-      // set all local readMap to true
       Object.keys(this.readMap).forEach(k => this.readMap[k] = true);
 
       this.syncSidebarCount(this.unreadCount);

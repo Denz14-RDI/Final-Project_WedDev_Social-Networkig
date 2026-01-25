@@ -47,7 +47,6 @@
           'announcement' => 'Announcement',
           'campus_life' => 'Campus Life',
           'help_wanted' => 'Help Wanted',
-          'lost_found' => 'Lost & Found',
           ];
 
           // helper urls (stays on same page)
