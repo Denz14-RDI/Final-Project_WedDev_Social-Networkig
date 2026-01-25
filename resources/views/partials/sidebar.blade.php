@@ -1,4 +1,6 @@
 {{-- resources/views/partials/sidebar.blade.php --}}
+
+{{-- Left Sidebar Navigation --}}
 <aside
     class="bg-app-sidebar border-r border-app
            fixed inset-y-0 left-0 z-50
@@ -25,7 +27,7 @@
                     <div class="text-lg font-extrabold tracking-wide text-app truncate">PUPCOM</div>
                 </div>
 
-                {{-- Mobile close --}}
+                {{-- Mobile: Close Button --}}
                 <button
                     type="button"
                     class="lg:hidden h-10 w-10 rounded-xl bg-app-input border border-app text-app inline-flex items-center justify-center"
@@ -36,7 +38,7 @@
             </div>
         </div>
 
-        {{-- divider --}}
+        {{-- Divider --}}
         <div class="px-6">
             <div class="h-px bg-app-divider"></div>
         </div>
@@ -87,7 +89,7 @@
                     </svg>
                     <span class="text-[15px] font-semibold">Notifications</span>
                 </div>
-
+                {{-- Show badge only if unreadCount > 0 --}}
                 <template x-if="unreadCount > 0">
                     <span class="min-w-[22px] h-[22px] px-1.5 rounded-full bg-app-brand text-white text-[12px] font-extrabold flex items-center justify-center">
                         <span x-text="unreadCount"></span>
@@ -120,12 +122,12 @@
             </a>
         </nav>
 
-        {{-- divider above user --}}
+        {{-- Divider above the user section --}}
         <div class="px-6">
             <div class="h-px bg-app-divider"></div>
         </div>
 
-        {{-- User info + logout --}}
+        {{-- User Section: Avatar + Name + Username + Logout --}}
         <div class="px-6 py-5 flex items-center gap-3">
             <a href="{{ route('profile') }}"
                 @click="sidebarOpen=false"

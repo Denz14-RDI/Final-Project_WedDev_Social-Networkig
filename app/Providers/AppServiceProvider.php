@@ -1,5 +1,8 @@
 <?php
-
+// ------------------------------------------------------------------
+// This is App Service Provider uses a view composer to attach data 
+// everytime the right-sidebar.blade.php is rendered.
+// ------------------------------------------------------------------
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
@@ -19,20 +22,26 @@ class AppServiceProvider extends ServiceProvider
         //
     }
 
+    // --------------------------------------------------------------------------
+    // In this part it prepares data for Highlights of the Week and Who to Follow
+    // --------------------------------------------------------------------------
     public function boot(): void
     {
         View::composer('partials.right-sidebar', function ($view) {
 
-            /**
-             * ✅ HIGHLIGHTS OF THE WEEK
-             */
+            // ----------------------
+            // HIGHLIGHTS OF THE WEEK
+            // ----------------------
+
+            // Only this categories are allowed and want we want to show for highlights of the week
             $allowed = ['academic', 'events', 'announcement', 'campus_life', 'help_wanted'];
 
+            // Get active category and counts of posts per category in the last 7 days
             $activeCategory = request()->query('category');
             if (!in_array($activeCategory, $allowed, true)) {
                 $activeCategory = null;
             }
-
+            
             $since = Carbon::now()->subDays(7);
 
             $counts = Post::select('category', DB::raw('COUNT(*) as total'))
@@ -42,6 +51,7 @@ class AppServiceProvider extends ServiceProvider
                 ->orderByDesc('total')
                 ->get();
 
+            // Convert category keys to labels 
             $labels = [
                 'academic'      => 'Academics',
                 'events'        => 'Events',
@@ -50,6 +60,7 @@ class AppServiceProvider extends ServiceProvider
                 'help_wanted'   => 'Help Wanted',
             ];
 
+            // After that it sends results to right-sidebar view
             $highlights = $counts->map(function ($row) use ($labels) {
                 return [
                     'key'   => $row->category,
@@ -61,9 +72,11 @@ class AppServiceProvider extends ServiceProvider
             $view->with('highlights', $highlights);
             $view->with('activeCategory', $activeCategory);
 
-            /**
-             * ✅ WHO TO FOLLOW (Follow -> Following then disappears on refresh)
-             */
+            // -------------
+            // WHO TO FOLLOW
+            // -------------
+
+            // This will get the current logged-in user
             $authUser = Auth::user();
 
             if (!$authUser) {
@@ -73,7 +86,7 @@ class AppServiceProvider extends ServiceProvider
                 return;
             }
 
-            // Get following rows including friend_id
+            // This will get the list of users the current user is following including friend_id
             $followingRows = Friend::query()
                 ->where('user_id_1', $authUser->user_id)
                 ->where('status', 'following')
@@ -88,18 +101,18 @@ class AppServiceProvider extends ServiceProvider
                 $followIdMap[$row->user_id_2] = $row->friend_id;
             }
 
-            // ✅ this is the special “show Following once” user
+            // Check if there is a "just followed" user in session
             $justFollowedId = session('just_followed');
 
-            // Exclude yourself + already followed
+            // Exclude the current logged-in user and already followed users
             $alreadyFollowingIds = array_keys($followMap);
 
-            // ✅ allow “just followed” to still appear ONCE (so we can show Following)
+            // Allow “just followed” to still appear ONCE 
             if ($justFollowedId) {
                 $alreadyFollowingIds = array_values(array_diff($alreadyFollowingIds, [$justFollowedId]));
             }
 
-            // Suggestions normally exclude followed users
+            // Suggestions are random users not yet followed and limited to 4 users
             $whoToFollow = User::query()
                 ->where('user_id', '!=', $authUser->user_id)
                 ->when(!empty($alreadyFollowingIds), function ($q) use ($alreadyFollowingIds) {
@@ -109,7 +122,7 @@ class AppServiceProvider extends ServiceProvider
                 ->limit(4)
                 ->get();
 
-            // ✅ ensure “just followed” is included at top for THIS request only
+            // This will display the user that was just followed at the top of the list
             if ($justFollowedId) {
                 $justFollowedUser = User::where('user_id', $justFollowedId)->first();
 
@@ -119,6 +132,7 @@ class AppServiceProvider extends ServiceProvider
                 }
             }
 
+            // Pass data to the right-sidebar view
             $view->with('whoToFollow', $whoToFollow);
             $view->with('followMap', $followMap);
             $view->with('followIdMap', $followIdMap);

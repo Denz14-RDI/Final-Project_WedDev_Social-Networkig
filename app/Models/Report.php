@@ -1,51 +1,62 @@
 <?php
 
+// ---------------------------------------------------------
+// Report model representing reports made by users on posts
+// ---------------------------------------------------------
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+// -----------------------------------------
+// Class Report
+// Maps to 'reports' table in the database
+// -----------------------------------------
+
 class Report extends Model
 {
-    // Custom primary key
+    // Primary key column for the reports table, data type, and auto-incrementing setting
     protected $primaryKey = 'report_id';
     public $incrementing = true;
     protected $keyType = 'int';
 
-    // Mass assignable fields
+    // The attributes that are mass assignable
     protected $fillable = [
-        'post_id',
-        'reported_by',
-        'reason',
-        'details',
-        'status',
+        'post_id', // ID of the reported post
+        'reported_by', // ID of the user who reported
+        'reason', // Reason for the report
+        'details', // Additional details provided by the reporter
+        'status', // Status of the report (pending, resolved, dismissed)
     ];
 
-    // Relationships
+    // Get the post that was reported
+    // Relationship: Report belongs to a Post
     public function post()
     {
-        // Report belongs to a Post (custom PK on posts table)
         return $this->belongsTo(Post::class, 'post_id', 'post_id');
     }
 
+    // Get the user who reported the post
+    // Relationship: Report belongs to a User (custom PK on users table)
     public function reporter()
     {
-        // Report belongs to a User (custom PK on users table)
         return $this->belongsTo(User::class, 'reported_by', 'user_id');
     }
 
-    // ✅ Helper: check if report is pending
+
+    // Check if report is pending
     public function isPending()
     {
         return $this->status === 'pending';
     }
 
-    // ✅ Helper: check if report is resolved
+    // Check if report is resolved
     public function isResolved()
     {
         return $this->status === 'resolved';
     }
 
-    // ✅ Helper: check if report is dismissed
+    // Check if report is dismissed
     public function isDismissed()
     {
         return $this->status === 'dismissed';
