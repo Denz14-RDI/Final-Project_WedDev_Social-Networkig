@@ -21,7 +21,6 @@ use App\Models\Notification;
 //  These routes are accessible to everyone, even guests.
 //  They typically show landing pages, login, and registration.
 // --------------------
-
 // Landing page showing a welcome screen for guests
 Route::get('/', fn() => view('welcome'))->name('welcome');
 
@@ -31,7 +30,6 @@ Route::get('/', fn() => view('welcome'))->name('welcome');
 // Routes for user login, sign-in choice, and registration.
 // Guests use these to access or create accounts.
 // --------------------
-
 // Show a login form with email/username and password field
 Route::get('/login', fn() => view('auth.login'))->name('login');
 
@@ -53,7 +51,6 @@ Route::post('/register', [UserController::class, 'store'])->name('register.store
 // Routes for admin login and logout.
 // These are separate from user login to enforce role separation
 // --------------------
-
 // Shows a login form with email and password field
 Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
 
@@ -66,12 +63,13 @@ Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admi
 // --------------------
 // Authenticated routes
 // --------------------
+// These routes are only accessible to logged-in users.
+// The 'auth' middleware ensures guests are redirected to login.
+// --------------------
 Route::middleware('auth')->group(function () {
-
     // --------------------
     // Feed & Posts
     // --------------------
-
     // Show the main community feed and list of posts
     Route::get('/feed', [PostController::class, 'index'])->name('feed');
 
@@ -87,24 +85,34 @@ Route::middleware('auth')->group(function () {
     // Handles updated post
     Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update');
     
-    // Handle the delete post
+    // Handles delete post
     Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
 
     // --------------------
     // Reports
     // --------------------
-
+    // Report a post via ReportController with (create-report-modal)
     Route::post('/posts/{post}/report', [ReportController::class, 'store'])->name('posts.report');
 
+    // --------------------
     // Likes
-    Route::post('/posts/{post}/like', [LikeController::class, 'toggle'])
-        ->middleware('auth')
-        ->name('posts.like');
+    // --------------------
+    // Toggle button that allows user to like/unlike a post via LikeController
+    Route::post('/posts/{post}/like', [LikeController::class, 'toggle']) ->middleware('auth')->name('posts.like');
 
+    // --------------------
     // Comments
+    // --------------------
+    // Shows list of comments on a post
     Route::get('/posts/{post}/comments', [CommentController::class, 'index'])->name('comments.index');
+    
+    // Add a new comment to a post via CommentController
     Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->name('comments.store');
+    
+    // Update an existing comment on a post
     Route::put('/comments/{comment}', [CommentController::class, 'update'])->name('comments.update');
+   
+    // Delete an existing comment on a post
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
 
     // Notifications (Blade page)
