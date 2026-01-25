@@ -1,3 +1,5 @@
+{{-- A page that lists your notifications (likes/comments/follows) and lets you mark them as read --}}
+
 @extends('layouts.app')
 @section('title','Notifications')
 

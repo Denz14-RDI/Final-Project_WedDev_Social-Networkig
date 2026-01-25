@@ -1,3 +1,5 @@
+{{-- Main page that shows the community posts feed (with filters, create post, like, and comments) --}}
+
 @extends('layouts.app')
 @section('title','Feed')
 

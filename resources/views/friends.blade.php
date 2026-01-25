@@ -1,3 +1,5 @@
+{{-- A page that shows the list of users you are currently following, with an option to unfollow --}}
+
 @extends('layouts.app')
 @section('title','Friends')
 
