@@ -1,16 +1,22 @@
+{{--
+Admin Content Moderation View
+This page allows administrators to review reported posts,
+filter them by status, and take action by resolving or dismissing reports.
+--}}
+
 @extends('layouts.admin')
 @section('title', 'Content Moderation')
 
 @section('content')
 <div class="w-full max-w-5xl">
 
-    {{-- Header --}}
+    {{-- Page header showing the title and short description of the moderation panel --}}
     <div class="mb-6">
         <h1 class="text-3xl font-extrabold text-app leading-tight">🚨 Content Moderation</h1>
         <p class="text-sm text-app-muted mt-1">Review and act on reported posts.</p>
     </div>
 
-    {{-- Tabs --}}
+    {{-- Tabs used to filter reports by status (pending, resolved, dismissed) --}}
     <div class="inline-flex items-center gap-1 rounded-2xl bg-app-input border border-app p-1 mb-5">
         @foreach($tabs as $t)
         <a href="{{ route('admin.reports.moderation', ['tab'=>$t['key']]) }}"
@@ -23,13 +29,14 @@
         @endforeach
     </div>
 
-    {{-- Panel --}}
+    {{-- Main panel that displays list of reports based on selected tab --}}
     <section class="bg-app-card border border-app rounded-2xl shadow-app overflow-hidden">
         <div class="p-6 border-b border-app">
             <div class="text-lg font-extrabold text-app">{{ ucfirst($tab) }} Reports</div>
             <div class="text-sm text-app-muted">Showing {{ $reports->count() }} report(s).</div>
         </div>
 
+        {{-- List of reports --}}
         <div class="p-6 space-y-4">
             @forelse($reports as $r)
             <div class="border border-app rounded-2xl p-5 bg-app-card hover-app transition">
@@ -48,7 +55,7 @@
                             @endif
                         </div>
 
-                        {{-- Reason --}}
+                        {{-- Shows the reason why the post was reported --}}
                         <div class="mt-2">
                             <span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-full"
                                   style="background: var(--amber-bg); color: var(--amber); border: 1px solid var(--border);">
@@ -56,14 +63,14 @@
                             </span>
                         </div>
 
-                        {{-- Details --}}
+                        {{-- Additional details provided by the reporter --}}
                         @if(!empty($r->details))
                         <div class="text-sm text-app-muted mt-2">
                             {{ Str::limit($r->details, 120) }}
                         </div>
                         @endif
 
-                        {{-- Post content --}}
+                        {{-- Preview of the reported post content --}}
                         @if($r->post && $r->post->post_content)
                         <div class="mt-3 rounded-2xl bg-app-input border border-app p-4 text-sm text-app">
                             <div class="text-xs text-app-muted mb-1">Post content</div>
@@ -71,7 +78,7 @@
                         </div>
                         @endif
 
-                        {{-- Reporter --}}
+                        {{-- Displays who submitted the report and when it was created --}}
                         <div class="text-xs text-app-muted mt-3">
                             Reported by {{ optional($r->reporter)->username ? '@'.$r->reporter->username : 'Unknown' }}
                         </div>
@@ -83,6 +90,8 @@
                     {{-- Actions (only for pending) --}}
                     @if($r->status === 'pending')
                     <div class="ml-2 flex flex-col gap-2 w-36">
+
+                        {{-- Marks the report as resolved --}}
                         <form method="POST" action="{{ route('admin.reports.updateStatus', $r) }}">
                             @csrf
                             @method('PUT')
@@ -93,6 +102,7 @@
                             </button>
                         </form>
 
+                        {{-- Dismisses the report without taking further action --}}
                         <form method="POST" action="{{ route('admin.reports.updateStatus', $r) }}">
                             @csrf
                             @method('PUT')

@@ -1,3 +1,11 @@
+{{-- ------------------------
+   Admin Sidebar
+   ------------------------
+   Displays navigation links for admin pages
+   Includes admin profile info and logout option
+   ------------------------ --}}
+
+
 <aside
     class="bg-app-sidebar border-r border-app
            fixed inset-y-0 left-0 z-50
@@ -10,7 +18,7 @@
 
     <div class="h-full flex flex-col">
 
-        {{-- BRAND --}}
+        {{-- Brand / header --}}
         <div class="px-6 pt-6 pb-5">
             <div class="flex items-center justify-between gap-3">
                 <div class="flex items-center gap-3 min-w-0">
@@ -25,7 +33,7 @@
                     </div>
                 </div>
 
-                {{-- Mobile close --}}
+                {{-- Mobile close button --}}
                 <button
                     type="button"
                     class="lg:hidden h-10 w-10 rounded-xl bg-app-input border border-app text-app inline-flex items-center justify-center"
@@ -41,12 +49,13 @@
         </div>
 
         @php
+            // Active navigation helper
         $navItem = fn($route) => request()->routeIs($route)
         ? 'bg-app-brand text-white shadow-sm'
         : 'text-app hover-app';
         @endphp
 
-        {{-- NAV --}}
+        {{-- Admin Navigation --}}
         <nav class="px-4 py-5 space-y-1 flex-1">
             <a href="{{ route('admin.dashboard') }}"
                 @click="sidebarOpen=false"
@@ -74,7 +83,7 @@
             <div class="h-px bg-app-divider"></div>
         </div>
 
-        {{-- ADMIN PROFILE / LOGOUT --}}
+        {{-- Admin Profile / Logout --}}
         @php
         $admin = auth()->user();
         $adminName = trim(($admin->first_name ?? '') . ' ' . ($admin->last_name ?? ''));
