@@ -1,5 +1,5 @@
 @extends('layouts.guest')
-@section('title', 'Admin Sign in')
+@section('title', 'Admin Login')
 
 @section('content')
 <div class="min-h-screen grid grid-cols-1 md:grid-cols-2">
@@ -19,17 +19,17 @@
     </div>
 
     <!-- RIGHT -->
-    <div class="flex items-center justify-center bg-[#F6F6F6] px-6 py-12">
+    <div class="flex items-center justify-center bg-[#F2EADA] px-6 py-12">
         <div class="w-full max-w-md bg-white rounded-2xl border border-black/10 shadow-[0_18px_40px_rgba(0,0,0,.10)] p-8">
 
             <h2 class="text-3xl font-extrabold text-black">Admin Login</h2>
             <p class="text-sm text-black mt-1">Sign in to access the admin dashboard</p>
 
             <!-- Tabs -->
-            <div class="mt-5 rounded-full bg-black/5 p-1 flex gap-1">
+            <div class="mt-5 rounded-full bg-[#E9E0E0] p-1 flex gap-1">
                 <div class="flex-1 text-center">
                     <span class="block w-full rounded-full bg-white py-2 text-sm font-semibold text-black shadow-sm">
-                        Admin Login
+                        Login
                     </span>
                 </div>
 

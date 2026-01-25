@@ -105,7 +105,7 @@ Route::middleware('auth')->group(function () {
         Auth::logout();
         request()->session()->invalidate();
         request()->session()->regenerateToken();
-        return redirect('/login');
+        return redirect()->route('signin.choice');
     })->name('logout');
 });
 

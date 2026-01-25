@@ -1,20 +1,38 @@
 {{-- resources/views/partials/sidebar.blade.php --}}
 <aside
-    class="bg-app-sidebar lg:sticky lg:top-0 lg:h-screen border-r border-app"
+    class="bg-app-sidebar border-r border-app
+           fixed inset-y-0 left-0 z-50
+           w-[320px] max-w-[85vw]
+           transform transition duration-200 ease-out
+           -translate-x-full
+           lg:translate-x-0 lg:static lg:inset-auto lg:z-auto lg:w-auto
+           lg:sticky lg:top-0 lg:h-screen"
+    :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
     x-data="notifSidebar()"
     x-init="init()"
-    @keydown.escape.window="closeAll()">
+    @keydown.escape.window="closeAll(); sidebarOpen=false">
 
     <div class="h-full flex flex-col">
 
         {{-- HEADER --}}
         <div class="px-6 pt-6 pb-4">
-            <div class="flex items-center gap-3">
-                <img
-                    src="{{ asset('images/logo.png') }}"
-                    alt="PUPCOM Logo"
-                    class="h-11 w-11 rounded-2xl object-contain select-none" />
-                <div class="text-lg font-extrabold tracking-wide text-app">PUPCOM</div>
+            <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <img
+                        src="{{ asset('images/logo.png') }}"
+                        alt="PUPCOM Logo"
+                        class="h-11 w-11 rounded-2xl object-contain select-none" />
+                    <div class="text-lg font-extrabold tracking-wide text-app truncate">PUPCOM</div>
+                </div>
+
+                {{-- Mobile close --}}
+                <button
+                    type="button"
+                    class="lg:hidden h-10 w-10 rounded-xl bg-app-input border border-app text-app inline-flex items-center justify-center"
+                    @click="sidebarOpen=false"
+                    aria-label="Close menu">
+                    ✕
+                </button>
             </div>
         </div>
 
@@ -29,13 +47,14 @@
         ? 'bg-app-brand text-white'
         : 'text-app hover-app';
         };
-        $onNotificationsPage = request()->routeIs('notifications');
         @endphp
 
         <nav class="px-4 py-5 space-y-1 flex-1 relative">
 
             {{-- Home --}}
-            <a href="{{ route('feed') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl {{ $navItem('feed') }}">
+            <a href="{{ route('feed') }}"
+                @click="sidebarOpen=false"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl {{ $navItem('feed') }}">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round">
                     <path d="M3 10.5 12 3l9 7.5" />
@@ -45,7 +64,9 @@
             </a>
 
             {{-- Search --}}
-            <a href="{{ route('search') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl {{ $navItem('search') }}">
+            <a href="{{ route('search') }}"
+                @click="sidebarOpen=false"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl {{ $navItem('search') }}">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="11" cy="11" r="7"></circle>
@@ -55,8 +76,8 @@
             </a>
 
             {{-- Notifications --}}
-            <a
-                href="{{ route('notifications') }}"
+            <a href="{{ route('notifications') }}"
+                @click="sidebarOpen=false"
                 class="flex items-center justify-between gap-3 px-4 py-3 rounded-xl {{ $navItem('notifications') }}">
                 <div class="flex items-center gap-3">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -74,9 +95,9 @@
                 </template>
             </a>
 
-
             {{-- Profile --}}
             <a href="{{ route('profile') }}"
+                @click="sidebarOpen=false"
                 class="flex items-center gap-3 px-4 py-3 rounded-xl {{ $navItem('profile') }}">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round">
@@ -87,7 +108,9 @@
             </a>
 
             {{-- Settings --}}
-            <a href="{{ route('settings') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl {{ $navItem('settings') }}">
+            <a href="{{ route('settings') }}"
+                @click="sidebarOpen=false"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl {{ $navItem('settings') }}">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round">
                     <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
@@ -104,12 +127,14 @@
 
         {{-- User info + logout --}}
         <div class="px-6 py-5 flex items-center gap-3">
-            <a href="{{ route('profile') }}" class="flex items-center gap-3 flex-1 hover:opacity-90 transition">
+            <a href="{{ route('profile') }}"
+                @click="sidebarOpen=false"
+                class="flex items-center gap-3 flex-1 hover:opacity-90 transition">
                 <img src="{{ asset(Auth::user()->profile_pic ?? 'images/default.png') }}"
                     class="h-11 w-11 rounded-full object-cover" alt="me">
-                <div class="leading-tight">
-                    <div class="text-sm font-semibold text-app">{{ Auth::user()->first_name }} {{ Auth::user()->last_name }}</div>
-                    <div class="text-xs text-app-muted">{{ '@' . Auth::user()->username }}</div>
+                <div class="leading-tight min-w-0">
+                    <div class="text-sm font-semibold text-app truncate">{{ Auth::user()->first_name }} {{ Auth::user()->last_name }}</div>
+                    <div class="text-xs text-app-muted truncate">{{ '@' . Auth::user()->username }}</div>
                 </div>
             </a>
 

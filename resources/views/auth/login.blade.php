@@ -21,7 +21,16 @@
   <!-- RIGHT (beige background + login card) -->
   <div class="flex items-center justify-center bg-[#F2EADA] px-6 py-12">
     <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
-      <h2 class="text-3xl font-extrabold text-gray-900">Login to PUPCOM</h2>
+
+      <!-- ✅ Return button -->
+      <a
+        href="{{ route('signin.choice') }}"
+        class="inline-flex items-center gap-2 text-sm font-semibold text-[#6C1517] hover:underline">
+        <span aria-hidden="true">←</span>
+        Return to Sign in choice
+      </a>
+
+      <h2 class="mt-3 text-3xl font-extrabold text-gray-900">Login to PUPCOM</h2>
 
       <!-- Tabs/Pill -->
       <div class="mt-5 rounded-full bg-[#E9E0E0] p-1 flex gap-1">
@@ -40,25 +49,25 @@
 
       <!-- ✅ Flash Messages -->
       @if (session('success'))
-        <div class="mb-4 rounded-lg bg-green-100 border border-green-400 text-green-700 px-4 py-3">
-          {{ session('success') }}
-        </div>
+      <div class="mb-4 rounded-lg bg-green-100 border border-green-400 text-green-700 px-4 py-3">
+        {{ session('success') }}
+      </div>
       @endif
 
       @if ($errors->any())
-        <div class="mb-4 rounded-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3">
-          <ul class="list-disc pl-5">
-            @foreach ($errors->all() as $error)
-              <li>{{ $error }}</li>
-            @endforeach
-          </ul>
-        </div>
+      <div class="mb-4 rounded-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3">
+        <ul class="list-disc pl-5">
+          @foreach ($errors->all() as $error)
+          <li>{{ $error }}</li>
+          @endforeach
+        </ul>
+      </div>
       @endif
 
       @if (session('error'))
-        <div class="mb-4 rounded-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3">
-          {{ session('error') }}
-        </div>
+      <div class="mb-4 rounded-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3">
+        {{ session('error') }}
+      </div>
       @endif
 
       <form method="POST" action="{{ route('login') }}" class="mt-6 space-y-5">
@@ -110,6 +119,7 @@
           Login
         </button>
       </form>
+
     </div>
   </div>
 

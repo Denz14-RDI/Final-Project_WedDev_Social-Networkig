@@ -30,8 +30,12 @@
                 <a href="{{ route('login') }}"
                     class="block rounded-2xl border border-gray-200 p-5 hover:border-[#6C1517]/30 hover:shadow-md transition">
                     <div class="flex items-center gap-4">
-                        <div class="h-12 w-12 rounded-full bg-[#F5D27A] flex items-center justify-center text-[#6C1517] font-bold">
-                            CM
+                        <div class="h-12 w-12 rounded-full bg-[#F5D27A] flex items-center justify-center overflow-hidden">
+                            <img
+                                src="{{ asset('images/roles/community_member_logo.png') }}"
+                                alt="Community Member"
+                                class="h-10 w-10 object-contain select-none"
+                                loading="lazy">
                         </div>
                         <div>
                             <div class="font-semibold text-gray-900">Community Member</div>
@@ -44,8 +48,12 @@
                 <a href="{{ route('admin.login') }}"
                     class="block rounded-2xl border border-gray-200 p-5 hover:border-[#6C1517]/30 hover:shadow-md transition">
                     <div class="flex items-center gap-4">
-                        <div class="h-12 w-12 rounded-full bg-[#6C1517] flex items-center justify-center text-white font-bold">
-                            AD
+                        <div class="h-12 w-12 rounded-full bg-[#6C1517] flex items-center justify-center overflow-hidden">
+                            <img
+                                src="{{ asset('images/roles/administrator_logo.png') }}"
+                                alt="Administrator"
+                                class="h-10 w-10 object-contain select-none"
+                                loading="lazy">
                         </div>
                         <div>
                             <div class="font-semibold text-gray-900">Administrator</div>
