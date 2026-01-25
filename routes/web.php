@@ -18,37 +18,82 @@ use App\Models\Notification;
 // --------------------
 // Public pages
 // --------------------
+//  These routes are accessible to everyone, even guests.
+//  They typically show landing pages, login, and registration.
+// --------------------
+
+// Landing page showing a welcome screen for guests
 Route::get('/', fn() => view('welcome'))->name('welcome');
 
-// Authentication
+// --------------------
+// Member Login Authentication
+// --------------------
+// Routes for user login, sign-in choice, and registration.
+// Guests use these to access or create accounts.
+// --------------------
+
+// Show a login form with email/username and password field
 Route::get('/login', fn() => view('auth.login'))->name('login');
+
+// Handles login submission via AuthController
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 
+// Sign-in choice page where you can choose logging in as community member and admin
 Route::get('/sign-in', fn() => view('auth.signin-choice'))->name('signin.choice');
 
-// Admin login
-Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
-Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
-Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
-
-// Registration
+// Show a registration form with first and last name, username, email, and password with confirm password fields
 Route::get('/register', fn() => view('auth.register'))->name('register');
+
+// Handles user registration via UserController
 Route::post('/register', [UserController::class, 'store'])->name('register.store');
+
+// --------------------
+// Admin login Authentication
+// --------------------
+// Routes for admin login and logout.
+// These are separate from user login to enforce role separation
+// --------------------
+
+// Shows a login form with email and password field
+Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
+
+// Handles admin login submission via AdminAuthController
+Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
+
+// Handles admin logout process via AdminAuthController
+Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
 
 // --------------------
 // Authenticated routes
 // --------------------
 Route::middleware('auth')->group(function () {
 
+    // --------------------
     // Feed & Posts
+    // --------------------
+
+    // Show the main community feed and list of posts
     Route::get('/feed', [PostController::class, 'index'])->name('feed');
+
+    // Create a new post via PostController with a Modal (create-post-modal)
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
+    
+    // Show a single post by its ID
     Route::get('/posts/{post}', [PostController::class, 'show'])->name('posts.show');
+   
+    // Can edit post via PostController with a Modal (create-post-modal)
     Route::get('/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit');
+
+    // Handles updated post
     Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update');
+    
+    // Handle the delete post
     Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
 
-    // Reports (user side)
+    // --------------------
+    // Reports
+    // --------------------
+
     Route::post('/posts/{post}/report', [ReportController::class, 'store'])->name('posts.report');
 
     // Likes
@@ -75,8 +120,6 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])
         ->name('notifications.markAllAsRead');
-
-
 
     // Search
     Route::get('/search', [SearchController::class, 'index'])->name('search');

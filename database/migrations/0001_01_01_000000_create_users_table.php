@@ -20,10 +20,7 @@ return new class extends Migration
             $table->string('password');
             $table->text('bio')->nullable();
             $table->string('profile_pic')->nullable();
-
-            // 👇 Add role column: only "member" or "admin"
             $table->enum('role', ['member', 'admin'])->default('member');
-
             $table->timestamps();
         });
 

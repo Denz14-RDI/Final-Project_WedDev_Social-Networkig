@@ -102,16 +102,6 @@
           @enderror
         </div>
 
-        <!-- Remember me -->
-        <div class="flex items-center gap-2">
-          <input
-            id="remember"
-            type="checkbox"
-            name="remember"
-            class="h-4 w-4 rounded border-gray-300 text-[#6C1517] focus:ring-[#6C1517]/30">
-          <label for="remember" class="text-sm text-gray-700">Remember me</label>
-        </div>
-
         <!-- Button -->
         <button
           type="submit"
