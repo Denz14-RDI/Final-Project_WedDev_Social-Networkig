@@ -1,5 +1,8 @@
 {{-- resources/views/partials/create-post-modal.blade.php --}}
 
+{{-- Modal for creating or editing a post --}}
+
+{{-- Breakdown by sections --}}
 <div
   x-show="createOpen"
   x-cloak
@@ -7,24 +10,25 @@
   class="fixed inset-0 z-[999] flex items-center justify-center px-4"
   style="display:none;"
   @keydown.escape.window="createOpen=false">
-  {{-- backdrop --}}
+
+  {{-- Backdrop --}}
   <button
     type="button"
     class="absolute inset-0 bg-black/50"
     @click="createOpen=false"
     aria-label="Close modal"></button>
 
-  {{-- modal --}}
+  {{-- Modal --}}
   <div class="relative w-full max-w-xl bg-app-card border border-app rounded-2xl shadow-app overflow-hidden flex flex-col max-h-[90dvh]">
 
-    {{-- header --}}
+    {{-- Header with title and close button --}}
     <div class="px-6 py-5 border-b border-app flex items-center justify-between gap-3 shrink-0">
       <div>
         <div class="text-lg font-extrabold text-app" x-text="editMode ? 'Edit Post' : 'Create Post'"></div>
         <div class="text-sm text-app-muted" x-text="editMode ? 'Update your post details.' : 'Share something with the PUP community.'"></div>
       </div>
 
-      {{-- close --}}
+      {{-- Close button --}}
       <button
         type="button"
         class="h-10 w-10 rounded-xl hover-app grid place-items-center text-app-muted"
@@ -34,7 +38,7 @@
       </button>
     </div>
 
-    {{-- form (scrolls on small screens) --}}
+    {{-- Form for creating or editing a post --}}
     <form class="p-6 space-y-5 overflow-y-auto"
       method="POST"
       :action="editMode ? '{{ url('/posts') }}/' + editPost.post_id : '{{ route('posts.store') }}'">

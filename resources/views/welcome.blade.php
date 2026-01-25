@@ -77,7 +77,7 @@
         <div class="h-14 w-14 rounded-2xl bg-blue-100 flex items-center justify-center text-2xl">✨</div>
         <h3 class="mt-6 text-xl font-extrabold text-[#0F172A]">Discover</h3>
         <p class="mt-3 text-base text-gray-700 leading-relaxed">
-          Explore campus life, announcements, events, and posts from the PUP community.
+          Unlock insights from peers, mentors, and trending academic topics.
         </p>
       </div>
     </div>

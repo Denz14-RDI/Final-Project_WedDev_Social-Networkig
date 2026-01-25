@@ -1,20 +1,24 @@
 {{-- resources/views/partials/report-modal.blade.php --}}
+
+{{-- Modal for reporting a post --}}
+
+{{-- Breakdown by sections --}}
 <div x-show="reportOpen"
      x-transition.opacity
      class="fixed inset-0 z-[999] flex items-center justify-center px-4"
      style="display:none;"
      @keydown.escape.window="reportOpen=false">
 
-    {{-- backdrop --}}
+    {{-- Backdrop --}}
     <button type="button"
             class="absolute inset-0 bg-black/50"
             @click="reportOpen=false"
             aria-label="Close modal"></button>
 
-    {{-- modal --}}
+    {{-- Modal --}}
     <div class="relative w-full max-w-md bg-app-card border border-app rounded-2xl shadow-app overflow-hidden">
 
-        {{-- header --}}
+        {{-- Header with title and close button --}}
         <div class="px-6 py-5 border-b border-app flex items-center justify-between gap-3">
             <div>
                 <div class="text-lg font-extrabold text-app">Report Post</div>
@@ -28,7 +32,7 @@
             </button>
         </div>
 
-        {{-- form --}}
+        {{-- Form with fields for reason and details --}}
         <form class="p-6 space-y-5"
               method="POST"
               :action="'/posts/' + reportPost.post_id + '/report'">
@@ -57,7 +61,7 @@
                           placeholder="Add more context..."></textarea>
             </div>
 
-            {{-- footer buttons --}}
+            {{-- Footer buttons for cancel and submit --}}
             <div class="pt-2 flex items-center justify-end gap-3">
                 <button type="button"
                         class="rounded-xl btn-ghost px-5 py-2.5 text-sm font-semibold"

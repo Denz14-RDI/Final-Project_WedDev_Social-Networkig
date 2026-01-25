@@ -140,7 +140,7 @@
               {{-- POSTS --}}
               <div class="mt-6 space-y-6">
                 @forelse($posts as $p)
-                  <div class="bg-app-card rounded-2xl border border-app shadow-app overflow-hidden">
+                <div class="bg-app-card rounded-2xl border border-app shadow-app overflow-hidden">
 
                     <div class="p-4 sm:p-6">
                       <div class="flex items-start gap-4">
@@ -215,7 +215,7 @@
                               </div>
                             </div>
 
-                          </div>
+                        </div>
 
                           <div class="mt-3 text-sm text-app break-words">
                             {{ $p->post_content }}
@@ -240,9 +240,9 @@
                             </div>
                           @endif
 
-                        </div>
                       </div>
                     </div>
+                  </div>
 
                     {{-- FOOTER + COMMENTS (single Alpine scope) --}}
                     <div class="px-5 py-3 text-sm text-app-muted"
@@ -523,7 +523,7 @@
 
                   </div>
                 @empty
-                  <p class="text-center text-app-muted">No posts yet.</p>
+                <p class="text-center text-app-muted">No posts yet.</p>
                 @endforelse
               </div>
 
