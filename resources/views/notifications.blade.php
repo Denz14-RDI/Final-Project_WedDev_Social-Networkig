@@ -4,6 +4,8 @@
 @section('main_class', 'bg-app-page')
 
 @section('content')
+
+{{-- Alpine component (notifPage) controls read/unread logic --}}
 <div
   class="h-screen overflow-hidden"
   x-data="notifPage({
@@ -17,7 +19,7 @@
 >
   <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] h-full">
 
-    {{-- CENTER (scroll) --}}
+    {{-- CENTER SECTION (scrollable) --}}
     <section class="px-4 sm:px-6 lg:px-10 py-8 overflow-y-auto">
       <div class="w-full max-w-[840px] mx-auto space-y-5">
 
@@ -28,6 +30,7 @@
             <div class="text-sm text-app-muted">Recent activity</div>
           </div>
 
+          {{-- Mark all as read button --}}
           <button
             type="button"
             class="text-sm font-semibold text-app hover:underline underline-offset-4 disabled:opacity-60"
@@ -38,17 +41,20 @@
           </button>
         </div>
 
-        {{-- List --}}
+        {{-- Notification list --}}
         <div class="space-y-4">
           @forelse($notifications as $n)
             @php
               $data = $n->notif_data ?? [];
+              // Name of the actor (user who performed the action)
               $actorName = $data['actor_name'] ?? 'Someone';
 
-              // default message + link target
+              // Default message and destination link
               $message = '';
               $href = route('feed');
 
+              // Customize message and link based on notification type
+              // Like, Comment, and Follow notifications
               if ($n->notif_type === 'new_like') {
                 $message = "<span class='font-semibold'>{$actorName}</span> liked your post.";
                 $postId = $data['post_id'] ?? $n->entity_id;
@@ -66,6 +72,7 @@
               }
             @endphp
 
+            {{-- Clickable notification item --}}
             <a
               href="{{ $href }}"
               class="block bg-app-card rounded-2xl border border-app shadow-app overflow-hidden"
@@ -83,6 +90,7 @@
                     {{ strtoupper(mb_substr(($data['actor_name'] ?? 'N'), 0, 1)) }}
                   </div>
 
+                  {{-- Message and timestamp --}}
                   <div class="flex-1 min-w-0">
                     <div class="text-sm text-app">
                       {!! $message !!}
@@ -95,6 +103,7 @@
                     </div>
                   </div>
 
+                  {{-- Unread indicator --}}
                   <template x-if="!readMap[{{ $n->notif_id }}]">
                     <div class="h-2.5 w-2.5 rounded-full bg-app-brand"></div>
                   </template>
@@ -103,6 +112,7 @@
               </div>
             </a>
 
+          {{-- If no notifications --}}
           @empty
             <p class="text-center text-app-muted">No notifications yet.</p>
           @endforelse
@@ -117,17 +127,22 @@
   </div>
 </div>
 
+{{-- JavaScript for page interaction --}}
 <script>
 function notifPage({ markUrlBase, unreadUrl, markAllUrl, csrf, initialUnread }) {
   return {
+    // Unread count shown/used for disabling "mark all" button
     unreadCount: initialUnread,
     readMap: {},
 
+    // Sends an event to update sidebar count
     syncSidebarCount(count){
       window.dispatchEvent(new CustomEvent('notif-updated', { detail: { count } }));
     },
 
+    // This is called when a notification is clicked
     async openNotif(e, notifId, href, alreadyRead){
+      // Mark as read if not already read
       if (!alreadyRead && !this.readMap[notifId]) {
         const res = await fetch(`${markUrlBase}/${notifId}/read`, {
           method: 'POST',
@@ -139,15 +154,21 @@ function notifPage({ markUrlBase, unreadUrl, markAllUrl, csrf, initialUnread }) 
 
         if (res.ok) {
           const data = await res.json();
+
+          // Update UI: mark as read and decrement count
           this.readMap[notifId] = true;
           this.unreadCount = data.count ?? Math.max(0, this.unreadCount - 1);
+
+          // Update sidebar count
           this.syncSidebarCount(this.unreadCount);
         }
       }
 
+      // Redirect to the notification link
       window.location.href = href;
     },
 
+    // Marks all notifications as read
     async markAll(){
       const res = await fetch(markAllUrl, {
         method: 'POST',
@@ -160,10 +181,14 @@ function notifPage({ markUrlBase, unreadUrl, markAllUrl, csrf, initialUnread }) 
       if (!res.ok) return;
 
       const data = await res.json();
+
+      // Set unread count to 0
       this.unreadCount = data.count ?? 0;
 
+      // Mark all local read states to true
       Object.keys(this.readMap).forEach(k => this.readMap[k] = true);
 
+      // Update sidebar count
       this.syncSidebarCount(this.unreadCount);
     },
   }
