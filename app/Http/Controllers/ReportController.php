@@ -1,4 +1,12 @@
 <?php
+// ------------------------------------------------------------
+// ReportController
+// ------------------------------------------------------------
+// Manages reports submitted by users against posts.
+// Provides methods for storing new reports, listing reports,
+// showing individual reports, updating report status (resolve/dismiss),
+// and rendering the moderation dashboard.
+// ------------------------------------------------------------
 
 namespace App\Http\Controllers;
 
@@ -9,7 +17,11 @@ use Illuminate\Support\Facades\Auth;
 
 class ReportController extends Controller
 {
-    // Store a new report
+    // --------------------
+    // Store New Report
+    // --------------------
+    // Validates input, checks if the user already reported the post,
+    // and creates a new report with status = 'pending' if none exists.
     public function store(Request $request, Post $post)
     {
         $validated = $request->validate([
@@ -17,7 +29,7 @@ class ReportController extends Controller
             'details' => 'nullable|string|max:1000',
         ]);
 
-        // 🔎 Check if this user already reported this post
+        // Check if this user already reported this post
         $existingReport = Report::where('post_id', $post->post_id)
             ->where('reported_by', Auth::user()->user_id)
             ->first();
@@ -26,7 +38,7 @@ class ReportController extends Controller
             return back()->with('error', 'You have already reported this post.');
         }
 
-        // ✅ Create new report if none exists
+        // Create new report if none exists
         Report::create([
             'post_id'     => $post->post_id,
             'reported_by' => Auth::user()->user_id,
@@ -38,7 +50,11 @@ class ReportController extends Controller
         return back()->with('success', 'Report submitted successfully!');
     }
 
-    // List all reports
+    // --------------------
+    // List All Reports
+    // --------------------
+    // Retrieves all reports with related post and reporter data,
+    // including soft-deleted posts, and returns admin reports view.
     public function index()
     {
         $reports = Report::with([
@@ -49,7 +65,11 @@ class ReportController extends Controller
         return view('admin.reports.index', compact('reports'));
     }
 
-    // Show a single report
+    // --------------------
+    // Show Single Report
+    // --------------------
+    // Loads one report with related post (including soft-deleted)
+    // and reporter data, then returns admin report detail view.
     public function show(Report $report)
     {
         $report->load([
@@ -60,7 +80,12 @@ class ReportController extends Controller
         return view('admin.reports.show', compact('report'));
     }
 
-    // Update report status (resolve/dismiss logic)
+    // --------------------
+    // Update Report Status
+    // --------------------
+    // Updates the status of a report (pending, resolved, dismissed).
+    // If resolved, cascades to all reports for the post and soft-deletes the post.
+    // If dismissed, only updates the single report.
     public function updateStatus(Request $request, Report $report)
     {
         $validated = $request->validate([
@@ -68,17 +93,17 @@ class ReportController extends Controller
         ]);
 
         if ($validated['status'] === 'resolved') {
-            // ✅ Cascade: mark ALL reports for this post as resolved
+            // Cascade: mark ALL reports for this post as resolved
             Report::where('post_id', $report->post_id)->update(['status' => 'resolved']);
 
-            // ✅ Soft delete the post itself
+            // Soft delete the post itself
             $post = Post::withTrashed()->find($report->post_id);
             if ($post && !$post->trashed()) {
-                $post->delete(); // soft delete
+                $post->delete();
             }
 
         } elseif ($validated['status'] === 'dismissed') {
-            // ✅ Only dismiss this single report
+            // Only dismiss this single report
             $report->status = 'dismissed';
             $report->save();
         }
@@ -86,7 +111,11 @@ class ReportController extends Controller
         return back()->with('success', 'Report status updated!');
     }
 
-    // Moderation dashboard view
+    // --------------------
+    // Moderation Dashboard View
+    // --------------------
+    // Retrieves reports filtered by status (pending/resolved/dismissed),
+    // builds tab counts for each status, and returns moderation dashboard view.
     public function moderationView(Request $request)
     {
         $tab = $request->get('tab', 'pending');

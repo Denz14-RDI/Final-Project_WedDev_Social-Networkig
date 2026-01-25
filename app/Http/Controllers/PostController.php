@@ -1,4 +1,12 @@
 <?php
+// ------------------------------------------------------------
+// PostController
+// ------------------------------------------------------------
+// Manages posts in the application (feed + explore).
+// Provides methods for listing posts, creating new posts,
+// showing individual posts, editing/updating posts, and deleting posts.
+// Includes logic for categories, follow maps, and weekly highlights.
+// ------------------------------------------------------------
 
 namespace App\Http\Controllers;
 
@@ -11,14 +19,21 @@ use Carbon\Carbon;
 
 class PostController extends Controller
 {
-    // Show posts (feed + explore)
+    // --------------------
+    // Show Posts 
+    // --------------------
+    // Retrieves posts for the feed or explore view.
+    // Supports category filtering, scope (all vs following),
+    // builds follow maps for UI, and calculates weekly highlights.
     public function index()
     {
         $user = Auth::user();
         $userId = $user->user_id;
 
+        // Allowed categories
         $allowed = ['academic', 'events', 'announcement', 'campus_life', 'help_wanted'];
 
+        // Validate active category
         $activeCategory = request()->query('category');
         if (!in_array($activeCategory, $allowed, true)) {
             $activeCategory = null;
@@ -26,7 +41,7 @@ class PostController extends Controller
 
         $scope = request()->query('scope'); // 'all' or null
 
-        // ✅ Build follow maps for the feed UI
+        // Build follow maps for feed UI
         $followRows = Friend::query()
             ->where('user_id_1', $userId)
             ->whereIn('status', ['follow', 'following'])
@@ -39,7 +54,7 @@ class PostController extends Controller
             $followIdMap[$r->user_id_2] = $r->friend_id;
         }
 
-        // ✅ POSTS QUERY (with counts needed by comments + likes UI)
+        // Posts query with counts (likes + comments + liked_by_me)
         if ($scope === 'all') {
             $postsQuery = Post::with('user')
                 ->withCount('likes')
@@ -53,6 +68,7 @@ class PostController extends Controller
                 $postsQuery->where('category', $activeCategory);
             }
         } else {
+            // Only posts from following + self
             $followingIds = Friend::query()
                 ->where('user_id_1', $userId)
                 ->where('status', 'following')
@@ -77,7 +93,7 @@ class PostController extends Controller
 
         $posts = $postsQuery->get();
 
-        // ✅ HIGHLIGHTS OF THE WEEK
+        // Highlights of the week (category counts in last 7 days)
         $since = Carbon::now()->subDays(7);
 
         $counts = Post::select('category', DB::raw('COUNT(*) as total'))
@@ -112,7 +128,11 @@ class PostController extends Controller
         ));
     }
 
-    // Store a new post
+    // --------------------
+    // Store New Post
+    // --------------------
+    // Validates input, attaches user_id, and creates a new post.
+    // Redirects back to feed with success message.
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -129,15 +149,20 @@ class PostController extends Controller
         return redirect()->route('feed')->with('success', 'Post created successfully!');
     }
 
+    // --------------------
+    // Show Single Post
+    // --------------------
+    // Loads one post with counts and relationships,
+    // builds follow maps, and returns feed view with singlePost flag.
     public function show(Post $post)
     {
         $user = Auth::user();
 
-        // load counts + relationships needed sa feed UI
+        // Load relationships and counts
         $post->load('user');
         $post->loadCount(['likes', 'comments']);
 
-        // reuse followMap logic (same as index mo)
+        // Build follow maps (same as index)
         $followRows = Friend::query()
             ->where('user_id_1', $user->user_id)
             ->whereIn('status', ['follow', 'following'])
@@ -150,17 +175,19 @@ class PostController extends Controller
             $followIdMap[$r->user_id_2] = $r->friend_id;
         }
 
-        // ✅ only 1 post
+        // Wrap single post in collection
         $posts = collect([$post]);
 
-        // optional flag para maitago composer/header stuff
         $singlePost = true;
 
         return view('feed', compact('posts', 'followMap', 'followIdMap', 'singlePost'));
     }
 
-
-    // Show edit form
+    // --------------------
+    // Show Edit Form
+    // --------------------
+    // Ensures only the post owner can edit,
+    // then returns the edit view.
     public function edit(Post $post)
     {
         if ($post->user_id !== Auth::user()->user_id) {
@@ -170,7 +197,11 @@ class PostController extends Controller
         return view('posts.edit', compact('post'));
     }
 
-    // Update post
+    // --------------------
+    // Update Post
+    // --------------------
+    // Validates input and updates a post.
+    // Only the post owner can perform this action.
     public function update(Request $request, Post $post)
     {
         $authId = Auth::user()->user_id;
@@ -191,7 +222,11 @@ class PostController extends Controller
         return back()->with('success', 'Post updated successfully!');
     }
 
-    // Delete a post
+    // --------------------
+    // Delete Post
+    // --------------------
+    // Deletes a post if it belongs to the logged-in user.
+    // Returns success message after deletion.
     public function destroy(Post $post)
     {
         $authId = Auth::user()->user_id;

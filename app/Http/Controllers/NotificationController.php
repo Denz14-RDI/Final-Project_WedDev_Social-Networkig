@@ -1,4 +1,11 @@
 <?php
+// ------------------------------------------------------------
+// NotificationController
+// ------------------------------------------------------------
+// Manages user notifications.
+// Provides methods for displaying notifications in Blade views,
+// and marking notifications as read.
+// ------------------------------------------------------------
 
 namespace App\Http\Controllers;
 
@@ -8,7 +15,11 @@ use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
-    // ✅ Blade page: /notifications
+    // --------------------
+    // Notifications Page
+    // --------------------
+    // Retrieves all notifications for the logged-in user,
+    // counts unread notifications, and returns the Blade view.
     public function page()
     {
         $authId = Auth::user()->user_id;
@@ -24,7 +35,10 @@ class NotificationController extends Controller
         return view('notifications', compact('notifications', 'unreadCount'));
     }
 
-    // ✅ JSON list (optional): /notifications/json
+    // --------------------
+    // Notifications
+    // --------------------
+    // Returns all notifications for the logged-in user
     public function index()
     {
         $authId = Auth::user()->user_id;
@@ -36,7 +50,10 @@ class NotificationController extends Controller
         return response()->json($notifications);
     }
 
-    // ✅ JSON unread count: /notifications/unread
+    // --------------------
+    // Unread Count 
+    // --------------------
+    // Returns the count of unread notifications
     public function unread()
     {
         $authId = Auth::user()->user_id;
@@ -48,19 +65,26 @@ class NotificationController extends Controller
         return response()->json(['count' => $count]);
     }
 
-    // ✅ Mark ONE as read: /notifications/{notification}/read
+    // --------------------
+    // Mark One Notification as Read
+    // --------------------
+    // Marks a single notification as read if it belongs
+    // to the logged-in user, then returns updated unread count.
     public function markAsRead(Notification $notification)
     {
         $authId = Auth::user()->user_id;
 
+        // Ensure the notification belongs to the logged-in user
         if ((int) $notification->user_id !== (int) $authId) {
             abort(403, 'Unauthorized');
         }
 
+        // Update only if still unread
         if (is_null($notification->read_at)) {
             $notification->update(['read_at' => now()]);
         }
 
+        // Return updated unread count
         $count = Notification::where('user_id', $authId)
             ->whereNull('read_at')
             ->count();
@@ -71,7 +95,11 @@ class NotificationController extends Controller
         ]);
     }
 
-    // ✅ Mark ALL as read: /notifications/read-all
+    // --------------------
+    // Mark All Notifications as Read
+    // --------------------
+    // Marks all unread notifications for the logged-in user
+    // as read
     public function markAllAsRead()
     {
         $authId = Auth::user()->user_id;

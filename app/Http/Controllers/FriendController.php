@@ -1,4 +1,11 @@
 <?php
+// ------------------------------------------------------------
+// FriendController
+// ------------------------------------------------------------
+// Handles the follow/unfollow system between users.
+// Provides routes for listing followed users, following new users,
+// creating notifications when a follow occurs.
+// ------------------------------------------------------------
 
 namespace App\Http\Controllers;
 
@@ -9,13 +16,18 @@ use Illuminate\Support\Facades\Auth;
 
 class FriendController extends Controller
 {
-    // List of people the logged-in user is following
+    // --------------------
+    // List Following
+    // --------------------
+    // Retrieves the list of people the logged-in user is following.
+    // Filters by status = 'following'
+    // eager loads related user data, and paginates results.
     public function index()
     {
         $user = Auth::user();
 
         $following = Friend::where('user_id_1', $user->user_id)
-            ->where('status', 'following') // ✅ lowercase
+            ->where('status', 'following') // lowercase status
             ->whereNull('deleted_at')
             ->with('following')
             ->paginate(20);
@@ -23,15 +35,23 @@ class FriendController extends Controller
         return view('friends.index', compact('following'));
     }
 
-    // Follow a user
+    // --------------------
+    // Follow User
+    // --------------------
+    // Allows the logged-in user to follow another user.
+    // Prevents self-follow,
+    // updates status if needed, and creates a notification
+    // for the user being followed.
     public function store(User $user)
     {
         $authUser = Auth::user();
 
+        // Prevent following yourself
         if ($authUser->user_id === $user->user_id) {
             return back()->with('error', 'You cannot follow yourself.');
         }
 
+        // Check if relationship already exists
         $existing = Friend::withTrashed()
             ->where('user_id_1', $authUser->user_id)
             ->where('user_id_2', $user->user_id)
@@ -43,9 +63,10 @@ class FriendController extends Controller
             $existing->restore();
 
             if ($existing->status === 'following') {
-                // already following
+                // Already following
                 $nowFollowing = false;
             } else {
+                // Update status to following
                 $existing->update([
                     'status' => 'following',
                     'deleted_at' => null,
@@ -53,6 +74,7 @@ class FriendController extends Controller
                 $nowFollowing = true;
             }
         } else {
+            // Create new follow record
             Friend::create([
                 'user_id_1' => $authUser->user_id,
                 'user_id_2' => $user->user_id,
@@ -61,10 +83,10 @@ class FriendController extends Controller
             $nowFollowing = true;
         }
 
-        // ✅ CREATE NOTIFICATION (only if became "following")
+        // Create notification only if a new follow occurred
         if ($nowFollowing) {
-            // optional: prevent duplicate follow notifications
-            $exists = Notification::where('user_id', $user->user_id) // receiver = the one being followed
+            // Prevent duplicate follow notifications
+            $exists = Notification::where('user_id', $user->user_id) // receiver
                 ->where('notif_type', 'new_friend')
                 ->where('entity_type', 'user')
                 ->where('entity_id', $authUser->user_id) // actor id
@@ -94,13 +116,17 @@ class FriendController extends Controller
             ->with('just_followed', $user->user_id);
     }
 
-
-    // Unfollow a user (by Friend record ID) 
+    // --------------------
+    // Unfollow User
+    // --------------------
+    // Allows the logged-in user to unfollow another user.
+    // Finds the Friend record by ID, ensures ownership,
+    // updates status to 'unfollow', and soft-deletes the record.
     public function unfollow($friendId)
     {
         $authUser = Auth::user();
 
-        $friend = Friend::where('friend_id', $friendId) // or 'id' if your PK is 'id'
+        $friend = Friend::where('friend_id', $friendId) 
             ->where('user_id_1', $authUser->user_id)
             ->first();
 

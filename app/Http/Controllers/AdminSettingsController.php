@@ -1,4 +1,11 @@
 <?php
+// ------------------------------------------------------------
+// AdminSettingsController
+// ------------------------------------------------------------
+// Handles admin account settings.
+// Provides functionality for updating the admin's password
+// with validation and role-based security
+// ------------------------------------------------------------
 
 namespace App\Http\Controllers;
 
@@ -9,12 +16,14 @@ use Illuminate\Support\Facades\Hash;
 
 class AdminSettingsController extends Controller
 {
-    /**
-     * Update the admin's password.
-     */
+    // --------------------
+    // Update Admin Password
+    // --------------------
+    // Validates input, checks current password, and updates
+    // the admin's password securely using hashing.
     public function updatePassword(Request $request)
     {
-        // ✅ Validate input with custom messages
+        // Validate input fields with custom error messages
         $request->validate([
             'current_password' => ['required'],
             'new_password' => ['required', 'min:8'],
@@ -30,16 +39,17 @@ class AdminSettingsController extends Controller
         /** @var \App\Models\User $admin */
         $admin = Auth::user();
 
-        // ✅ Check if current password matches
+        // Check if the provided current password matches the stored one
         if (!Hash::check($request->current_password, $admin->password)) {
             return back()->withErrors(['current_password' => 'Current password is incorrect.']);
         }
 
-        // ✅ Update password using Eloquent's update()
+        // Update password securely using Eloquent's update() and Hash::make()
         $admin->update([
             'password' => Hash::make($request->new_password),
         ]);
 
-        return back()->with('success', '✅ Password updated successfully!');
+        // Return success message after update
+        return back()->with('success', 'Password updated successfully!');
     }
 }

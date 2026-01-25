@@ -1,4 +1,11 @@
 <?php
+// ------------------------------------------------------------
+// UserController
+// ------------------------------------------------------------
+// This controller manages user accounts.
+// It covers registration, showing profiles, and updating details
+// Admin accounts are protected from community-level changes.
+// ------------------------------------------------------------
 
 namespace App\Http\Controllers;
 
@@ -11,6 +18,12 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
+    // --------------------
+    // Register New User
+    // --------------------
+    // Validates registration form, sets default profile picture,
+    // forces role to "member", and saves the new account.
+    // Redirects to login page after success.
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -46,22 +59,28 @@ class UserController extends Controller
             ->with('success', 'Registration successful! Please log in.');
     }
 
+    // --------------------
+    // Show User Profile
+    // --------------------
+    // Displays a user’s profile page with their posts,
+    // follower/following counts, and follow status.
+    // Admin profiles are hidden from community view.
     public function show($id)
     {
         $user = User::findOrFail($id);
 
-        // Block access to admin profiles in community
+        // Block access to admin profiles
         if ($user->role === 'admin') {
-            abort(404); // or redirect()->route('feed')->withErrors('Profile not found.');
+            abort(404);
         }
         
-        $authUserId = Auth::user()->user_id; // correct for your schema
+        $authUserId = Auth::user()->user_id;
 
-        // Load posts + likes_count + liked_by_me
+        // Load posts with like/comment counts
         $posts = Post::where('user_id', $user->user_id)
             ->latest()
-            ->withCount('likes') // likes_count
-            ->withCount('comments') // comments_count
+            ->withCount('likes')
+            ->withCount('comments')
             ->withCount([
                 'likes as liked_by_me' => function ($q) use ($authUserId) {
                     $q->where('user_id', $authUserId);
@@ -69,8 +88,9 @@ class UserController extends Controller
             ])
             ->get();
 
-        $authId = $authUserId; // keep your blade logic working
+        $authId = $authUserId;
 
+        // Following and followers lists
         $followingRows = Friend::query()
             ->where('user_id_1', $user->user_id)
             ->where('status', 'following')
@@ -90,6 +110,7 @@ class UserController extends Controller
         $followingCount = $followingRows->count();
         $followersCount = $followersRows->count();
 
+        // Check if logged-in user is following this profile
         $isFollowing = false;
         $friendId = null;
 
@@ -118,11 +139,17 @@ class UserController extends Controller
         ));
     }
 
+    // --------------------
+    // Update User Profile
+    // --------------------
+    // Allows a user to edit their account details.
+    // Checks current password before changing to a new one.
+    // Prevents admin accounts from being updated here.
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
 
-        // Prevent admin accounts from being updated via community settings
+        // Prevent admin accounts from being updated
         if ($user->role === 'admin') {
             abort(403, 'Unauthorized action.');
         }
@@ -148,6 +175,7 @@ class UserController extends Controller
             'password.min' => 'Password must be at least 8 characters long.',
         ]);
 
+        // Handle password change
         if (!empty($validated['password'])) {
             if (empty($validated['current_password']) || !Hash::check($validated['current_password'], $user->password)) {
                 return back()->withErrors(['current_password' => 'Current password is incorrect.']);
@@ -157,11 +185,12 @@ class UserController extends Controller
             unset($validated['password']);
         }
 
+        // Default profile picture if empty
         if (empty($validated['profile_pic'])) {
             $validated['profile_pic'] = 'images/default.png';
         }
 
-        // Prevent role changes via profile update
+        // Prevent role changes
         unset($validated['role']);
 
         $user->update($validated);
@@ -174,11 +203,17 @@ class UserController extends Controller
             ->with('success', 'Profile updated successfully!');
     }
 
+    // --------------------
+    // Delete User Account
+    // --------------------
+    // Deletes a user account from the system.
+    // Admin accounts cannot be deleted here.
+    // For future update 
     public function destroy($id)
     {
         $user = User::findOrFail($id);
 
-        // Prevent deleting admin accounts via community
+        // Prevent deleting admin accounts
         if ($user->role === 'admin') {
             abort(403, 'Unauthorized action.');
         }

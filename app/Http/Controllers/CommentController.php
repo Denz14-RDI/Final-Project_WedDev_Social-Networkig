@@ -1,4 +1,11 @@
 <?php
+// ------------------------------------------------------------
+// CommentController
+// ------------------------------------------------------------
+// Handles all comment-related actions for posts.
+// Provides routes for creating, updating, deleting, and listing comments.
+// Also triggers notifications when users comment on others' posts.
+// ------------------------------------------------------------
 
 namespace App\Http\Controllers;
 
@@ -10,7 +17,11 @@ use Illuminate\Support\Facades\Auth;
 
 class CommentController extends Controller
 {
-    // store a new comment on a post
+    // --------------------
+    // Store New Comment
+    // --------------------
+    // Validates input, creates a new comment on a post,
+    // and triggers a notification for the post owner.
     public function store(Request $request, Post $post)
     {
         $request->validate([
@@ -19,18 +30,18 @@ class CommentController extends Controller
 
         $actor = Auth::user();
 
+        // Create new comment record
         $comment = Comment::create([
-            'post_id' => $post->post_id,
-            'user_id' => $actor->user_id,
-            'com_content' => $request->com_content,
+            'post_id'    => $post->post_id,
+            'user_id'    => $actor->user_id,
+            'com_content'=> $request->com_content,
         ]);
 
         $comment->load('user'); // eager load the user who made the comment
 
-        // ✅ CREATE NOTIFICATION (only if commenting on someone else's post)
+        // Create notification only if commenting on someone else's post
         if ((int)$post->user_id !== (int)$actor->user_id) {
-
-            // optional: avoid duplicates if user spam-clicks submit etc.
+            // Prevent Duplications
             $exists = Notification::where('user_id', $post->user_id) // receiver (post owner)
                 ->where('notif_type', 'new_comment')
                 ->where('entity_type', 'post')
@@ -38,6 +49,7 @@ class CommentController extends Controller
                 ->whereJsonContains('notif_data->comment_id', $comment->com_id)
                 ->exists();
 
+            // If comment is not exist it will create a new one
             if (!$exists) {
                 Notification::create([
                     'user_id'     => $post->user_id,   // receiver
@@ -55,16 +67,21 @@ class CommentController extends Controller
             }
         }
 
+        // Count Comment
         $commentsCount = $post->comments()->count();
 
         return response()->json([
-            'message' => 'Comment added successfully.',
-            'comment' => $comment,
+            'message'        => 'Comment added successfully.',
+            'comment'        => $comment,
             'comments_count' => $commentsCount,
         ]);
     }
 
-    // update an existing comment
+    // --------------------
+    // Update Comment
+    // --------------------
+    // Validates input and updates an existing comment.
+    // Only the comment owner can perform this action.
     public function update(Request $request, Comment $comment)
     {
         if ($comment->user_id !== Auth::user()->user_id) {
@@ -79,7 +96,7 @@ class CommentController extends Controller
             'com_content' => $request->com_content,
         ]);
 
-        $comment->load('user'); // eager load the user who made the comment
+        $comment->load('user'); // load the user who made the comment
 
         return response()->json([
             'message' => 'Comment updated successfully.',
@@ -87,7 +104,11 @@ class CommentController extends Controller
         ]);
     }
 
-    // soft delete a comment
+    // --------------------
+    // Delete Comment
+    // --------------------
+    // Soft deletes a comment.
+    // Only the comment owner can perform this action.
     public function destroy(Comment $comment)
     {
         if ($comment->user_id !== Auth::user()->user_id) {
@@ -102,18 +123,23 @@ class CommentController extends Controller
         $commentsCount = $post->comments()->count();
 
         return response()->json([
-            'message' => 'Comment deleted successfully.',
-            'deleted_id' => $deletedId,
+            'message'        => 'Comment deleted successfully.',
+            'deleted_id'     => $deletedId,
             'comments_count' => $commentsCount,
         ]);
     }
 
-    // get all comments for a specific post
+    // --------------------
+    // List Comments
+    // --------------------
+    // Retrieves all comments for a specific post,
+    // eager loads the user who made each comment,
+    // and orders them by most recent.
     public function index(Post $post)
     {
         $comments = $post->comments()
-            ->with('user') // eager load the user who made the comment
-            ->latest() // order by most recent
+            ->with('user') // load the user who made the comment
+            ->latest()     // order by most recent
             ->get();
 
         return response()->json($comments);
