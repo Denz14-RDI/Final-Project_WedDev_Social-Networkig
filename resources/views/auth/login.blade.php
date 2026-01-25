@@ -1,16 +1,26 @@
+{{-- 
+User Login View
+Allows registered users to log in using email/username and password
+Provides navigation to registration and sign-in choice page
+--}}
+
 @extends('layouts.guest')
 @section('title', 'Log in')
 
 @section('content')
 <div class="min-h-screen grid grid-cols-1 md:grid-cols-2">
 
-  <!-- LEFT (background image panel) -->
+  {{-- LEFT SIDE (Background image and branding) --}}
+  {{-- Visible only on medium and larger screens --}}
   <div
     class="hidden md:flex items-center justify-center relative overflow-hidden"
     style="background-image: url('/images/pupbg.png'); background-size: cover; background-position: center;">
+    
+    {{-- Gradient overlay for visual effect --}}
     <div class="absolute inset-0 bg-gradient-to-tr from-[#F59E0B]/50 via-[#EF4444]/35 to-[#6C1517]/55"></div>
     <div class="absolute inset-0 bg-black/10"></div>
 
+    {{-- PUPCOM logo --}}
     <img
       src="{{ asset('images/logo.png') }}"
       alt="PUPCOM Logo"
@@ -18,11 +28,11 @@
     drop-shadow-[0_18px_35px_rgba(0,0,0,.35)]">
   </div>
 
-  <!-- RIGHT (beige background + login card) -->
+  {{-- RIGHT SIDE (Login form container) --}}
   <div class="flex items-center justify-center bg-[#F2EADA] px-6 py-12">
     <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
 
-      <!-- ✅ Return button -->
+      {{-- Back button to sign-in choice page --}}
       <a
         href="{{ route('signin.choice') }}"
         class="inline-flex items-center gap-2 text-sm font-semibold text-[#6C1517] hover:underline">
@@ -30,9 +40,10 @@
         Return to Sign in choice
       </a>
 
+      {{-- Page title --}}
       <h2 class="mt-3 text-3xl font-extrabold text-gray-900">Login to PUPCOM</h2>
 
-      <!-- Tabs/Pill -->
+      {{-- Login/Register navigation tabs --}}
       <div class="mt-5 rounded-full bg-[#E9E0E0] p-1 flex gap-1">
         <div class="flex-1 text-center">
           <span class="block w-full rounded-full bg-white py-2 text-sm font-semibold text-gray-900 shadow-sm">
@@ -47,13 +58,14 @@
         </a>
       </div>
 
-      <!-- ✅ Flash Messages -->
+      {{-- Success flash message --}}
       @if (session('success'))
       <div class="mb-4 rounded-lg bg-green-100 border border-green-400 text-green-700 px-4 py-3">
         {{ session('success') }}
       </div>
       @endif
 
+      {{-- Validation error messages --}}
       @if ($errors->any())
       <div class="mb-4 rounded-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3">
         <ul class="list-disc pl-5">
@@ -64,16 +76,18 @@
       </div>
       @endif
 
+      {{-- Login error message --}}
       @if (session('error'))
       <div class="mb-4 rounded-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3">
         {{ session('error') }}
       </div>
       @endif
 
+      {{-- Login form --}}
       <form method="POST" action="{{ route('login') }}" class="mt-6 space-y-5">
         @csrf
 
-        <!-- Email or Username -->
+        {{-- Email or username input --}}
         <div>
           <label class="block text-sm font-semibold text-gray-800">Email or Username</label>
           <input
@@ -88,7 +102,7 @@
           @enderror
         </div>
 
-        <!-- Password -->
+        {{-- Password input --}}
         <div>
           <label class="block text-sm font-semibold text-gray-800">Password</label>
           <input
@@ -102,7 +116,7 @@
           @enderror
         </div>
 
-        <!-- Button -->
+        {{-- Submit login button --}}
         <button
           type="submit"
           class="w-full rounded-xl bg-[#6C1517] py-3 font-semibold text-white shadow-sm hover:opacity-95">
