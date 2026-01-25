@@ -1,9 +1,14 @@
+{{-- Main page that shows the community posts feed (with filters, create post, like, and comments) --}}
+
 @extends('layouts.app')
 @section('title','Feed')
 
+{{-- This class is used by layout to style the page background --}}
 @section('main_class', 'bg-app-page')
 
 @section('content')
+
+{{-- Main content container. Using Alpine.js for interactivity --}}
 <div
   x-data="{
     createOpen:false,
@@ -22,9 +27,11 @@
     reportOpen=true
   "
   class="h-screen overflow-hidden">
+
+  {{-- Layout: Center feed + Right sidebar --}}
   <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] h-full">
 
-    {{-- CENTER --}}
+    {{-- CENTER FEED --}}
     <section class="px-4 sm:px-6 lg:px-10 py-8 overflow-y-auto">
       <div class="w-full max-w-[840px] mx-auto space-y-5">
 
@@ -100,7 +107,7 @@
             </div>
 
 
-            {{-- subtle divider --}}
+            {{-- Subtle divider --}}
             <div class="h-px bg-app-divider"></div>
           </div>
         </div>
@@ -139,7 +146,7 @@
           <div class="p-5 pb-3">
             <div class="flex items-start justify-between gap-4">
 
-              {{-- Left: avatar + meta --}}
+              {{-- Left: Avatar + Meta --}}
               <div class="flex items-start gap-3">
                 <img
                   src="{{ asset($post->user->profile_pic ?? 'images/default.png') }}"
@@ -166,7 +173,7 @@
                 </div>
               </div>
 
-              {{-- Right: Follow toggle (explore only) + dropdown --}}
+              {{-- Right: Follow toggle (explore only) + Dropdown --}}
               @php
               $scope = request('scope');
               $isExplore = ($scope === 'all');
@@ -443,7 +450,7 @@
                   this.openCommentMenuId = null;
                 },
               }">
-            {{-- row (likes + clickable comments count) --}}
+            {{-- Row (likes + clickable comments count) --}}
             <div class="flex items-center justify-between">
               <button type="button" @click="toggleLike()" class="flex items-center gap-2 hover:text-app transition">
                 <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-app-brand text-white text-[11px]">🔥</span>

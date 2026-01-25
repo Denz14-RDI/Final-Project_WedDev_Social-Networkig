@@ -1,3 +1,6 @@
+{{-- Search View
+Allows users to search for other people on the platform and displays user profiles with follow/unfollow actions --}}
+
 @extends('layouts.app')
 @section('title','Search')
 
@@ -5,7 +8,10 @@
 
 @section('content')
 @php
+  // Current search query
   $q = request('q', '');
+
+  // Authenticated user
   $authUser = auth()->user();
 
   // Variables passed from SearchController
@@ -16,17 +22,17 @@
 <div class="h-screen overflow-hidden">
   <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] h-full">
 
-    {{-- CENTER (scroll) --}}
+    {{-- CENTER SECTION (Scrollable content) --}}
     <section class="px-4 sm:px-6 lg:px-10 py-8 overflow-y-auto">
       <div class="w-full max-w-[840px] mx-auto space-y-5">
 
-        {{-- Header --}}
+        {{-- Page header --}}
         <div>
           <div class="text-3xl font-extrabold text-app leading-tight">Search</div>
           <div class="text-sm text-app-muted">Find people in PUPCOM</div>
         </div>
 
-        {{-- Search box --}}
+        {{-- Search input form --}}
         <form action="{{ route('search') }}" method="GET"
           class="bg-app-card rounded-2xl border border-app shadow-app p-4">
           <div class="flex items-center gap-3 h-11 rounded-full bg-app-input border border-app px-5">
@@ -40,32 +46,39 @@
           </div>
         </form>
 
-        {{-- Results --}}
+        {{-- Search results container --}}
         <div class="bg-app-card rounded-2xl border border-app shadow-app overflow-hidden">
 
+          {{-- Results header --}}
           <div class="p-6 pb-4 flex items-center justify-between">
             <div class="text-lg font-extrabold flex items-center gap-2 text-app">
               <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-app-brand text-white text-sm">👥</span>
               <span>People</span>
             </div>
 
+            {{-- Total results count --}}
             <div class="text-xs text-app-muted">
               {{ method_exists($users, 'total') ? $users->total() : $users->count() }} results
             </div>
           </div>
 
+          {{-- Users list --}}
           <div class="px-6 pb-6 space-y-4">
             @forelse($users as $u)
               @php
+                // Check if this user is the authenticated user
                 $isMe = $authUser && ($authUser->user_id == $u->user_id);
 
+                // Friendship info from controller
                 $info = $friendMap[$u->user_id] ?? null;
                 $status = $info['status'] ?? null;        // following | unfollow | follow | null
                 $friendId = $info['friend_id'] ?? null;   // for unfollow route
               @endphp
 
+              {{-- Single user card --}}
               <div class="flex items-center justify-between gap-4 rounded-2xl border border-app bg-app-input p-4">
 
+                {{-- User avatar and info --}}
                 <div class="flex items-center gap-4 min-w-0">
                   <a href="{{ route('profile.show', $u->user_id) }}">
                     <img
@@ -83,6 +96,7 @@
                       </div>
                     </div>
 
+                    {{-- Username --}}
                     <div class="text-sm text-app-muted">
                       @if(!empty($u->username))
                         <a href="{{ route('profile.show', $u->user_id) }}" class="hover:underline">
@@ -93,13 +107,14 @@
                       @endif
                     </div>
 
+                    {{-- User bio preview --}}
                     @if(!empty($u->bio))
                       <div class="text-sm text-app-muted mt-1 line-clamp-2">{{ $u->bio }}</div>
                     @endif
                   </div>
                 </div>
 
-                {{-- Action button --}}
+                {{-- Follow / Unfollow actions --}}
                 <div class="shrink-0">
                   @if($isMe)
                     <button type="button" disabled
@@ -114,7 +129,7 @@
                         Following
                       </button>
 
-                      {{-- Unfollow --}}
+                      {{-- Unfollow button --}}
                       <form action="{{ route('friends.unfollow', $friendId) }}" method="POST">
                         @csrf
                         <button type="submit"
@@ -125,7 +140,7 @@
                     </div>
 
                   @else
-                    {{-- status null OR unfollow OR follow => show Follow (immediate follow system) --}}
+                    {{-- Follow button --}}
                     <form action="{{ route('friends.store', $u) }}" method="POST">
                       @csrf
                       <button type="submit"
@@ -138,6 +153,7 @@
 
               </div>
             @empty
+            {{-- No results message --}}
               <div class="px-6 pb-6">
                 <p class="text-app-muted">
                   @if($q)

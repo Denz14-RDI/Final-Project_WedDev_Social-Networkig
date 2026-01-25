@@ -1,8 +1,10 @@
 {{-- resources/views/partials/right-sidebar.blade.php --}}
 
+{{-- Right sidebar with highlights and who to follow --}}
+
 <div x-data="{ rbOpen:false }">
 
-    {{-- Floating button (mobile only) --}}
+    {{-- Floating button that opens the sidebar (for mobile only) --}}
     <button
         type="button"
         class="lg:hidden fixed bottom-4 right-4 z-40 h-12 w-12 rounded-2xl bg-app-brand text-white shadow-app grid place-items-center active:opacity-90"
@@ -11,7 +13,7 @@
         ☰
     </button>
 
-    {{-- Backdrop (mobile only) --}}
+    {{-- Backdrop (for mobile only) --}}
     <div
         x-show="rbOpen"
         x-cloak
@@ -31,7 +33,7 @@
         x-transition:leave-end="opacity-0 translate-y-6"
         class="lg:hidden fixed inset-x-0 bottom-0 z-50 bg-app-card border-t border-app rounded-t-3xl shadow-app overflow-hidden"
         style="max-height: 85dvh;">
-        {{-- header --}}
+        {{-- Header --}}
         <div class="px-5 py-4 border-b border-app flex items-center justify-between">
             <div class="font-extrabold text-app">Sidebar</div>
             <button
@@ -43,7 +45,7 @@
             </button>
         </div>
 
-        {{-- content (scrollable) --}}
+        {{-- Content area (scrollable) --}}
         <div class="p-4 overflow-y-auto" style="max-height: calc(85dvh - 64px);">
             <div class="space-y-5">
 
@@ -62,7 +64,7 @@
                     $isExploreAll = ($scope === 'all') && empty($activeCategory ?? null);
                     @endphp
 
-                    {{-- All / Clear filter (Explore all posts) --}}
+                    {{-- "All Categories" link clears category filter and shows everything (Explore all posts) --}}
                     <a href="{{ route('feed', ['scope' => 'all']) }}"
                         class="block mb-4 text-sm font-semibold {{ $isExploreAll ? 'text-app' : 'text-app-muted hover:text-app' }}">
                         📌 All Categories
@@ -74,6 +76,7 @@
                         $isActive = ($scope === 'all') && (($activeCategory ?? null) === ($h['key'] ?? null));
                         @endphp
 
+                    {{-- Clicking a category link filters the feed by that category --}}
                         <a href="{{ route('feed', ['category' => $h['key'], 'scope' => 'all']) }}"
                             class="block rounded-xl p-3 border border-app hover:bg-app-input transition {{ $isActive ? 'bg-app-input' : '' }}">
 
@@ -109,6 +112,7 @@
                 <div class="bg-app-card rounded-2xl shadow-app border border-app p-6">
                     <div class="font-extrabold text-app mb-4">Who to follow</div>
 
+                    {{-- List of user suggestions --}}
                     <div class="space-y-4">
                         @php $suggestions = $whoToFollow ?? collect(); @endphp
 
@@ -119,6 +123,7 @@
                         $friendId = $followIdMap[$u->user_id] ?? null;
                         @endphp
 
+                        {{-- profile picture with a default fallback --}}
                         <div class="flex items-center justify-between gap-4">
                             <a href="{{ route('profile.show', $u->user_id) }}"
                                 class="flex items-center gap-3 min-w-0 group">
@@ -137,6 +142,8 @@
                                 </div>
                             </a>
 
+                            {{-- If already following, show "Following" --}}
+                            {{-- If not following yet, show Follow form --}}
                             <div class="shrink-0">
                                 @if($isFollowing)
                                 <button type="button"
@@ -190,7 +197,7 @@
                     $isExploreAll = ($scope === 'all') && empty($activeCategory ?? null);
                     @endphp
 
-                    {{-- All / Clear filter (Explore all posts) --}}
+                    {{-- "All Categories" link clears category filter and shows everything (Explore all posts) --}}
                     <a href="{{ route('feed', ['scope' => 'all']) }}"
                         class="block mb-4 text-sm font-semibold {{ $isExploreAll ? 'text-app' : 'text-app-muted hover:text-app' }}">
                         📌 All Categories
@@ -202,6 +209,7 @@
                         $isActive = ($scope === 'all') && (($activeCategory ?? null) === ($h['key'] ?? null));
                         @endphp
 
+                        {{-- Clicking a category link filters the feed by that category --}}
                         <a href="{{ route('feed', ['category' => $h['key'], 'scope' => 'all']) }}"
                             class="block rounded-xl p-3 border border-app hover:bg-app-input transition {{ $isActive ? 'bg-app-input' : '' }}">
 
@@ -237,6 +245,7 @@
                 <div class="bg-app-card rounded-2xl shadow-app border border-app p-6">
                     <div class="font-extrabold text-app mb-4">Who to follow</div>
 
+                    {{-- List of user suggestions --}}
                     <div class="space-y-4">
                         @php $suggestions = $whoToFollow ?? collect(); @endphp
 
@@ -265,6 +274,8 @@
                                 </div>
                             </a>
 
+                            {{-- If already following, show "Following" --}}
+                            {{-- If not following yet, show Follow form --}}
                             <div class="shrink-0">
                                 @if($isFollowing)
                                 <button type="button"

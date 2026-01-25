@@ -1,21 +1,26 @@
+{{-- Settings View
+Allows users to manage account information, change passwords, and toggle display preferences --}}
+
 @extends('layouts.app')
 @section('title','Settings')
 
 @section('main_class', 'bg-app-page')
 
 @section('content')
+
+{{-- Logged-in user --}}
 @php
-    $user = Auth::user(); // logged-in user
+    $user = Auth::user(); 
 @endphp
 
 <div class="h-screen overflow-hidden">
     <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] h-full">
 
-        {{-- CENTER (scroll) --}}
+        {{-- CENTER SECTION (scrollable settings content) --}}
         <section class="px-4 sm:px-6 lg:px-10 py-8 overflow-y-auto">
             <div class="w-full max-w-[840px] mx-auto space-y-6">
 
-                {{-- Header --}}
+                {{-- Page header --}}
                 <div>
                     <div class="text-3xl font-extrabold text-app leading-tight">Settings</div>
                     <div class="text-sm text-app-muted">Manage your account and display preferences.</div>
@@ -28,6 +33,7 @@
                     </div>
                 @endif
 
+                {{-- Validation error messages --}}
                 @if($errors->any())
                     <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-xl">
                         <ul class="list-disc list-inside">
@@ -38,7 +44,7 @@
                     </div>
                 @endif
 
-                {{-- ACCOUNT --}}
+                {{-- Account Settings --}}
                 <section class="bg-app-card rounded-2xl border border-app shadow-app overflow-hidden">
                     <div class="p-6 border-b border-app">
                         <div class="flex items-start gap-3">
@@ -50,14 +56,15 @@
                         </div>
                     </div>
 
+                    {{-- Account update form --}}
                     <form action="{{ route('profile.update', $user->user_id) }}" method="POST" class="p-6 space-y-6">
                         @csrf
                         @method('PUT')
 
-                        {{-- Hidden source field --}}
+                        {{-- Identify update source as settings page --}}
                         <input type="hidden" name="source" value="settings">
 
-                        {{-- Username --}}
+                        {{-- Username field --}}
                         <div>
                             <label class="block text-sm font-semibold text-app mb-2">Username</label>
                             <input
@@ -70,12 +77,13 @@
                             @enderror
                         </div>
 
-                        {{-- Password --}}
+                        {{-- Change password section --}}
                         <div class="pt-6 border-t border-app">
                             <div class="text-sm font-semibold text-app">Change Password</div>
                             <div class="text-xs text-app-muted mt-1">Enter your current password and a new one.</div>
 
                             <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {{-- Current password --}}
                                 <div>
                                     <input
                                         type="password"
@@ -87,6 +95,7 @@
                                     @enderror
                                 </div>
 
+                                {{-- New password --}}
                                 <div>
                                     <input
                                         type="password"
@@ -99,6 +108,7 @@
                                 </div>
                             </div>
 
+                            {{-- Confirm new password --}}
                             <div class="mt-4">
                                 <input
                                     type="password"
@@ -111,7 +121,7 @@
                             </div>
                         </div>
 
-                        {{-- Update button --}}
+                        {{-- Submit account updates --}}
                         <div class="mt-4 flex justify-end">
                             <button
                                 type="submit"
@@ -122,7 +132,7 @@
                     </form>
                 </section>
 
-                {{-- DISPLAY --}}
+                {{-- DISPLAY SETTINGS --}}
                 <section class="bg-app-card rounded-2xl border border-app shadow-app overflow-hidden">
                     <div class="p-6 border-b border-app">
                         <div class="flex items-start gap-3">
@@ -134,7 +144,7 @@
                         </div>
                     </div>
 
-                    {{-- clickable row --}}
+                    {{-- Dark mode toggle row --}}
                     <button
                         id="themeRow"
                         type="button"
@@ -144,7 +154,7 @@
                             <div class="text-sm text-app-muted">Black/gray theme for night viewing.</div>
                         </div>
 
-                        {{-- switch --}}
+                        {{-- Dark mode switch --}}
                         <div class="relative inline-flex items-center select-none">
                             <input id="themeToggle" type="checkbox" class="sr-only">
                             <div id="themeTrack" class="theme-track"></div>
@@ -162,6 +172,7 @@
     </div>
 </div>
 
+{{-- Dark mode toggle logic --}}
 <script>
     (function() {
         const row = document.getElementById('themeRow');
@@ -169,26 +180,30 @@
         const track = document.getElementById('themeTrack');
         const knob = document.getElementById('themeKnob');
 
+        // Checks if dark mode is currently enabled
         function isDark() {
             return document.documentElement.classList.contains('dark');
         }
 
+        // Updates toggle UI based on theme state
         function paint() {
             const dark = isDark();
             toggle.checked = dark;
             track.classList.toggle('on', dark);
             knob.classList.toggle('on', dark);
         }
-
+        // Switches between light and dark mode
         function flip() {
             window.setTheme(isDark() ? 'light' : 'dark');
             paint();
         }
 
+        // Event listeners
         row.addEventListener('click', flip);
         toggle.addEventListener('click', (e) => e.stopPropagation());
         toggle.addEventListener('change', flip);
 
+        // Initialize toggle state
         paint();
     })();
 </script>

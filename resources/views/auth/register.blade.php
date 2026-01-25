@@ -1,14 +1,22 @@
+{{-- 
+User Registration View
+Allows new users to create an account by providing personal details,
+login credentials, and email information.
+--}}
+
+
 @extends('layouts.guest') 
 @section('title', 'Create your account')
 
 @section('content')
 <div class="min-h-screen grid grid-cols-1 md:grid-cols-2">
 
-  <!-- LEFT (PUP background image panel) -->
+  {{-- LEFT SIDE: Background image and branding (visible on medium+ screens) --}}
   <div
     class="hidden md:flex items-center justify-center relative overflow-hidden"
     style="background-image: url('/images/pupbg.png'); background-size: cover; background-position: center;">
-    {{-- warm overlay like login --}}
+
+    {{-- Gradient overlay for visual styling --}}
     <div class="absolute inset-0 bg-gradient-to-tr from-[#F59E0B]/50 via-[#EF4444]/35 to-[#6C1517]/55"></div>
     <div class="absolute inset-0 bg-black/10"></div>
 
@@ -20,11 +28,11 @@
     drop-shadow-[0_18px_35px_rgba(0,0,0,.35)]">
   </div>
 
-  <!-- RIGHT (beige background + register card) -->
+  {{-- RIGHT SIDE: Registration form container --}}
   <div class="flex items-center justify-center bg-[#F2EADA] px-6 py-12">
     <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
 
-      <!-- ✅ Return button -->
+      {{-- Back button to sign-in choice page --}}
       <a
         href="{{ route('signin.choice') }}"
         class="inline-flex items-center gap-2 text-sm font-semibold text-[#6C1517] hover:underline">
@@ -32,9 +40,10 @@
         Return to Sign in choice
       </a>
 
+      {{-- Page title --}}
       <h2 class="mt-3 text-3xl font-extrabold text-gray-900">Create your account</h2>
 
-      {{-- Tabs/Pill --}}
+      {{-- Login / Register navigation tabs --}}
       <div class="mt-5 rounded-full bg-[#E9E0E0] p-1 flex gap-1">
         <a
           href="{{ route('login') }}"
@@ -49,10 +58,11 @@
         </div>
       </div>
 
+      {{-- Registration form --}}
       <form method="POST" action="{{ route('register') }}" class="mt-6 space-y-4">
         @csrf
 
-        {{-- First + Last name --}}
+        {{-- First and Last name inputs --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-semibold text-gray-800 mb-1">First Name</label>
@@ -83,7 +93,7 @@
           </div>
         </div>
 
-        {{-- Username --}}
+        {{-- Username Input --}}
         <div>
           <label class="block text-sm font-semibold text-gray-800 mb-1">Username</label>
           <input
@@ -98,7 +108,7 @@
           @enderror
         </div>
 
-        {{-- Email --}}
+        {{-- Email Input --}}
         <div>
           <label class="block text-sm font-semibold text-gray-800 mb-1">Email</label>
           <input
@@ -113,7 +123,7 @@
           @enderror
         </div>
 
-        {{-- Password --}}
+        {{-- Password Input --}}
         <div>
           <label class="block text-sm font-semibold text-gray-800 mb-1">Password</label>
           <input
@@ -127,7 +137,7 @@
           @enderror
         </div>
 
-        {{-- Confirm Password --}}
+        {{-- Confirm Password Input --}}
         <div>
           <label class="block text-sm font-semibold text-gray-800 mb-1">Confirm Password</label>
           <input
@@ -138,7 +148,7 @@
             required>
         </div>
 
-        {{-- Button --}}
+        {{-- Submit Registration Button --}}
         <button
           type="submit"
           class="w-full mt-2 rounded-xl bg-[#6C1517] py-3 font-semibold text-white shadow-sm hover:opacity-95">

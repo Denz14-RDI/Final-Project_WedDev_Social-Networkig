@@ -1,3 +1,10 @@
+{{-- 
+Admin Dashboard View
+Displays platform statistics and recent pending reports
+Used by administrators for monitoring system activity
+--}}
+
+
 @extends('layouts.admin')
 @section('title', 'Dashboard')
 
@@ -7,7 +14,7 @@ use App\Models\User;
 use App\Models\Post;
 use App\Models\Report;
 
-// Stats from DB
+// Dashboard statistics fetched from the database
 $stats = [
 ['label'=>'Total Users', 'value'=>User::count(), 'emoji'=>'👥'],
 ['label'=>'Total Posts', 'value'=>Post::count(), 'emoji'=>'📝'],
@@ -24,13 +31,13 @@ $reports = Report::where('status','pending')
 
 <div class="w-full max-w-6xl">
 
-    {{-- Header --}}
+    {{-- Page Header --}}
     <div class="mb-6">
         <h1 class="text-3xl font-extrabold text-app leading-tight">Dashboard</h1>
         <p class="text-sm text-app-muted mt-1">Overview of PUPCOM platform activity</p>
     </div>
 
-    {{-- Stats Grid --}}
+    {{-- Statistics Grid --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         @foreach($stats as $s)
         <div class="bg-app-card border border-app rounded-2xl shadow-app p-5">
@@ -43,7 +50,7 @@ $reports = Report::where('status','pending')
         @endforeach
     </div>
 
-    {{-- Recent Pending Reports --}}
+    {{-- Recent Pending Reports Section --}}
     @if($reports->count() > 0)
     <section class="mt-6 bg-app-card border border-app rounded-2xl shadow-app overflow-hidden">
         <div class="p-6 border-b border-app">

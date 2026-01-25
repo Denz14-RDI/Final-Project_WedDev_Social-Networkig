@@ -13,6 +13,10 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+// ------------------------------------------------------
+// This check if the user trying to access admin routes has
+// the 'admin' role. If not, it aborts with a 403 error.
+// ------------------------------------------------------
 class AdminMiddleware
 {
     // --------------------

@@ -1,41 +1,50 @@
+{{-- User Profile View
+Shows a user's profile info, follow stats, posts, and modals for editing profile, followers/following, posts, and reports. --}}
+
 @extends('layouts.app')
 @section('title','Profile')
 @section('main_class', 'bg-app-page')
 
 @section('content')
+
+{{-- opens post edit modal from child components --}}
+{{-- opens report modal from child components --}}
 <div
   x-data="{
+    // Post modals + state
     createOpen:false,
     editMode:false,
     editPost:{},
     reportOpen:false,
     reportPost:{},
 
-    // ✅ Alpine-driven modals (no more brittle JS/IDs)
+    // profile modals
     editProfileOpen:false,
     followersOpen:false,
     followingOpen:false,
   }"
+
   @open-edit.window="editMode=true; editPost=$event.detail.post; createOpen=true"
+
   @open-report.window="reportPost=$event.detail.post; reportOpen=true"
   class="h-screen overflow-hidden"
 >
-
+  {{-- Page layout: main profile content + right sidebar --}}
   <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] h-full">
 
-    {{-- CENTER --}}
+    {{-- CENTER: Profile details + posts --}}
     <main class="h-full overflow-y-auto">
       <div class="px-4 sm:px-6 py-8 sm:py-10">
         <div class="max-w-[980px] mx-auto">
           <div class="bg-app-card rounded-2xl shadow-app border border-app overflow-hidden">
 
-            {{-- COVER --}}
+            {{-- Profile cover banner --}}
             <div class="h-36 sm:h-56 bg-gradient-to-r from-[#6C1517] via-[#7B2A2D] to-[#9B5658]"></div>
 
             <div class="px-4 sm:px-8 pb-6 sm:pb-8">
               <div class="relative pt-10 sm:pt-12">
 
-                {{-- avatar --}}
+                {{-- Profile avatar --}}
                 <div class="absolute -top-12 sm:-top-16 left-0">
                   <img
                     src="{{ asset($user->profile_pic ?? 'images/default.png') }}"
@@ -50,12 +59,14 @@
                       <div class="text-xl sm:text-3xl font-extrabold text-app leading-tight truncate">
                         {{ $user->first_name }} {{ $user->last_name }}
                       </div>
+                      
+                      {{-- Username --}}
                       <div class="mt-1 text-sm text-app-muted truncate">
                         {{ '@' . $user->username }}
                       </div>
                     </div>
 
-                    {{-- Conditional button --}}
+                    {{-- Profile action button (edit for owner, follow/unfollow for others) --}}
                     <div class="shrink-0">
                       @if($authId === $user->user_id)
                         <button
@@ -67,6 +78,8 @@
                         </button>
                       @else
                         @if(!empty($isFollowing) && !empty($friendId))
+
+                          {{-- Unfollow user --}}
                           <form action="{{ route('friends.unfollow', $friendId) }}" method="POST">
                             @csrf
                             <button
@@ -77,6 +90,8 @@
                             </button>
                           </form>
                         @else
+
+                          {{-- Follow user --}}
                           <form action="{{ route('friends.store', $user) }}" method="POST">
                             @csrf
                             <button
@@ -91,18 +106,18 @@
                     </div>
                   </div>
 
-                  {{-- bio --}}
+                  {{-- User bio --}}
                   <div class="mt-3 text-sm text-app break-words">
                     {{ $user->bio ?? 'No bio yet.' }}
                   </div>
 
-                  {{-- joined --}}
+                  {{-- Joined date --}}
                   <div class="mt-3 flex items-center gap-2 text-sm text-app-muted">
                     <span>📅</span>
                     <span>Joined {{ $user->created_at->format('F Y') }}</span>
                   </div>
 
-                  {{-- FOLLOWERS / FOLLOWING --}}
+                  {{-- Followers / Following buttons (open modals) --}}
                   <div class="mt-5 flex flex-wrap items-center gap-6 sm:gap-8 text-sm">
                     <button
                       type="button"
@@ -137,11 +152,12 @@
               {{-- Divider --}}
               <div class="mt-8 border-t border-app"></div>
 
-              {{-- POSTS --}}
+              {{-- User posts list --}}
               <div class="mt-6 space-y-6">
                 @forelse($posts as $p)
                 <div class="bg-app-card rounded-2xl border border-app shadow-app overflow-hidden">
 
+                    {{-- Post header + body --}}
                     <div class="p-4 sm:p-6">
                       <div class="flex items-start gap-4">
                         <img
@@ -153,21 +169,24 @@
                         <div class="flex-1 min-w-0">
                           <div class="flex items-start justify-between gap-4">
 
+
                             <div class="leading-tight min-w-0">
                               <div class="font-extrabold text-app truncate">
                                 {{ $user->first_name }} {{ $user->last_name }}
                               </div>
 
+                              {{-- Username + post timestamp --}}
                               <div class="mt-1 text-sm text-app-muted truncate">
                                 {{ '@' . $user->username }} · {{ $p->created_at->diffForHumans() }}
                               </div>
 
+                              {{-- Post category --}}
                               <div class="text-xs text-app-muted mt-1 truncate">
                                 📌 {{ ucfirst(str_replace('_',' ', $p->category)) }}
                               </div>
                             </div>
 
-                            {{-- dropdown --}}
+                            {{-- Post options menu (edit/delete for owner, report for others) --}}
                             <div x-data="{ openMenu:false }" class="relative shrink-0">
                               <button
                                 type="button"
@@ -193,6 +212,7 @@
                                     ✏️ Edit Post
                                   </button>
 
+                                  {{-- Delete post --}}
                                   <form action="{{ route('posts.destroy', $p->post_id) }}" method="POST">
                                     @csrf
                                     @method('DELETE')
@@ -204,6 +224,8 @@
                                     </button>
                                   </form>
                                 @else
+
+                                  {{-- Open report modal --}}
                                   <button
                                     type="button"
                                     @click="$dispatch('open-report', { post: {{ $p->toJson() }} }); openMenu=false"
@@ -217,10 +239,12 @@
 
                         </div>
 
+                          {{-- Post content --}}
                           <div class="mt-3 text-sm text-app break-words">
                             {{ $p->post_content }}
                           </div>
 
+                          {{-- Post image (optional) --}}
                           @if($p->image)
                             <div class="mt-5 overflow-hidden rounded-2xl bg-app-input border border-app">
                               <img
@@ -232,6 +256,7 @@
                             </div>
                           @endif
 
+                          {{-- Post link (optional) --}}
                           @if($p->link)
                             <div class="mt-2 text-sm text-app-muted break-all">
                               <a href="{{ $p->link }}" target="_blank" class="underline">
@@ -244,13 +269,13 @@
                     </div>
                   </div>
 
-                    {{-- FOOTER + COMMENTS (single Alpine scope) --}}
+                    {{-- Footer actions: likes + comments (Alpine manages fetch + edit/delete) --}}
                     <div class="px-5 py-3 text-sm text-app-muted"
                       x-data="{
-                        // likes
+                        // like state
                         count: {{ $p->likes_count ?? 0 }},
 
-                        // comments
+                        // comments state
                         commentCount: {{ $p->comments_count ?? 0 }},
                         showComments: false,
                         comments: [],
@@ -538,7 +563,7 @@
 
   </div>
 
-  {{-- ✅ FOLLOWERS MODAL (Alpine) --}}
+  {{-- FOLLOWERS MODAL (Alpine) --}}
   <div
     x-show="followersOpen"
     x-cloak
@@ -580,7 +605,7 @@
     </div>
   </div>
 
-  {{-- ✅ FOLLOWING MODAL (Alpine) --}}
+  {{-- FOLLOWING MODAL (Alpine) --}}
   <div
     x-show="followingOpen"
     x-cloak
@@ -622,7 +647,7 @@
     </div>
   </div>
 
-  {{-- ✅ EDIT PROFILE MODAL (Alpine wrapper, uses your partial markup inside) --}}
+  {{--  EDIT PROFILE MODAL (Alpine wrapper, uses your partial markup inside) --}}
   @if($authId === $user->user_id)
     <div
       x-show="editProfileOpen"
