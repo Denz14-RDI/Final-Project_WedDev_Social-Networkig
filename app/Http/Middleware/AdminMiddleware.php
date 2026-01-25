@@ -1,11 +1,17 @@
 <?php
-
+// ------------------------------------------------------
+// This middleware restricts access to admin-only routes.
+// ------------------------------------------------------
 namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+// ------------------------------------------------------
+// This check if the user trying to access admin routes has
+// the 'admin' role. If not, it aborts with a 403 error.
+// ------------------------------------------------------
 class AdminMiddleware
 {
     public function handle(Request $request, Closure $next)
